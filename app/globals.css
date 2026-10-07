@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+/*
+ * One palette across the whole app, taken from the marketplace design: deep
+ * green ink and sidebars, orange for the primary action, peach washes. The
+ * "wine"/"ox" token names remain for the desk components but resolve to it.
+ * Warm off-white ground, white cards with hairlines, mono for figures.
+ */
+@theme {
+  --color-ground: #f3f4f1;
+  --color-card: #ffffff;
+  --color-line: #dce0da;
+  --color-line-2: #c5cec9;
+  --color-soft: #eef0ec;
+
+  --color-ink: #10201b;
+  --color-ink-2: #4a5852;
+  --color-ink-3: #7d8a84;
+
+  /* marketplace / OS */
+  --color-pine: #10201b;
+  --color-pine-2: #2c3d36;
+  --color-flame: #c2410c;
+  --color-flame-2: #a5370a;
+  --color-peach: #fdebdd;
+  --color-apricot: #f6b38a;
+
+  /* desks: same tone as the marketplace (founder's call, 2026-10-03) */
+  --color-wine: #10201b;
+  --color-wine-2: #2c3d36;
+  --color-ox: #c2410c;
+  --color-ox-2: #a5370a;
+  --color-ox-wash: #fff4ec;
+  --color-rose: #f6b38a;
+
+  /* status */
+  --color-ok: #166534;
+  --color-ok-bg: #dcfce7;
+  --color-warn: #93600f;
+  --color-warn-bg: #ffedd5;
+  --color-bad: #a5321f;
+  --color-bad-bg: #fbe3df;
+  --color-info: #1d4ed8;
+  --color-info-bg: #e5edfd;
+
+  /* category tints (marketplace tiles) */
+  --color-t-sage: #e3ece6;
+  --color-t-blush: #f6e3d6;
+  --color-t-oat: #efe8d3;
+  --color-t-sky: #dde7ef;
+  --color-t-lilac: #e8e3ef;
+  --color-t-stone: #e8e7e2;
+
+  --font-sans: var(--font-plex), ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-display: var(--font-display-face), var(--font-plex), sans-serif;
+  --font-desk: var(--font-display-face), var(--font-plex), sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, Consolas, monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+  body {
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  /* Grid items default to min-width: auto, which lets a wide table stretch the
+     whole page sideways on a phone. Tables scroll inside their own card instead. */
+  .grid > * {
+    min-width: 0;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-flame);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  .card {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+  }
+  .cap {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--color-ink-2);
+  }
+  .monocap {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  /* Page titles and display type: Bricolage 800, as in the reference. */
+  .disp {
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
+    font-weight: 800;
+  }
+  /* Dashboard headings: same Bricolage Grotesque as the marketplace. */
+  .desk {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  .input {
+    height: 2.75rem;
+    width: 100%;
+    border: 1px solid var(--color-line-2);
+    border-radius: 8px;
+    background: #fff;
+    padding: 0 0.75rem;
+    font-size: 14px;
+    outline: none;
+  }
+  .input:focus {
+    border-color: var(--color-ink);
+    box-shadow: 0 0 0 1px var(--color-ink);
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .hatch {
+    background: repeating-linear-gradient(135deg, #f1f3ef 0 10px, #e4e7e2 10px 20px);
+  }
+  /* Tables: one recipe everywhere. 12px caps header, 14px cells, quiet row rules. */
+  .th {
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-ink-2);
+    font-weight: 600;
+    text-align: left;
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid var(--color-line);
+    white-space: nowrap;
+  }
+  .td {
+    padding: 0.875rem 0.75rem;
+    border-bottom: 1px solid var(--color-soft);
+    vertical-align: middle;
+    font-size: 14px;
+  }
+  /* Figures, dates and the last (status/action) column never break mid-value. */
+  td.num,
+  .td .num,
+  .td:last-child {
+    white-space: nowrap;
+  }
+  tbody tr:last-child .td {
+    border-bottom: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 200ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
