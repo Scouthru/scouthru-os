@@ -252,7 +252,7 @@ function Market() {
         </section>
 
         {/* custom requirement */}
-        <section className="mt-[32px] grid items-center gap-[18px] rounded-[12px] border border-[#d9e7dc] bg-cs-mint p-[22px] sm:p-[28px] lg:grid-cols-[1fr_1.15fr]">
+        <section className="mt-[32px] grid items-center gap-[18px] rounded-[12px] border border-[#f1d9cb] bg-cs-mint p-[22px] sm:p-[28px] lg:grid-cols-[1fr_1.15fr]">
           <div>
             <h2 className="serif text-[30px] font-semibold tracking-[-0.02em]">Can&apos;t find it ready-made?</h2>
             <p className="mt-[4px] text-[14px] text-[#3e4440]">Post a custom requirement. Verified factories that can make it will respond.</p>

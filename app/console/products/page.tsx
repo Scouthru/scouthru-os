@@ -345,7 +345,7 @@ function ProductPanel({ p, editing, setEditing, onClose, onArchive, onPack, onRe
               <span className={cn("grid size-[33px] place-items-center rounded-full border", on ? "border-cs-green bg-cs-green text-white" : done ? "border-cs-mint bg-cs-mint text-cs-green" : "border-[#e2e0da] bg-[#f6f5f1] text-[#4b524e]")}><st.icon className="size-[16px]" strokeWidth={1.7} /></span>
               <p className="mt-[4px] text-[11px] font-semibold">{st.label}</p>
               <p className="text-[9.5px] text-cs-ink-2">{dates[i] ? `${done || on ? "" : "Est. "}${fmtDate(dates[i]!).replace(/ \d{4}$/, "")}` : "—"}</p>
-              <span className={cn("mt-[2px] rounded-[4px] px-[5px] py-[1px] text-[9.5px]", done ? "bg-cs-mint text-cs-green-2" : on ? "bg-cs-blue-bg text-cs-blue" : "text-cs-ink-2")}>{done ? "Completed" : on ? "In Progress" : "Upcoming"}</span>
+              <span className={cn("mt-[2px] rounded-[4px] px-[5px] py-[1px] text-[9.5px]", done ? "bg-cs-ok-bg text-cs-ok" : on ? "bg-cs-blue-bg text-cs-blue" : "text-cs-ink-2")}>{done ? "Completed" : on ? "In Progress" : "Upcoming"}</span>
             </div>
           );
         })}

@@ -196,7 +196,7 @@ export default function Reports() {
                     <span className="text-[#2b302d]">{label}</span>
                     <span className="text-cs-ink-2">{pct}%</span>
                     <span className="flex items-center gap-[8px] text-[17px]">
-                      <span className="h-[28px] rounded-[2px]" style={{ width: `${Math.max(4, pct * 0.85)}%`, background: ["#1d4b34", "#8fcb9c", "#a9d7b3", "#c4e4ca", "#dcefe0"][i] }} />
+                      <span className="h-[28px] rounded-[2px]" style={{ width: `${Math.max(4, pct * 0.85)}%`, background: ["#a8461f", "#8fcb9c", "#a9d7b3", "#c4e4ca", "#dcefe0"][i] }} />
                       <span className="serif text-[15px] font-semibold">{n}</span>
                     </span>
                   </div>

@@ -78,7 +78,7 @@ function SampleStepper({ s }: { s: Sample }) {
 }
 
 function EvalStatus({ e }: { e: Eval }) {
-  if (e.status === "Pass") return <span className="flex items-center gap-[7px] text-[12.5px] text-[#1d211e]"><span className="grid size-[16px] place-items-center rounded-full bg-cs-green-2 text-white"><CheckIcon className="size-[10px]" strokeWidth={3} /></span>Pass</span>;
+  if (e.status === "Pass") return <span className="flex items-center gap-[7px] text-[12.5px] text-[#1d211e]"><span className="grid size-[16px] place-items-center rounded-full bg-cs-ok text-white"><CheckIcon className="size-[10px]" strokeWidth={3} /></span>Pass</span>;
   if (e.status === "Fail") return <span className="flex items-center gap-[7px] text-[12.5px] text-cs-red"><span className="grid size-[16px] place-items-center rounded-full bg-cs-red text-white"><X className="size-[10px]" strokeWidth={3} /></span>Fail</span>;
   if (e.status === "Testing") return <span className="flex items-center gap-[7px] text-[12.5px] text-[#1d211e]"><Clock3 className="size-[16px] text-cs-ink-2" strokeWidth={1.8} />Testing</span>;
   return <span className="flex items-center gap-[7px] text-[12.5px] text-[#1d211e]"><span className="size-[14px] rounded-full bg-[#c9ccc7]" />Not Started</span>;

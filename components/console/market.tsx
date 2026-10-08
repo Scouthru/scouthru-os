@@ -34,7 +34,7 @@ export function MarketHeader({ compact, query = "" }: { compact?: boolean; query
   return (
     <>
       {!compact && (
-        <div className="bg-cs-green text-white">
+        <div className="bg-cs-deep text-white">
           <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-3 px-4 py-[7px] text-[12px] sm:px-6">
             <span>FMCG makers in India, matched by capability<span className="hidden sm:inline"> · Brands from anywhere · Free for brands</span></span>
             <Link href="/os" className="hidden font-medium text-white/90 hover:text-white sm:inline">For factories: Scouthru OS →</Link>
@@ -50,7 +50,7 @@ export function MarketHeader({ compact, query = "" }: { compact?: boolean; query
           >
             <Search className="size-[17px] shrink-0 text-cs-ink-2" strokeWidth={1.7} />
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products, manufacturers, packaging" className="min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-[#6f7571]" aria-label="Search the marketplace" />
-            <button className="hidden h-[34px] rounded-[7px] bg-cs-green px-[14px] text-[12.5px] font-medium text-white hover:bg-[#163b29] sm:block">Search</button>
+            <button className="hidden h-[34px] rounded-[7px] bg-cs-green px-[14px] text-[12.5px] font-medium text-white hover:bg-[#8f3a18] sm:block">Search</button>
           </form>
           <button type="button" onClick={() => setPost({ assist: true })} className="ml-auto flex h-[42px] shrink-0 items-center gap-[7px] rounded-[9px] border border-cs-line bg-white px-[12px] text-[13px] font-medium text-cs-green hover:border-cs-green-2/60 sm:ml-0" aria-label="AI assist: write my requirement">
             <Sparkles className="size-[16px]" strokeWidth={1.7} /><span className="hidden sm:inline">AI assist</span>

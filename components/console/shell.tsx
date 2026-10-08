@@ -301,7 +301,7 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
             <div className="px-[16px] pb-[18px] pt-[4px]">
               <p className="serif text-[21px] font-semibold leading-[1.08] text-cs-ink">{promo.title}</p>
               {promo.text && <p className="mt-[8px] text-[13px] leading-[1.35] text-[#3b403d]">{promo.text}</p>}
-              <Link href={promo.href} aria-label="Get started" className="mt-[12px] grid size-[37px] place-items-center rounded-full bg-cs-green text-white hover:bg-[#163b29]">
+              <Link href={promo.href} aria-label="Get started" className="mt-[12px] grid size-[37px] place-items-center rounded-full bg-cs-green text-white hover:bg-[#8f3a18]">
                 <ArrowRight className="size-[17px]" />
               </Link>
             </div>

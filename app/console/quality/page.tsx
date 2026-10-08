@@ -56,12 +56,12 @@ function workflow(q: QualityBatch): StepState[] {
 }
 
 const STEP_PILL: Record<StepState, string> = {
-  Completed: "bg-cs-mint text-cs-green-2",
+  Completed: "bg-cs-ok-bg text-cs-ok",
   "In Progress": "bg-cs-blue-bg text-cs-blue",
   Pending: "bg-cs-orange-bg text-[#b8641f]",
   "Issues Found": "bg-cs-red-bg text-cs-red",
 };
-const CHECK_PILL: Record<CheckStatus, string> = { Completed: "bg-cs-mint text-cs-green-2", "In Progress": "bg-cs-blue-bg text-cs-blue", Pending: "bg-cs-orange-bg text-[#b8641f]" };
+const CHECK_PILL: Record<CheckStatus, string> = { Completed: "bg-cs-ok-bg text-cs-ok", "In Progress": "bg-cs-blue-bg text-cs-blue", Pending: "bg-cs-orange-bg text-[#b8641f]" };
 const NEXT_CHECK: Record<CheckStatus, CheckStatus> = { Pending: "In Progress", "In Progress": "Completed", Completed: "Pending" };
 const DOC_ICON: Record<string, LucideIcon> = { GMP: ShieldCheck, FSSAI: FileText, "ISO 22000": Globe, COA: FlaskConical, "Stability Data": BarChart3, "Microbial Test": Settings2 };
 const RANGES: Record<string, number> = { "Last 7 days": 7, "Last 30 days": 30, "Last 90 days": 90 };
@@ -80,7 +80,7 @@ function T({ children, right, sub, size = 16.5 }: { children: React.ReactNode; r
 }
 
 function TestBadge({ status }: { status: TestStatus }) {
-  if (status === "Pass") return <span className="flex items-center gap-[6px] text-[12px] text-cs-green-2"><span className="grid size-[15px] place-items-center rounded-full bg-cs-green-2 text-white"><CheckIcon className="size-[9px]" strokeWidth={3} /></span>Pass</span>;
+  if (status === "Pass") return <span className="flex items-center gap-[6px] text-[12px] text-cs-ok"><span className="grid size-[15px] place-items-center rounded-full bg-cs-ok text-white"><CheckIcon className="size-[9px]" strokeWidth={3} /></span>Pass</span>;
   if (status === "Fail") return <span className="flex items-center gap-[6px] text-[12px] text-cs-red"><span className="grid size-[15px] place-items-center rounded-full bg-cs-red text-white"><X className="size-[9px]" strokeWidth={3} /></span>Fail</span>;
   if (status === "In Progress") return <span className="flex items-center gap-[5px] rounded-[5px] bg-cs-blue-bg px-[7px] py-[2px] text-[11.5px] text-cs-blue"><span className="size-[10px] rounded-full border-2 border-cs-blue border-r-transparent" />In Progress</span>;
   return <span className="flex items-center gap-[5px] rounded-[5px] bg-cs-orange-bg px-[7px] py-[2px] text-[11.5px] text-[#b8641f]"><span className="size-[10px] rounded-full border-2 border-cs-orange border-r-transparent" />Pending</span>;

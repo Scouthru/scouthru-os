@@ -196,7 +196,7 @@ export default function Dashboard() {
                   key={a.label}
                   type="button"
                   onClick={a.go}
-                  className={cn("flex h-[54px] items-center gap-[10px] rounded-[7px] px-[12px] text-left text-[12.5px] font-medium leading-tight tracking-[-0.01em] min-[1024px]:whitespace-nowrap", i === 0 ? "bg-cs-green text-white hover:bg-[#163b29]" : "border border-cs-line bg-white text-[#1f2421] hover:border-[#cfcac0]")}
+                  className={cn("flex h-[54px] items-center gap-[10px] rounded-[7px] px-[12px] text-left text-[12.5px] font-medium leading-tight tracking-[-0.01em] min-[1024px]:whitespace-nowrap", i === 0 ? "bg-cs-green text-white hover:bg-[#8f3a18]" : "border border-cs-line bg-white text-[#1f2421] hover:border-[#cfcac0]")}
                 >
                   <a.icon className={cn("size-[21px] shrink-0", a.color)} strokeWidth={1.6} />
                   {a.label}

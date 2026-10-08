@@ -9,7 +9,7 @@ import { cn } from "@/lib/cn";
 export type Tone = "green" | "orange" | "blue" | "violet" | "red" | "gray";
 
 export const TONE: Record<Tone, { bg: string; fg: string }> = {
-  green: { bg: "bg-cs-mint", fg: "text-cs-green-2" },
+  green: { bg: "bg-cs-ok-bg", fg: "text-cs-ok" },
   orange: { bg: "bg-cs-orange-bg", fg: "text-cs-orange" },
   blue: { bg: "bg-cs-blue-bg", fg: "text-cs-blue" },
   violet: { bg: "bg-cs-violet-bg", fg: "text-cs-violet" },
@@ -58,7 +58,7 @@ export function Crumbs({ items }: { items: string[] }) {
 
 export function IconDot({ icon: Icon, tone, className }: { icon: LucideIcon; tone: Tone; className?: string }) {
   return (
-    <span className={cn("grid size-[46px] shrink-0 place-items-center rounded-full", TONE[tone].bg, TONE[tone].fg, className)}>
+    <span className={cn("grid size-[46px] shrink-0 place-items-center rounded-full", tone === "green" ? "bg-cs-mint text-cs-green-2" : `${TONE[tone].bg} ${TONE[tone].fg}`, className)}>
       <Icon className="size-[22px]" strokeWidth={1.7} />
     </span>
   );
@@ -108,7 +108,7 @@ export function Btn({ kind = "outline", icon: Icon, children, className, ...rest
       {...rest}
       className={cn(
         "inline-flex h-[40px] items-center justify-center gap-[9px] whitespace-nowrap rounded-[7px] px-[16px] text-[13px] font-medium transition disabled:cursor-not-allowed disabled:opacity-50",
-        kind === "primary" && "bg-cs-green text-white hover:bg-[#163b29]",
+        kind === "primary" && "bg-cs-green text-white hover:bg-[#8f3a18]",
         kind === "outline" && "border border-[#cfd2cd] bg-white text-[#1d211e] hover:border-[#9aa19c]",
         kind === "danger" && "border border-[#f0a8a0] bg-[#fdf3f2] text-cs-red hover:border-cs-red",
         className,

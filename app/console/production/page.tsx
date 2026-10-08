@@ -349,7 +349,7 @@ function ProductionInner() {
           return (
             <div className="space-y-[10px]">
               <Field label={`Completed units (of ${fmtNum(b.planned)})`}><input type="number" min={0} max={b.planned} className={inputCls} value={units} onChange={(e) => setUnits(Math.max(0, Math.min(b.planned, +e.target.value)))} /></Field>
-              <input type="range" aria-label="Completed units" min={0} max={b.planned} step={500} value={units} onChange={(e) => setUnits(+e.target.value)} className="w-full accent-[#1d4b34]" />
+              <input type="range" aria-label="Completed units" min={0} max={b.planned} step={500} value={units} onChange={(e) => setUnits(+e.target.value)} className="w-full accent-[#a8461f]" />
               <p className="text-[12px] text-cs-ink-2">{Math.round((units / b.planned) * 100)}% of batch</p>
             </div>
           );

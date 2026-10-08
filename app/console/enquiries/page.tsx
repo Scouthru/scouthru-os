@@ -177,7 +177,7 @@ function Enquiries() {
                   { key: "closed", label: `Closed (${count("closed")})` },
                 ]}
               />
-              <button type="button" onClick={() => setCreating(true)} className="mb-[8px] hidden h-[30px] items-center gap-[6px] rounded-[6px] bg-cs-green px-[11px] text-[12px] font-medium text-white hover:bg-[#163b29] min-[1024px]:flex" style={{ display: showPanel ? "none" : undefined }}>
+              <button type="button" onClick={() => setCreating(true)} className="mb-[8px] hidden h-[30px] items-center gap-[6px] rounded-[6px] bg-cs-green px-[11px] text-[12px] font-medium text-white hover:bg-[#8f3a18] min-[1024px]:flex" style={{ display: showPanel ? "none" : undefined }}>
                 <Plus className="size-[14px]" /> New Enquiry
               </button>
             </div>

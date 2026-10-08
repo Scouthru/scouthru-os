@@ -95,7 +95,7 @@ export default function MakerDashboard() {
             <CardTitle sub="Jump straight into the work.">Quick Actions</CardTitle>
             <div className="mt-[16px] grid grid-cols-2 gap-[9px]">
               {ACTIONS.map((a, i) => (
-                <Link key={a.label} href={a.href} className={cn("flex h-[54px] items-center gap-[10px] rounded-[7px] px-[12px] text-[12.5px] font-medium leading-tight", i === 0 ? "bg-cs-green text-white hover:bg-[#163b29]" : "border border-cs-line bg-white text-[#1f2421] hover:border-[#cfcac0]")}>
+                <Link key={a.label} href={a.href} className={cn("flex h-[54px] items-center gap-[10px] rounded-[7px] px-[12px] text-[12.5px] font-medium leading-tight", i === 0 ? "bg-cs-green text-white hover:bg-[#8f3a18]" : "border border-cs-line bg-white text-[#1f2421] hover:border-[#cfcac0]")}>
                   <a.icon className={cn("size-[20px] shrink-0", a.color)} strokeWidth={1.6} />{a.label}<ChevronRight className="ml-auto size-[15px]" />
                 </Link>
               ))}

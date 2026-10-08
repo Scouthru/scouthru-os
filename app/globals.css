@@ -57,9 +57,15 @@
   --color-cs-line: #ebe7df;
   --color-cs-ink: #1b1f1c;
   --color-cs-ink-2: #5d635f;
-  --color-cs-green: #1d4b34;
-  --color-cs-green-2: #2f6b47;
-  --color-cs-mint: #e6f1e7;
+  /* brand: terracotta (2026-10-08, replaced the mockups' dark green at the founder's request) */
+  --color-cs-green: #a8461f;
+  --color-cs-green-2: #b4532c;
+  --color-cs-mint: #fbede4;
+  /* success states keep a soft green so Paid / Passed never read as warnings */
+  --color-cs-ok: #2f7a4f;
+  --color-cs-ok-bg: #e4f2e7;
+  /* dark bands (trust section, footer, feature cards): warm espresso */
+  --color-cs-deep: #3b241a;
   --color-cs-orange: #d8742c;
   --color-cs-orange-bg: #fcecde;
   --color-cs-blue: #3a64c8;

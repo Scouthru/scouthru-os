@@ -148,12 +148,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               {p.included.map((i) => <li key={i} className="flex gap-[8px] py-[9px]"><Check className="mt-[2px] size-[16px] shrink-0 text-cs-green-2" />{i}</li>)}
             </ul>
           </div>
-          <div className="rounded-[12px] bg-cs-green p-[20px] text-white">
+          <div className="rounded-[12px] bg-cs-deep p-[20px] text-white">
             <p className="text-[11px] font-semibold tracking-[0.18em] text-white/70">MADE BY</p>
             <p className="serif mt-[8px] text-[26px] font-semibold">{revealed ? unit?.name : `Unit ${p.unit}`}</p>
             <p className="mt-[4px] text-[13.5px] text-white/80">{unit?.city} · {unit?.licences.join(", ")} · visited by Scouthru</p>
             <p className="mt-[8px] text-[12.5px] text-white/70">{revealed ? "Name shared because you connected with this unit." : "Name shared once you request a sample or place an order."}</p>
-            <div className="mt-[14px] h-[6px] rounded-full bg-white/15"><div className="h-full rounded-full bg-[#b9dcc3]" style={{ width: `${unit?.booked ?? 0}%` }} /></div>
+            <div className="mt-[14px] h-[6px] rounded-full bg-white/15"><div className="h-full rounded-full bg-[#f2c4ad]" style={{ width: `${unit?.booked ?? 0}%` }} /></div>
             <p className="mt-[6px] text-[11.5px] text-white/75">{unit?.booked}% booked this quarter</p>
             {revealed && <Link href={`/console/manufacturers?id=${mfrId}`} className="mt-[12px] inline-flex items-center gap-[6px] text-[12.5px] font-medium text-white hover:underline">Open in Scouthru OS <ArrowRight className="size-[14px]" /></Link>}
           </div>
