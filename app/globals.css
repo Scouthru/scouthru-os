@@ -51,6 +51,25 @@
   --color-t-lilac: #e8e3ef;
   --color-t-stone: #e8e7e2;
 
+  /* Scouthru OS console (green mockups, 2026-10-08): scoped to /console only */
+  --color-cs-ground: #fbfaf6;
+  --color-cs-cream: #f4efe6;
+  --color-cs-line: #ebe7df;
+  --color-cs-ink: #1b1f1c;
+  --color-cs-ink-2: #5d635f;
+  --color-cs-green: #1d4b34;
+  --color-cs-green-2: #2f6b47;
+  --color-cs-mint: #e6f1e7;
+  --color-cs-orange: #d8742c;
+  --color-cs-orange-bg: #fcecde;
+  --color-cs-blue: #3a64c8;
+  --color-cs-blue-bg: #e6edfb;
+  --color-cs-violet: #6650c6;
+  --color-cs-violet-bg: #ece8fb;
+  --color-cs-red: #dc4437;
+  --color-cs-red-bg: #fde8e5;
+  --color-cs-amber: #e0a31c;
+
   --font-sans: var(--font-plex), ui-sans-serif, system-ui, "Segoe UI", sans-serif;
   --font-display: var(--font-display-face), var(--font-plex), sans-serif;
   --font-desk: var(--font-display-face), var(--font-plex), sans-serif;
@@ -189,4 +208,24 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Scouthru OS console: Inter body, Source Serif headings, cream ground. */
+.cs {
+  font-family: var(--font-cs-sans), ui-sans-serif, system-ui, sans-serif;
+  color: var(--color-cs-ink);
+  background: var(--color-cs-ground);
+  font-feature-settings: "cv11";
+}
+.cs .serif {
+  font-family: var(--font-cs-serif), Georgia, serif;
+  letter-spacing: -0.015em;
+}
+.cs .cs-card {
+  background: #fff;
+  border: 1px solid var(--color-cs-line);
+  border-radius: 12px;
+}
+.cs :focus-visible {
+  outline: 2px solid var(--color-cs-green);
 }
