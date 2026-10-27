@@ -6,18 +6,20 @@ import { ArrowRight, Factory, PackageOpen, RotateCcw, Store, Warehouse } from "l
 import { SiteFooter, SiteHeader } from "@/components/console/site";
 import { Btn, Modal } from "@/components/console/kit";
 import { useConsole } from "@/lib/console/store";
+import { useAccount } from "@/lib/console/account";
+import type { Portal } from "@/lib/console/types";
 
 /** Pick a portal: the four sides of the same demo network. */
 export default function Demo() {
-  const { s, reset } = useConsole();
+  const { reset } = useConsole();
+  const { signIn } = useAccount();
   const [confirm, setConfirm] = useState(false);
-  const maker = s.manufacturers.find((m) => m.id === s.makerId)?.name ?? "Manufacturer";
-  const supplier = s.suppliers.find((x) => x.id === s.supplierId)?.name ?? "Supplier";
-  const ROLES: [string, string, string, string, string, typeof Store][] = [
-    ["For brands", "I want to make a product", `${s.workspace} · post enquiries, approve samples, track batches, pay by milestone.`, "/console", s.user.name, Store],
-    ["For manufacturers", "I run a factory", `${maker} · quote enquiries, plan capacity, run batches and dispatch.`, "/console/maker", s.people.maker.name, Factory],
-    ["For suppliers", "I supply packaging or raw material", `${supplier} · answer RFQs, ship purchase orders, keep stock and prices current.`, "/console/supplier", s.people.supplier.name, PackageOpen],
-    ["For distributors", "I distribute to retailers", `${s.distributor.name} · receive stock, run retailer orders and routes, collect payments.`, "/console/distributor", s.people.distributor.name, Warehouse],
+  // Shown by account type only, never a person's name.
+  const ROLES: [string, string, string, string, string, typeof Store, Portal][] = [
+    ["For product owners", "I want to make a product", "Post enquiries, approve samples, track batches, pay by milestone.", "/console", "product owner", Store, "brand"],
+    ["For manufacturers", "I run a factory", "Quote enquiries, plan capacity, run batches and dispatch.", "/console/maker", "manufacturer", Factory, "maker"],
+    ["For suppliers", "I supply packaging or raw material", "Answer price requests, ship purchase orders, keep stock and prices current.", "/console/supplier", "supplier", PackageOpen, "supplier"],
+    ["For distributors", "I distribute to retailers", "Receive stock, run retailer orders and routes, collect payments.", "/console/distributor", "distributor", Warehouse, "distributor"],
   ];
 
   return (
@@ -28,8 +30,8 @@ export default function Demo() {
         <h1 className="serif mt-[14px] max-w-[18ch] text-[44px] font-semibold leading-[1.03] tracking-[-0.025em] sm:text-[56px]">Find the right factory. Run every order in one place.</h1>
         <p className="mt-[14px] text-[16px] text-[#3e4440]">Pick a side and click through. All four portals share one network, so what you do on one side shows up on the others.</p>
         <div className="mt-[28px] grid gap-[14px] md:grid-cols-2">
-          {ROLES.map(([k, t, d, href, who, Icon], i) => (
-            <Link key={k} href={href} className={i % 3 === 0 ? "group flex flex-col gap-[8px] rounded-[14px] bg-cs-deep p-[26px] text-white" : "cs-card group flex flex-col gap-[8px] p-[26px] hover:border-[#cfcac0]"}>
+          {ROLES.map(([k, t, d, href, who, Icon, portal], i) => (
+            <Link key={k} href={href} onClick={() => signIn({ portal, plan: "Free" })} className={i % 3 === 0 ? "group flex flex-col gap-[8px] rounded-[14px] bg-cs-deep p-[26px] text-white" : "cs-card group flex flex-col gap-[8px] p-[26px] hover:border-[#cfcac0]"}>
               <div className="flex items-center justify-between">
                 <span className={i % 3 === 0 ? "text-[11.5px] font-semibold tracking-[0.18em] text-[#f2c4ad]" : "text-[11.5px] font-semibold tracking-[0.18em] text-cs-green-2"}>{k.toUpperCase()}</span>
                 <Icon className={i % 3 === 0 ? "size-[22px] text-[#f2c4ad]" : "size-[22px] text-cs-green-2"} strokeWidth={1.6} />

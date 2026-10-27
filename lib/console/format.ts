@@ -9,13 +9,27 @@ export function lakh(n: number) {
   return inr(n);
 }
 
+/**
+ * Every date is shown in India time. The server renders in UTC and the browser in
+ * the viewer's zone; without a fixed zone the two disagree and React rejects the page.
+ */
+export const TZ = "Asia/Kolkata";
+const PARTS = new Intl.DateTimeFormat("en-US", { timeZone: TZ, year: "numeric", month: "numeric", day: "numeric", weekday: "short" });
+/** Calendar parts of a moment in India time: month is 0-based, weekday is "Mon". */
+export function ist(at: string | number | Date = Date.now()) {
+  const p = Object.fromEntries(PARTS.formatToParts(new Date(at)).map((x) => [x.type, x.value]));
+  return { y: Number(p.year), m: Number(p.month) - 1, d: Number(p.day), wd: p.weekday };
+}
+
 /** "12 Jun 2026" */
-export const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+export const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: TZ });
 /** "12 Jun" */
-export const fmtDay = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+export const fmtDay = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: TZ });
+/** "Jun" */
+export const fmtMon = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { month: "short", timeZone: TZ });
 /** "12 Mar 2026, 10:30 AM" */
 export const fmtDateTime = (iso: string) =>
-  `${fmtDate(iso)}, ${new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`;
+  `${fmtDate(iso)}, ${new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: TZ })}`;
 
 /** "2 hours ago", "1 day ago", "1 week ago" */
 export function ago(iso: string, now = Date.now()) {

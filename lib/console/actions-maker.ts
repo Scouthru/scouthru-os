@@ -60,9 +60,9 @@ export function capacityLoad(s: ConsoleState) {
 /** Can the factory take `packs` more of something that runs on `line` this month? */
 export function capacityFit(s: ConsoleState, line: string, packs: number) {
   const l = capacityLoad(s).find((x) => x.line === line);
-  if (!l) return { fits: false, need: 0, free: 0, shortfall: 0, line };
+  if (!l) return { fits: false, need: 0, free: 0, shortfall: 0, line, unit: "units" };
   const need = lineUnits(line, packs);
-  return { fits: need <= l.free, need, free: l.free, shortfall: Math.max(0, need - l.free), line };
+  return { fits: need <= l.free, need, free: l.free, shortfall: Math.max(0, need - l.free), line, unit: l.unit };
 }
 
 export type Shown = "Paid" | "Due Soon" | "Overdue" | "Scheduled";

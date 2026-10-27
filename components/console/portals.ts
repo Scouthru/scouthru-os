@@ -16,7 +16,7 @@ export function portalOf(path: string): Portal {
 }
 
 export const PORTAL_HOME: Record<Portal, string> = { brand: "/console", maker: "/console/maker", supplier: "/console/supplier", distributor: "/console/distributor" };
-export const PORTAL_LABEL: Record<Portal, string> = { brand: "Brand", maker: "Manufacturer", supplier: "Supplier", distributor: "Distributor" };
+export const PORTAL_LABEL: Record<Portal, string> = { brand: "Product owner", maker: "Manufacturer", supplier: "Supplier", distributor: "Distributor" };
 export const PORTAL_ICON: Record<Portal, LucideIcon> = { brand: Store, maker: Factory, supplier: PackageOpen, distributor: Warehouse };
 
 export const NAVS: Record<Portal, NavItem[]> = {

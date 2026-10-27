@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
-  ArrowRight, BadgeCheck, Boxes, Factory, FileText, FlaskConical, Leaf, Lock, PackageOpen, Phone, ReceiptIndianRupee, Search, ShieldCheck, Sparkles, Store, Truck, Warehouse,
+  ArrowRight, BadgeCheck, Boxes, Factory, FileText, FlaskConical, Leaf, Lock, Phone, ReceiptIndianRupee, Search, ShieldCheck, Sparkles, Truck,
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/console/site";
 import { PostRequirement } from "@/components/console/market";
+import { PLANS, PORTALS } from "@/components/console/os-info";
 import { useConsole } from "@/lib/console/store";
+import { openEnquiries, ordersRunning, samplesInReview, shipmentsMoving } from "@/lib/console/counts";
 import { cn } from "@/lib/cn";
 
 const CATS = ["Protein bars", "Supplements", "Skincare", "Healthy snacks", "Beverages", "Packaging"];
@@ -26,13 +28,6 @@ const HOW: [string, string, string, typeof FileText][] = [
   ["04", "Track to delivery", "Milestones, photo proof, QC and payments, all in one place.", Truck],
 ];
 
-const PORTALS: [string, string, string, string, typeof Store][] = [
-  ["Brands", "Post enquiries, compare quotes, approve samples, track every batch and pay by milestone.", "/console", "Open brand console", Store],
-  ["Manufacturers", "Quote enquiries from any source, plan capacity, run batches and get paid on proof.", "/console/maker", "Open factory portal", Factory],
-  ["Suppliers", "Answer RFQs for packaging and ingredients, ship POs and keep stock and prices current.", "/console/supplier", "Open supplier portal", PackageOpen],
-  ["Distributors", "Count inbound stock, run retailer orders and routes, and collect payments.", "/console/distributor", "Open distributor portal", Warehouse],
-];
-
 const TRUST: [string, string, typeof BadgeCheck][] = [
   ["Verified units", "Every factory visited in person. Capability, machines and licences checked.", BadgeCheck],
   ["Protected contact", "Numbers stay masked. Calls and chats run through Scouthru.", Phone],
@@ -42,23 +37,17 @@ const TRUST: [string, string, typeof BadgeCheck][] = [
   ["7-day complaint window", "Raise any issue within 7 days of QC and delivery. We resolve it.", ShieldCheck],
 ];
 
-const PLANS: [string, string, string, boolean][] = [
-  ["Free", "₹0", "Post requirements, search the marketplace, and work on a limited number of enquiries each month.", false],
-  ["Pro", "₹4,999 / month", "Unlimited enquiries, large-lot leads, and the full Scouthru OS: enquiries, capacity, orders and payments.", true],
-  ["Done for you", "Included in order price", "Scouthru runs your order end to end. No separate fee, one price per order.", false],
-];
-
-export default function Home() {
+export default function About() {
   const router = useRouter();
   const { s } = useConsole();
   const [post, setPost] = useState(false);
   const [q, setQ] = useState({ what: "", qty: "", where: "" });
 
   // Live preview from the demo workspace.
-  const open = s.enquiries.filter((e) => e.stage !== "Closed").length;
-  const inReview = s.samples.filter((x) => ["Submitted", "In Review", "Testing", "Feedback"].includes(x.status)).length;
-  const running = s.orders.filter((o) => o.batches.some((b) => b.status !== "Completed")).length;
-  const transit = s.shipments.filter((x) => x.status === "In Transit").length;
+  const open = openEnquiries(s).length;
+  const inReview = samplesInReview(s).length;
+  const running = ordersRunning(s).length;
+  const transit = shipmentsMoving(s).length;
   const order = s.orders.find((o) => o.id === "ORD-2026-0042") ?? s.orders[0];
   const done = order ? order.batches.reduce((a, b) => a + b.completed, 0) : 0;
   const pct = order ? Math.round((done / order.qty) * 100) : 0;
@@ -84,7 +73,7 @@ export default function Home() {
           {/* live preview of the console */}
           <Link href="/console" className="group relative overflow-hidden rounded-[16px] border border-cs-line bg-white shadow-[0_24px_60px_-40px_rgba(16,32,27,.5)] transition-shadow hover:shadow-[0_28px_70px_-36px_rgba(16,32,27,.55)]">
             <div className="relative h-[150px] overflow-hidden bg-[#f7f2ea]">
-              <img src="/console/hero-dashboard-clean.jpg" alt="" className="absolute right-0 top-0 h-full w-[78%] object-cover object-right" />
+              <img src="/console/hero-dashboard-clean-v2.jpg" alt="" className="absolute right-0 top-0 h-full w-[78%] object-cover object-right" />
               <div className="absolute inset-y-0 left-0 w-[40%] bg-gradient-to-r from-[#f7f2ea] via-[#f7f2ea]/85 to-transparent" />
               <div className="relative px-[18px] pt-[18px]">
                 <p className="text-[10.5px] font-semibold tracking-[0.2em] text-[#2b302d]">SCOUTHRU OS · LIVE DEMO</p>
@@ -92,7 +81,7 @@ export default function Home() {
               </div>
             </div>
             <div className="grid grid-cols-4 border-y border-cs-line">
-              {[[open, "Open enquiries"], [inReview, "Samples in review"], [running, "In production"], [transit, "In transit"]].map(([v, l], i) => (
+              {[[open, "Open enquiries"], [inReview, "Samples in review"], [running, "In production"], [transit, "On the way"]].map(([v, l], i) => (
                 <div key={l as string} className={cn("px-[12px] py-[12px]", i > 0 && "border-l border-cs-line")}>
                   <p className="serif text-[24px] font-semibold leading-none">{v}</p>
                   <p className="mt-[5px] text-[11.5px] leading-tight text-cs-ink-2">{l}</p>

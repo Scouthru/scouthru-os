@@ -12,7 +12,7 @@ import { Btn, Check, CardTitle, Empty, Field, FilterSelect, Hero, Modal, Pill, R
 import { Bar } from "@/components/console/ops";
 import { useConsole } from "@/lib/console/store";
 import { recordPayment, sendMessage } from "@/lib/console/actions";
-import { daysUntil, download, csv, fmtDate, fmtDateTime, inr, lakh, ago } from "@/lib/console/format";
+import { daysUntil, download, csv, fmtDate, fmtDateTime, inr, ist, lakh, ago } from "@/lib/console/format";
 import type { ConsoleState, Milestone, PaymentPlan } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
 
@@ -26,7 +26,7 @@ function statusOf(m: Milestone): Shown {
   return "Scheduled";
 }
 const TONE: Record<Shown, Tone> = { Paid: "green", "Due Soon": "orange", Overdue: "red", Scheduled: "blue" };
-const sameMonth = (iso: string) => { const a = new Date(iso), b = new Date(); return a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear(); };
+const sameMonth = (iso: string) => { const a = ist(iso), b = ist(); return a.m === b.m && a.y === b.y; };
 
 type TabKey = "all" | "paid" | "month" | "overdue" | "schedules";
 const MONTHS: Record<string, number> = { "": 3, "Last 6 Months": 6, "Last 12 Months": 12, "All Time": 1200 };
@@ -143,11 +143,11 @@ function Payments() {
       <div className="px-[15px] pb-[20px]">
         <StatStrip
           items={[
-            { icon: FileText, tone: "green", value: lakh(totalValue), label: "Total Order Value", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />across {s.payments.length} orders</> },
-            { icon: Coins, tone: "green", value: lakh(paid.reduce((a, x) => a + x.m.amount, 0)), label: "Paid", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{Math.round((paid.reduce((a, x) => a + x.m.amount, 0) / Math.max(1, totalValue)) * 100)}% of order value</> },
-            { icon: CalendarDays, tone: "orange", value: lakh(monthDue.reduce((a, x) => a + x.m.amount, 0)), label: "Due This Month", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{new Set(monthDue.map((x) => x.p.orderId)).size} orders</> },
-            { icon: AlertCircle, tone: "red", value: lakh(overdue.reduce((a, x) => a + x.m.amount, 0)), label: "Overdue", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{overdue.length} invoice{overdue.length === 1 ? "" : "s"}</>, deltaTone: overdue.length ? "bad" : "up" },
-            { icon: ReceiptText, tone: "green", value: active.length, label: "Active Payment Schedules", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{newThisMonth} new this month</> },
+            { icon: FileText, tone: "green", value: lakh(totalValue), label: "Total Order Value", delta: `across ${s.payments.length} orders`, deltaTone: "muted" },
+            { icon: Coins, tone: "green", value: lakh(paid.reduce((a, x) => a + x.m.amount, 0)), label: "Paid", delta: `${Math.round((paid.reduce((a, x) => a + x.m.amount, 0) / Math.max(1, totalValue)) * 100)}% of order value`, deltaTone: "muted" },
+            { icon: CalendarDays, tone: "orange", value: lakh(monthDue.reduce((a, x) => a + x.m.amount, 0)), label: "Due This Month", delta: `${new Set(monthDue.map((x) => x.p.orderId)).size} orders`, deltaTone: "muted" },
+            { icon: AlertCircle, tone: "red", value: lakh(overdue.reduce((a, x) => a + x.m.amount, 0)), label: "Overdue", delta: `${overdue.length} invoice${overdue.length === 1 ? "" : "s"}`, deltaTone: overdue.length ? "bad" : "muted" },
+            { icon: ReceiptText, tone: "green", value: active.length, label: "Active Payment Schedules", delta: <>{newThisMonth > 0 && <ArrowUp className="mr-[3px] inline size-[13px]" />}{newThisMonth} new this month</>, deltaTone: newThisMonth ? "up" : "muted" },
           ]}
         />
 

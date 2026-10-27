@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowRight, ChevronDown, LayoutDashboard, Search, Sparkles } from "lucide-react";
+import { ArrowRight, ChevronDown, Search, Sparkles } from "lucide-react";
 import { Btn, Field, Modal, Toasts, inputCls, textareaCls } from "./kit";
 import { useConsole } from "@/lib/console/store";
 import { postMarketRequirement } from "@/lib/console/actions-market";
 import { parseRequirement } from "@/lib/parse";
 import { CATEGORIES, CATEGORY_SUBS } from "@/lib/seed";
 import { cn } from "@/lib/cn";
+import { AccountArea, openAuth } from "./account-ui";
 
 const NAV: { label: string; href: string; cat?: string }[] = [
   ...CATEGORIES.map((c) => ({ label: c.label === "Healthy snacks" ? "Snacks" : c.label, href: `/marketplace?c=${c.id}#ready`, cat: c.id })),
@@ -26,7 +27,7 @@ export function MarketLogo() {
   );
 }
 
-/** Marketplace header: search, post requirement, way into Scouthru OS, category menu. */
+/** Marketplace header: search, post requirement, account corner (Scouthru OS lives behind it), category menu. */
 export function MarketHeader({ compact, query = "" }: { compact?: boolean; query?: string }) {
   const router = useRouter();
   const [q, setQ] = useState(query);
@@ -37,7 +38,7 @@ export function MarketHeader({ compact, query = "" }: { compact?: boolean; query
         <div className="bg-cs-deep text-white">
           <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-3 px-4 py-[7px] text-[12px] sm:px-6">
             <span>FMCG makers in India, matched by capability<span className="hidden sm:inline"> · Brands from anywhere · Free for brands</span></span>
-            <Link href="/os" className="hidden font-medium text-white/90 hover:text-white sm:inline">For factories: Scouthru OS →</Link>
+            <button type="button" onClick={() => openAuth({ kind: "join", portal: "maker" })} className="hidden font-medium text-white/90 hover:text-white sm:inline">Run a factory? Join free →</button>
           </div>
         </div>
       )}
@@ -56,9 +57,7 @@ export function MarketHeader({ compact, query = "" }: { compact?: boolean; query
             <Sparkles className="size-[16px]" strokeWidth={1.7} /><span className="hidden sm:inline">AI assist</span>
           </button>
           <span className="hidden shrink-0 lg:block"><Btn kind="primary" onClick={() => setPost({ assist: false })} className="h-[42px]">Post requirement</Btn></span>
-          <Link href="/console" className="hidden h-[42px] shrink-0 items-center gap-[8px] rounded-[9px] border border-cs-line bg-white px-[12px] text-[13px] font-medium hover:border-[#cfcac0] md:flex">
-            <LayoutDashboard className="size-[16px]" strokeWidth={1.7} />Scouthru OS
-          </Link>
+          <AccountArea />
         </div>
         {!compact && (
           <nav className="mx-auto flex max-w-[1240px] gap-[2px] overflow-x-auto px-3 pb-[8px] text-[13.5px] sm:px-5 lg:overflow-visible" aria-label="Categories">
@@ -169,7 +168,7 @@ export function MarketFooter() {
         <nav className="flex flex-wrap gap-[20px] text-[13px] text-[#2f3431]">
           <Link href="/marketplace" className="hover:text-cs-green">Products</Link>
           <Link href="/manufacturers" className="hover:text-cs-green">Manufacturers</Link>
-          <Link href="/console" className="hover:text-cs-green">Scouthru OS</Link>
+          <Link href="/about#pricing" className="hover:text-cs-green">Pricing</Link>
           <Link href="/os" className="hover:text-cs-green">For factories</Link>
           <span className="text-cs-ink-2">Hyderabad, India</span>
           <span className="text-cs-ink-2">Product photos: Unsplash</span>

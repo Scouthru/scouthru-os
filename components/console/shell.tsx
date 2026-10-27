@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useConsole } from "@/lib/console/store";
+import { useAccount } from "@/lib/console/account";
 import { Btn, Menu, Modal, Toasts } from "./kit";
 import { NAVS, PORTAL_HOME, PORTAL_ICON, PORTAL_LABEL, PORTAL_PROMO, orgName, portalOf } from "./portals";
 import type { ConsoleState, Portal } from "@/lib/console/types";
@@ -253,6 +254,7 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const { s, reset, toasts } = useConsole();
+  const { signOut } = useAccount();
   const [confirmReset, setConfirmReset] = useState(false);
   const [drawer, setDrawer] = useState(false);
   useEffect(() => setDrawer(false), [path]);
@@ -338,7 +340,7 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
               align="right"
               items={[
                 { label: "Settings", icon: Settings, onClick: () => router.push("/console/settings") },
-                { label: "Sign out", icon: LogOut, onClick: () => router.push("/demo") },
+                { label: "Sign out", icon: LogOut, onClick: () => { signOut(); router.push("/marketplace"); } },
               ]}
               trigger={
                 <button type="button" className="flex items-center gap-[12px] rounded-[8px] hover:opacity-90">

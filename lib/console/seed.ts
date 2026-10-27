@@ -10,7 +10,7 @@ import type {
  * ago" stays true and due dates stay ahead.
  */
 
-export const CONSOLE_VERSION = 3;
+export const CONSOLE_VERSION = 4;
 
 const H = 3600e3;
 const D = 24 * H;
@@ -87,13 +87,14 @@ const MANUFACTURERS: Manufacturer[] = [
   mfr({ id: "wellplus", name: "WellPlus Manufacturing", city: "Vadodara", state: "Gujarat", img: "/console/f-wellplus-sq.jpg", rating: 4.1, reviews: 28, certs: ["GMP", "ISO"], capabilities: ["Capsules", "Liquids", "Personal Care"], moq: 100000, responseDays: [4, 6], shortlisted: true, onTime: 86, categories: ["Liquids", "Personal Care"] }),
 ];
 
+// Stages match the records: "In Production" only where an order exists, "Samples Requested" where a sample does.
 type EnqSeed = [name: string, img: string, category: string, mfrCount: number, moq: number, stage: EnquiryStage, hoursAgo: number];
 const ENQ: EnqSeed[] = [
   ["Daily Multivitamin Capsules", IMG.multivitamin, "Supplements", 8, 50000, "In Discussion", 2],
   ["Collagen Peptides Powder", IMG.collagenPowder, "Supplements", 6, 25000, "Samples Requested", 26],
-  ["Vitamin C Gummies", IMG.vitcGummies, "Supplements", 10, 100000, "In Production", 50],
-  ["Retinol Face Cream", IMG.retinol, "Skincare", 5, 30000, "In Discussion", 74],
-  ["Plant Protein Powder", IMG.plantProtein, "Food & Beverages", 7, 50000, "Quote Received", 98],
+  ["Vitamin C Gummies", IMG.vitcGummies, "Supplements", 10, 100000, "Samples Requested", 50],
+  ["Retinol Face Cream", IMG.retinol, "Skincare", 5, 30000, "In Production", 74],
+  ["Plant Protein Powder", IMG.plantProtein, "Food & Beverages", 7, 50000, "In Production", 98],
   ["Omega 3 Softgels", IMG.omega3, "Supplements", 6, 100000, "Samples Requested", 122],
   ["Hair Growth Serum", IMG.hairSerum, "Personal Care", 4, 20000, "Draft", 146],
   ["Protein Bar (Chocolate)", IMG.proteinBar, "Food & Beverages", 9, 100000, "In Discussion", 170],
@@ -107,10 +108,10 @@ const ENQ: EnqSeed[] = [
   ["Whey Protein Isolate", IMG.plantProtein, "Food & Beverages", 8, 40000, "Quote Received", 410],
   ["Night Repair Cream", IMG.retinol, "Skincare", 3, 10000, "In Discussion", 440],
   ["Electrolyte Sachets", IMG.sachets, "Food & Beverages", 6, 60000, "Samples Requested", 470],
-  ["Probiotic Capsules", IMG.multivitamin, "Supplements", 5, 30000, "In Production", 500],
+  ["Probiotic Capsules", IMG.multivitamin, "Supplements", 5, 30000, "Quote Received", 500],
   ["Fish Oil Softgels", IMG.omega3, "Supplements", 4, 50000, "Closed", 530],
   ["Herbal Green Tea Blend", IMG.greens, "Food & Beverages", 3, 20000, "In Discussion", 560],
-  ["Multivitamin Gummies", IMG.immunity, "Supplements", 6, 40000, "In Production", 590],
+  ["Multivitamin Gummies", IMG.immunity, "Supplements", 6, 40000, "Quote Received", 590],
   ["Argan Hair Oil", IMG.pump, "Personal Care", 4, 15000, "Closed", 620],
   ["Magnesium Tablets", IMG.vitcTablets, "Supplements", 5, 30000, "Samples Requested", 650],
 ];

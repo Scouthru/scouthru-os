@@ -6,8 +6,8 @@ import { CheckCircle2, Factory, Gauge, Pencil, Scale, TriangleAlert, Users } fro
 import { Btn, Field, Hero, Modal, Pill, StatStrip, inputCls } from "@/components/console/kit";
 import { Meter, Page, Panel, Split } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
-import { PER_PACK, capacityFit, capacityLoad, lineUnits, setLineCapacity, type LineKey } from "@/lib/console/actions-maker";
-import { fmtDay, fmtNum } from "@/lib/console/format";
+import { PER_PACK, capacityFit, capacityLoad, setLineCapacity, type LineKey } from "@/lib/console/actions-maker";
+import { fmtDay, fmtNum, ist } from "@/lib/console/format";
 import { cn } from "@/lib/cn";
 
 const FORMATS: { label: string; line: LineKey }[] = [
@@ -26,7 +26,7 @@ export default function MakerCapacityPage() {
   const total = lines.reduce((a, l) => a + l.perMonth, 0);
   const booked = lines.reduce((a, l) => a + Math.min(l.booked, l.perMonth), 0);
   const over = lines.filter((l) => l.pct > 100);
-  const months = [0, 1, 2].map((m) => { const d = new Date(); d.setMonth(d.getMonth() + m, 1); return d; });
+  const months = [0, 1, 2].map((m) => { const t = ist(); return new Date(Date.UTC(t.y, t.m + m, 1)); });
 
   return (
     <div>
@@ -58,11 +58,11 @@ export default function MakerCapacityPage() {
                   <p className="mt-[5px] text-[11.5px] text-cs-ink-2">{fmtNum(l.booked)} booked · <b className="text-cs-ink">{fmtNum(l.free)} free</b></p>
                   <div className="mt-[9px] grid grid-cols-3 gap-[6px]">
                     {months.map((m, i) => {
-                      const load = l.orders.reduce((a, x) => { const end = new Date(x.order.targetDelivery); const start = new Date(m.getFullYear(), m.getMonth(), 1); return a + (end >= start ? x.perMonth : 0); }, 0);
+                      const load = l.orders.reduce((a, x) => { const end = new Date(x.order.targetDelivery); const start = m; return a + (end >= start ? x.perMonth : 0); }, 0);
                       const pct = l.perMonth ? Math.round((load / l.perMonth) * 100) : 0;
                       return (
                         <div key={i} className="rounded-[6px] bg-[#f7f6f2] px-[8px] py-[6px]">
-                          <p className="text-[10.5px] text-cs-ink-2">{m.toLocaleDateString("en-GB", { month: "short", year: "numeric" })}</p>
+                          <p className="text-[10.5px] text-cs-ink-2">{m.toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" })}</p>
                           <div className="mt-[4px] flex h-[34px] items-end"><div className={cn("w-full rounded-[3px]", pct > 100 ? "bg-cs-red" : pct >= 70 ? "bg-cs-orange" : "bg-cs-green")} style={{ height: `${Math.max(4, Math.min(100, pct))}%` }} /></div>
                           <p className="mt-[3px] text-[11px] font-medium">{pct}%</p>
                         </div>
@@ -89,9 +89,9 @@ export default function MakerCapacityPage() {
                 <p className="flex items-center gap-[8px] text-[14px] font-semibold">{fit.fits ? <CheckCircle2 className="size-[18px] text-cs-green-2" /> : <TriangleAlert className="size-[18px] text-cs-orange" />}{fit.fits ? "Yes, it fits this month" : "Not this month on our own lines"}</p>
                 <ul className="mt-[6px] space-y-[2px] text-[12.5px] text-[#3e4440]">
                   <li>Runs on: {fit.line}</li>
-                  <li>Needs: {fmtNum(lineUnits(fit.line, packs))} {s.capacity.find((c) => c.line === fit.line)?.unit}</li>
-                  <li>Free now: {fmtNum(fit.free)}</li>
-                  {!fit.fits && <li>Short by {fmtNum(fit.shortfall)}. Quote a later slot, split the order, or use a Scouthru partner unit.</li>}
+                  <li>Needs: {fmtNum(fit.need)} {fit.unit}</li>
+                  <li>Free now: {fmtNum(fit.free)} {fit.unit}</li>
+                  {!fit.fits && <li>Short by {fmtNum(fit.shortfall)} {fit.unit}. Quote a later slot, split the order, or use a Scouthru partner unit.</li>}
                 </ul>
               </div>
             )}

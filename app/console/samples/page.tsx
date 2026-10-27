@@ -22,7 +22,7 @@ const EST_DAYS = [0, 3, 6, 8, 10];
 const EVAL_ICON: Record<string, LucideIcon> = {
   Appearance: Eye, Odor: Wind, Taste: Utensils, Texture: Layers, Disintegration: Hourglass, "Assay (Active Content)": FlaskConical, "Microbial Limits": Microscope,
 };
-const LARGE: Record<string, string> = { "Ashwagandha Capsules": "/console/smp-ashwagandha-lg.jpg" };
+const LARGE: Record<string, string> = { "Ashwagandha Capsules": "/console/smp-ashwagandha-lg-v2.jpg" };
 const STATUSES: SampleStatus[] = ["Draft", "Submitted", "In Review", "Testing", "Feedback", "Changes Requested", "Approved", "Rejected"];
 
 type Tab = "details" | "quality" | "packaging" | "comments" | "attachments";

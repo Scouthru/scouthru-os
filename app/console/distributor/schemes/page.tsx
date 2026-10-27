@@ -32,7 +32,7 @@ export default function SchemesPage() {
         eyebrow="BRANDS  ·  SCHEMES"
         title="Brands & Schemes"
         lede={<>The brands you carry, how each product sells through, and the trade schemes<br />you can offer retailers this month.</>}
-        img="/console/hero-dashboard.jpg"
+        img="/console/hero-dashboard-v2.jpg"
         quote={["Better schemes.", "Faster sales.", "Stronger brands.", "Happy retailers."]}
         height={177}
         quoteTop={35}

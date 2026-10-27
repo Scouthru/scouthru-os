@@ -26,6 +26,8 @@ function brandStatus(s: ConsoleState, e: Enquiry): Row["status"] {
   if (r.status === "Declined") return "Declined";
   const won = s.samples.some((x) => x.enquiryId === e.id && x.mfrId === s.makerId) || (e.stage === "In Production" && s.orders.some((o) => o.mfrId === s.makerId && o.name === e.name));
   if (won) return "Won";
+  // The brand went into production with another factory.
+  if (e.stage === "In Production" || e.stage === "Closed") return "Lost";
   if (r.status === "Quote Received") return "Quoted";
   return "To quote";
 }
@@ -164,7 +166,7 @@ function FitBadge({ name, qty }: { name: string; qty: number }) {
   return (
     <div className={cn("rounded-[8px] border px-[11px] py-[9px]", fit.fits ? "border-[#cfe5d4] bg-cs-mint/50" : "border-[#f3d6b9] bg-cs-orange-bg/60")}>
       <p className="flex items-center gap-[7px] text-[12.5px] font-semibold"><Gauge className={cn("size-[15px]", fit.fits ? "text-cs-green-2" : "text-cs-orange")} />{fit.fits ? "Fits this month's capacity" : "Needs a partner unit or a later slot"}</p>
-      <p className="mt-[2px] text-[11.5px] text-cs-ink-2">{line}: needs {fmtNum(fit.need)}, {fmtNum(fit.free)} free{fit.fits ? "" : ` (short by ${fmtNum(fit.shortfall)})`}</p>
+      <p className="mt-[2px] text-[11.5px] text-cs-ink-2">{line}: {fmtNum(qty)} packs need {fmtNum(fit.need)} {fit.unit}. {fmtNum(fit.free)} {fit.unit} free this month{fit.fits ? "." : `, short by ${fmtNum(fit.shortfall)}.`}</p>
     </div>
   );
 }

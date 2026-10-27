@@ -21,7 +21,7 @@ type TabKey = "all" | ProductStage;
 const TABS: TabKey[] = ["all", "Active", "In Development", "In Production", "Approved", "Archived"];
 
 /** Larger photos cropped from the mockup where the list thumbnail would be too small. */
-const PANEL_IMG: Record<string, string> = { "Daily Multivitamin Capsules": "/console/prod-panel.jpg" };
+const PANEL_IMG: Record<string, string> = { "Daily Multivitamin Capsules": "/console/prod-panel-v2.jpg" };
 const PACK_IMG: Record<string, string> = { "Bottle (120)": "/console/pkg-bottle120.jpg", "Pouch (30)": "/console/pkg-pouch.jpg" };
 const FACTORY_IMG: Record<string, string> = { nutralab: "/console/factory-nutralab.jpg" };
 
@@ -97,11 +97,11 @@ function Products() {
       <div className="px-[15px] pb-[20px]">
         <StatStrip
           items={[
-            { icon: Box, tone: "green", value: live.length, label: "Active Products", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{week()} updated this week</> },
-            { icon: FlaskConical, tone: "orange", value: count("In Development"), label: "In Development", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{week("In Development")} updated this week</> },
-            { icon: Settings2, tone: "orange", value: count("In Production"), label: "In Production", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{s.orders.filter((o) => o.batches.some((b) => b.status === "In Progress")).length} batches running</> },
-            { icon: ShieldCheck, tone: "blue", value: count("Approved"), label: "Approved", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />ready for production</> },
-            { icon: FileText, tone: "orange", value: count("Draft"), label: "Draft Briefs", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{count("Draft") ? "need a brief" : "none open"}</> },
+            { icon: Box, tone: "green", value: live.length, label: "Active Products", delta: <>{week() > 0 && <ArrowUp className="mr-[3px] inline size-[13px]" />}{week()} updated this week</>, deltaTone: week() ? "up" : "muted" },
+            { icon: FlaskConical, tone: "orange", value: count("In Development"), label: "In Development", delta: <>{week("In Development") > 0 && <ArrowUp className="mr-[3px] inline size-[13px]" />}{week("In Development")} updated this week</>, deltaTone: week("In Development") ? "up" : "muted" },
+            { icon: Settings2, tone: "orange", value: count("In Production"), label: "In Production", delta: `${s.orders.filter((o) => o.batches.some((b) => b.status === "In Progress")).length} batches running`, deltaTone: "muted" },
+            { icon: ShieldCheck, tone: "blue", value: count("Approved"), label: "Approved", delta: "ready for production", deltaTone: "muted" },
+            { icon: FileText, tone: "orange", value: count("Draft"), label: "Draft Briefs", delta: count("Draft") ? "need a brief" : "none open", deltaTone: "muted" },
           ]}
         />
 

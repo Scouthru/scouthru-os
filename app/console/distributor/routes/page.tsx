@@ -7,17 +7,16 @@ import { Btn, CardTitle, Hero, Pill, StatStrip, inputCls } from "@/components/co
 import { RO_TONE, RouteModal } from "@/components/console/distributor-kit";
 import { useConsole } from "@/lib/console/store";
 import { assignRoute, deliverRetailOrder, startRoute } from "@/lib/console/actions-network";
-import { inr } from "@/lib/console/format";
+import { inr, ist } from "@/lib/console/format";
 import type { Route } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
 
-const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function RoutesPage() {
   const { s, update, toast } = useConsole();
   const [edit, setEdit] = useState<Route | null>(null);
   const [adding, setAdding] = useState(false);
-  const today = WEEKDAY[new Date().getDay()];
+  const today = ist().wd;
   const active = s.retailOrders.filter((o) => o.status === "Packed" || o.status === "Out for Delivery");
   const unassigned = s.retailOrders.filter((o) => o.status === "Packed" && !o.routeId);
 

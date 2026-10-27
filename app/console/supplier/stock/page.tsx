@@ -42,7 +42,7 @@ function Stock() {
 
   return (
     <div>
-      <Hero eyebrow="STOCK · PRICES · LEAD TIMES" title="Stock & Prices" lede="Keep stock and prices current so factories see you as available." img="/console/hero-dashboard.jpg" quote={["Stock.", "Prices.", "Lead times.", "Always current."]} />
+      <Hero eyebrow="STOCK · PRICES · LEAD TIMES" title="Stock & Prices" lede="Keep stock and prices current so factories see you as available." img="/console/hero-dashboard-v2.jpg" quote={["Stock.", "Prices.", "Lead times.", "Always current."]} />
       <div className="px-[15px] pb-[15px]">
         <StatStrip items={[
           { icon: Boxes, tone: "green", value: s.supplierStock.length, label: "SKUs Listed", delta: `${fmtNum(s.supplierStock.reduce((a, x) => a + x.onHand, 0))} units on hand`, deltaTone: "muted" },

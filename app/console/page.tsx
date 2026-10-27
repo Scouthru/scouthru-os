@@ -11,8 +11,9 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { Btn, CardTitle, Field, Hero, IconDot, Modal, Pill, RowMenu, TONE, inputCls, type Tone } from "@/components/console/kit";
 import { useConsole } from "@/lib/console/store";
+import { openEnquiries as openEnq, ordersRunning, samplesInReview, shipmentsMoving } from "@/lib/console/counts";
 import { createOrderFromSample, raiseIssue, recordPayment, requestSample, sampleOrderDefaults } from "@/lib/console/actions";
-import { ago, daysUntil, fmtNum, inr } from "@/lib/console/format";
+import { ago, daysUntil, fmtMon, fmtNum, inr, ist } from "@/lib/console/format";
 import type { Activity, ConsoleState } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
 
@@ -73,30 +74,37 @@ export default function Dashboard() {
   const [allActivity, setAllActivity] = useState(false);
 
   const firstName = s.user.name.split(" ")[0].toUpperCase();
-  const inReview = s.samples.filter((x) => ["Submitted", "In Review", "Testing", "Feedback"].includes(x.status));
-  const running = s.orders.filter((o) => o.confirmed && o.batches.some((b) => b.status !== "Completed"));
+  const inReview = samplesInReview(s);
+  const running = ordersRunning(s);
   const openIssues = s.issues.filter((i) => !i.resolved);
-  const transit = s.shipments.filter((x) => x.status === "In Transit");
+  const openEnquiries = openEnq(s);
+  const moving = shipmentsMoving(s);
+  const delayed = moving.filter((x) => x.status === "Delayed");
   const unpaid = s.payments.flatMap((p) => p.milestones).filter((m) => m.status === "Overdue" || m.status === "Due Soon");
 
-  const STATS: { icon: LucideIcon; tone: Tone; value: number; label: string; delta: string; bad?: boolean; href: string }[] = [
-    { icon: FileText, tone: "green", value: s.enquiries.length, label: "Total Enquiries", delta: `${s.enquiries.filter((e) => within(e.createdAt, 30)).length} new this month`, href: "/console/enquiries" },
-    { icon: MessageSquareMore, tone: "orange", value: inReview.length, label: "Samples in Review", delta: `${inReview.filter((x) => within(x.requestedAt, 7)).length} new this week`, href: "/console/samples" },
+  const newEnq = s.enquiries.filter((e) => within(e.createdAt, 30)).length;
+  const newSamples = inReview.filter((x) => within(x.requestedAt, 7)).length;
+  const highIssues = openIssues.filter((i) => i.level === "High").length;
+  const dueWeek = unpaid.filter((m) => daysUntil(m.due) <= 7).length;
+  // up: a count of new items, shown with an arrow when above zero. bad: needs attention.
+  const STATS: { icon: LucideIcon; tone: Tone; value: number; label: string; delta: string; up?: boolean; bad?: boolean; href: string }[] = [
+    { icon: FileText, tone: "green", value: openEnquiries.length, label: "Open Enquiries", delta: `${newEnq} new this month`, up: newEnq > 0, href: "/console/enquiries" },
+    { icon: MessageSquareMore, tone: "orange", value: inReview.length, label: "Samples in Review", delta: `${newSamples} new this week`, up: newSamples > 0, href: "/console/samples" },
     { icon: CalendarDays, tone: "orange", value: running.length, label: "Orders in Production", delta: `${s.orders.filter((o) => !o.confirmed).length} awaiting start`, href: "/console/production" },
-    { icon: ShieldCheck, tone: "blue", value: openIssues.length, label: "Quality Alerts", delta: `${openIssues.filter((i) => i.level === "High").length} high priority`, bad: true, href: "/console/quality" },
-    { icon: Truck, tone: "violet", value: transit.length, label: "Shipments in Transit", delta: `${s.shipments.filter((x) => x.status === "Delayed").length} delayed`, href: "/console/shipments" },
-    { icon: Wallet, tone: "green", value: unpaid.length, label: "Payments Due", delta: `${unpaid.filter((m) => daysUntil(m.due) <= 7).length} due this week`, href: "/console/payments" },
+    { icon: ShieldCheck, tone: "blue", value: openIssues.length, label: "Quality Issues", delta: `${highIssues} high priority`, bad: highIssues > 0, href: "/console/quality" },
+    { icon: Truck, tone: "violet", value: moving.length, label: "Shipments on the Way", delta: `${delayed.length} delayed`, bad: delayed.length > 0, href: "/console/shipments" },
+    { icon: Wallet, tone: "green", value: unpaid.length, label: "Payments Due", delta: `${dueWeek} due this week`, bad: dueWeek > 0, href: "/console/payments" },
   ];
 
   const inRange = (iso: string) => within(iso, range);
   const delivered = s.shipments.filter((x) => x.status === "Delivered");
   const PIPE: { icon: LucideIcon; label: string; n: number; tag: string; tone: "green" | "gray" | "violet"; tagTone: "up" | "blue" | "green"; href: string }[] = [
-    { icon: FileText, label: "Enquiries", n: s.enquiries.filter((e) => e.stage !== "Closed").length, tag: `${s.enquiries.filter((e) => inRange(e.createdAt)).length} new`, tone: "green", tagTone: "up", href: "/console/enquiries" },
+    { icon: FileText, label: "Enquiries", n: openEnquiries.length, tag: `${s.enquiries.filter((e) => inRange(e.createdAt)).length} new`, tone: "green", tagTone: "up", href: "/console/enquiries" },
     { icon: FlaskConical, label: "Samples", n: inReview.length, tag: `${s.samples.filter((x) => inRange(x.requestedAt)).length} new`, tone: "green", tagTone: "up", href: "/console/samples" },
     { icon: Settings2, label: "Production", n: running.length, tag: `${s.orders.filter((o) => inRange(o.createdAt)).length} new`, tone: "green", tagTone: "up", href: "/console/production" },
-    { icon: ShieldCheck, label: "Quality", n: s.quality.filter((q) => q.status !== "Passed").length, tag: "In Progress", tone: "gray", tagTone: "blue", href: "/console/quality" },
-    { icon: Truck, label: "Shipments", n: transit.length + s.shipments.filter((x) => x.status === "Delayed").length, tag: `${s.shipments.filter((x) => inRange(x.updatedAt) && x.status !== "Pending").length} moving`, tone: "violet", tagTone: "up", href: "/console/shipments" },
-    { icon: Box, label: "Delivery", n: delivered.filter((x) => inRange(x.updatedAt)).length, tag: s.shipments.some((x) => x.status === "Delayed") ? "Delays" : "On Track", tone: "gray", tagTone: "green", href: "/console/shipments" },
+    { icon: ShieldCheck, label: "Quality", n: s.quality.filter((q) => q.status !== "Passed").length, tag: openIssues.length ? `${openIssues.length} open issue${openIssues.length === 1 ? "" : "s"}` : "No issues", tone: "gray", tagTone: "blue", href: "/console/quality" },
+    { icon: Truck, label: "Shipments", n: moving.length, tag: `${s.shipments.filter((x) => inRange(x.updatedAt) && x.status !== "Pending").length} moving`, tone: "violet", tagTone: "up", href: "/console/shipments" },
+    { icon: Box, label: "Delivery", n: delivered.filter((x) => inRange(x.updatedAt)).length, tag: delayed.length ? "Delays" : "On Track", tone: "gray", tagTone: "green", href: "/console/shipments" },
   ];
 
   const ACTIONS: { label: string; icon: LucideIcon; color: string; go: () => void }[] = [
@@ -128,7 +136,7 @@ export default function Dashboard() {
         eyebrow={`WELCOME BACK, ${firstName}`}
         title="Scouthru OS Dashboard"
         lede={<span className="text-[17.5px] leading-[1.32]">Your complete operations overview — from enquiries to delivery.<br />Track progress, monitor key metrics, and keep your supply chain moving.</span>}
-        img="/console/hero-dashboard.jpg"
+        img="/console/hero-dashboard-v2.jpg"
         quote={["Ideas.", "Samples.", "Production.", "To global markets."]}
       />
 
@@ -140,8 +148,8 @@ export default function Dashboard() {
               <div className="min-w-0 pt-[2px]">
                 <p className="text-[21px] font-semibold leading-none group-hover:text-cs-green">{st.value}</p>
                 <p className="mt-[7px] truncate text-[13px] text-[#3e4440]">{st.label}</p>
-                <p className={cn("mt-[4px] flex items-center gap-[4px] whitespace-nowrap text-[12px]", st.bad ? "text-cs-red" : "text-cs-green-2")}>
-                  <ArrowUp className="size-[13px]" strokeWidth={2} />{st.delta}
+                <p className={cn("mt-[4px] flex items-center gap-[4px] whitespace-nowrap text-[12px]", st.bad ? "text-cs-red" : st.up ? "text-cs-green-2" : "text-cs-ink-2")}>
+                  {st.up && <ArrowUp className="size-[13px] shrink-0" strokeWidth={2} />}{st.delta}
                 </p>
               </div>
             </Link>
@@ -288,13 +296,12 @@ export default function Dashboard() {
               <CardTitle right={<ViewAll href="/console/production" />}>Upcoming Milestones</CardTitle>
               <ul className="mt-[2px]">
                 {mile.slice(0, 3).map((m) => {
-                  const dt = new Date(m.at);
                   return (
                     <li key={m.title + m.sub} className="border-b border-cs-line last:border-0">
                       <Link href={m.href} className="flex items-center gap-[12px] py-[5px] hover:text-cs-green">
                         <span className="grid h-[36px] w-[30px] shrink-0 place-content-center rounded-[6px] bg-[#f3f1ec] text-center leading-none">
-                          <span className="serif block text-[14.5px] font-semibold">{dt.getDate()}</span>
-                          <span className="block text-[10px] text-cs-ink-2">{dt.toLocaleDateString("en-GB", { month: "short" })}</span>
+                          <span className="serif block text-[14.5px] font-semibold">{ist(m.at).d}</span>
+                          <span className="block text-[10px] text-cs-ink-2">{fmtMon(m.at)}</span>
                         </span>
                         <m.icon className={cn("size-[20px] shrink-0", m.color)} strokeWidth={1.6} />
                         <div className="min-w-0">

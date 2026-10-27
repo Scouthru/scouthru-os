@@ -1,6 +1,7 @@
 import type { ConsoleState, StockItem } from "./types";
 import { log, sendMessage } from "./actions";
 import { updateStock } from "./actions-network";
+import { fmtDate } from "./format";
 
 /** Supplier-only actions: price list edits, goods received, payment reminders. */
 
@@ -32,7 +33,7 @@ export function remindInvoice(d: ConsoleState, poId: string) {
   const po = d.purchaseOrders.find((x) => x.id === poId);
   if (!po?.invoice || po.invoice.paidAt) return;
   const buyer = d.manufacturers.find((m) => m.id === po.mfrId)?.name ?? po.mfrId;
-  const due = new Date(po.invoice.due).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  const due = fmtDate(po.invoice.due);
   sendMessage(d, buyer, `Payment reminder: ${po.invoice.no}`, `Invoice ${po.invoice.no} for ₹${po.invoice.amount.toLocaleString("en-IN")} (${po.id}, ${po.title}) was due on ${due}. Please share the payment reference once paid.`, `/console/maker/materials?id=${po.id}`, "Payment");
   po.events.push({ at: new Date().toISOString(), text: `Payment reminder sent for ${po.invoice.no}` });
 }

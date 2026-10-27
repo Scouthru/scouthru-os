@@ -121,7 +121,7 @@ function Enquiries() {
 
   const count = (k: TabKey) => (TAB_STAGES[k] ? s.enquiries.filter((e) => TAB_STAGES[k]!.includes(e.stage)).length : s.enquiries.length);
   const weekly = (k: TabKey) => s.enquiries.filter((e) => (!TAB_STAGES[k] || TAB_STAGES[k]!.includes(e.stage)) && now - new Date(e.updatedAt).getTime() < 7 * 864e5).length;
-  const up = (n: number) => <span className="flex items-center gap-[4px]"><ArrowUp className="size-[13px]" strokeWidth={2} />{n} updated this week</span>;
+  const up = (n: number) => <span className="flex items-center gap-[4px]">{n > 0 && <ArrowUp className="size-[13px] shrink-0" strokeWidth={2} />}{n} updated this week</span>;
 
   // The row open in the panel shows ticked (as in the mockup) and is included in bulk actions.
   const picked = new Set([...bulk, ...(showPanel && sel ? [sel.id] : [])]);
@@ -331,7 +331,7 @@ function EnquiryPanel({ e, onClose, onSample, onMessage, onMove, onDuplicate, on
         ) : (
           <>
             <div className="mt-[4px] flex gap-[13px]">
-              <Image src={e.id === "ENQ-2026-001" ? "/console/enq-multivitamin-lg.jpg" : e.img} alt="" width={168} height={156} className="h-[78px] w-[84px] shrink-0 rounded-[7px] object-cover" />
+              <Image src={e.id === "ENQ-2026-001" ? "/console/enq-multivitamin-lg-v2.jpg" : e.img} alt="" width={168} height={156} className="h-[78px] w-[84px] shrink-0 rounded-[7px] object-cover" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-[6px]">
                   <h2 title={e.name} className="serif min-w-0 truncate text-[15.5px] font-semibold leading-[1.2] tracking-[-0.035em]">{e.name}</h2>

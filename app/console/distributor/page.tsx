@@ -11,10 +11,9 @@ import { RestockModal, ageDays, inboundFor, stockValue } from "@/components/cons
 import { useConsole } from "@/lib/console/store";
 import { startRoute } from "@/lib/console/actions-network";
 import { distributorActivity } from "@/lib/console/actions-distributor";
-import { ago, fmtDate, fmtNum, inr, lakh } from "@/lib/console/format";
+import { ago, fmtDate, fmtNum, inr, ist, lakh } from "@/lib/console/format";
 import { cn } from "@/lib/cn";
 
-const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 type Pri = { key: string; icon: typeof Truck; tone: Tone; title: string; sub: string; due: string; level: "High" | "Medium" | "Low"; href: string; rank: number };
 const LEVEL: Record<string, string> = { High: "bg-cs-red-bg text-cs-red", Medium: "bg-cs-orange-bg text-[#b8641f]", Low: "bg-[#f1f0ec] text-[#4b524e]" };
@@ -30,7 +29,7 @@ export default function DistributorDashboard() {
   const open = s.retailOrders.filter((o) => o.status === "New" || o.status === "Packed" || o.status === "Out for Delivery");
   const due = s.retailOrders.filter((o) => o.status === "Delivered" && o.payment === "Due");
   const overdue = due.filter((o) => ageDays(o.deliveredAt ?? o.at) > 7);
-  const today = WEEKDAY[new Date().getDay()];
+  const today = ist().wd;
 
   const pri = useMemo<Pri[]>(() => {
     const out: Pri[] = [];

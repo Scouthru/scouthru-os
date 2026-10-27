@@ -13,17 +13,17 @@ import { Btn, CardTitle, Crumbs, Empty, Field, IconDot, Menu, Modal, Pill, RowMe
 import { Avatar, BATCH_TONE, Lightbox, Loading, MessageModal, WideHero, CT } from "@/components/console/making";
 import { useConsole } from "@/lib/console/store";
 import { confirmOrder, log, updateBatch } from "@/lib/console/actions";
-import { csv, daysUntil, download, fmtDate, fmtDateTime, fmtNum, inr } from "@/lib/console/format";
+import { csv, daysUntil, download, fmtDate, fmtDateTime, fmtMon, fmtNum, inr, ist } from "@/lib/console/format";
 import type { ConsoleState, Order } from "@/lib/console/types";
 import { orderProgress, orderStatus } from "@/lib/console/actions-making";
 import { cn } from "@/lib/cn";
 
 /** "12 Mar 2026" (the en-GB "Sept" is a character wider than the mockup's dates). */
-const shortDate = (iso: string) => { const d = new Date(iso); return `${d.getDate()} ${d.toLocaleDateString("en-US", { month: "short" })} ${d.getFullYear()}`; };
+const shortDate = (iso: string) => { const d = ist(iso); return `${d.d} ${fmtMon(iso)} ${d.y}`; };
 
 const STEP_ICONS: LucideIcon[] = [FileText, FlaskConical, Settings2, ShieldCheck, Truck, Box];
 const STEP_LABELS = ["Brief", "Sample", "Production", "Quality", "Dispatch", "Delivery"];
-const LARGE: Record<string, string> = { "Daily Multivitamin Capsules": "/console/ord-multivitamin-lg.jpg" };
+const LARGE: Record<string, string> = { "Daily Multivitamin Capsules": "/console/ord-multivitamin-lg-v2.jpg" };
 
 function ProductionInner() {
   const { s, ready, update, toast } = useConsole();

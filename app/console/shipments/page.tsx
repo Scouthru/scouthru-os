@@ -116,10 +116,10 @@ function Shipments() {
       <div className="px-[15px] pb-[20px]">
         <StatStrip
           items={[
-            { icon: Truck, tone: "blue", value: count("In Transit"), label: "Shipments in Transit", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{arrivingWeek} arriving this week</> },
-            { icon: CheckIcon, tone: "green", value: deliveredThisWeek, label: "Delivered This Week", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{deliveredLastWeek} last week</> },
+            { icon: Truck, tone: "blue", value: count("In Transit"), label: "Shipments in Transit", delta: `${arrivingWeek} arriving this week`, deltaTone: "muted" },
+            { icon: CheckIcon, tone: "green", value: deliveredThisWeek, label: "Delivered This Week", delta: `${deliveredLastWeek} last week`, deltaTone: "muted" },
             { icon: AlertTriangle, tone: "red", value: count("Delayed"), label: "Delayed", delta: <><ArrowDown className="mr-[3px] inline size-[13px]" />{count("Delayed") ? "needs attention" : "none right now"}</>, deltaTone: count("Delayed") ? "bad" : "up" },
-            { icon: BarChart3, tone: "green", value: `${onTime}%`, label: "On-Time Rate", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{moving.length - count("Delayed")} of {moving.length} on schedule</> },
+            { icon: BarChart3, tone: "green", value: `${onTime}%`, label: "On-Time Rate", delta: `${moving.length - count("Delayed")} of ${moving.length} on schedule`, deltaTone: "muted" },
             { icon: FileText, tone: "orange", value: count("Pending"), label: "Pending Dispatch", delta: <><ArrowDown className="mr-[3px] inline size-[13px]" />{s.shipments.filter((x) => x.status === "Pending" && /ready/i.test(x.note)).length} ready to ship</> },
           ]}
         />

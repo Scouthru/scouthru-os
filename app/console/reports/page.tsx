@@ -6,7 +6,7 @@ import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, Download, Eye, FileTex
 import { Btn, CardTitle, FilterSelect, Hero, Modal, Pill, RowMenu, StatStrip, ViewAllBtn } from "@/components/console/kit";
 import { useConsole } from "@/lib/console/store";
 import { addExport, removeExport } from "@/lib/console/actions-ops";
-import { csv, download, fmtDate, fmtNum, inr } from "@/lib/console/format";
+import { csv, download, fmtDate, fmtNum, inr, ist } from "@/lib/console/format";
 import type { ConsoleState } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
 
@@ -17,14 +17,15 @@ const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct
 
 /** The last n calendar months ending this month, oldest first. */
 function months(n: number) {
-  const now = new Date();
+  const now = ist();
   return Array.from({ length: n }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - (n - 1 - i), 1);
-    return { y: d.getFullYear(), m: d.getMonth(), label: MON[d.getMonth()] };
+    const d = new Date(Date.UTC(now.y, now.m - (n - 1 - i), 1));
+    return { y: d.getUTCFullYear(), m: d.getUTCMonth(), label: MON[d.getUTCMonth()] };
   });
 }
-const inMonth = (iso: string, b: { y: number; m: number }) => { const d = new Date(iso); return d.getFullYear() === b.y && d.getMonth() === b.m; };
-const since = (n: number) => { const now = new Date(); return new Date(now.getFullYear(), now.getMonth() - (n - 1), 1).getTime(); };
+const inMonth = (iso: string, b: { y: number; m: number }) => { const d = ist(iso); return d.y === b.y && d.m === b.m; };
+// Start of the month n-1 months back, at India midnight (UTC+5:30).
+const since = (n: number) => { const now = ist(); return Date.UTC(now.y, now.m - (n - 1), 1) - 5.5 * 36e5; };
 const within = (iso: string, n: number) => { const t = new Date(iso).getTime(); return t >= since(n) && t <= Date.now() + 864e5; };
 const fromWindow = (iso: string, n: number) => new Date(iso).getTime() >= since(n);
 
@@ -176,11 +177,11 @@ export default function Reports() {
       <div className="px-[15px] pb-[20px]">
         <StatStrip
           items={[
-            { icon: FileText, tone: "green", value: s.enquiries.length, label: "Total Enquiries", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{thisMonth} this month</> },
-            { icon: Filter, tone: "orange", value: `${conv}%`, label: "Conversion to Production", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{s.enquiries.filter((e) => e.stage === "In Production" || e.stage === "Closed").length} of {s.enquiries.length} enquiries</> },
-            { icon: Truck, tone: "blue", value: `${onTime}%`, label: "On-Time Delivery", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{allShip.onTime} of {allShip.total} shipments</> },
-            { icon: AlertTriangle, tone: "red", value: `${defect.toFixed(1)}%`, label: "Defect Rate", delta: <><ArrowDown className="mr-[3px] inline size-[13px]" />target under 2%</> },
-            { icon: Wallet, tone: "green", value: `${payDone}%`, label: "Payment Completion", delta: <><ArrowUp className="mr-[3px] inline size-[13px]" />{inr(allPay.paid)} received</> },
+            { icon: FileText, tone: "green", value: s.enquiries.length, label: "Total Enquiries", delta: <>{thisMonth > 0 && <ArrowUp className="mr-[3px] inline size-[13px]" />}{thisMonth} this month</>, deltaTone: thisMonth ? "up" : "muted" },
+            { icon: Filter, tone: "orange", value: `${conv}%`, label: "Conversion to Production", delta: `${s.enquiries.filter((e) => e.stage === "In Production" || e.stage === "Closed").length} of ${s.enquiries.length} enquiries`, deltaTone: "muted" },
+            { icon: Truck, tone: "blue", value: `${onTime}%`, label: "On-Time Delivery", delta: `${allShip.onTime} of ${allShip.total} shipments`, deltaTone: "muted" },
+            { icon: AlertTriangle, tone: "red", value: `${defect.toFixed(1)}%`, label: "Defect Rate", delta: "target under 2%", deltaTone: "muted" },
+            { icon: Wallet, tone: "green", value: `${payDone}%`, label: "Payment Completion", delta: `${inr(allPay.paid)} received`, deltaTone: "muted" },
           ]}
         />
 

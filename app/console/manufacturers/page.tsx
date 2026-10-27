@@ -138,11 +138,11 @@ function Manufacturers() {
         <div className="[&>section]:py-[11px] [&>section_p+p]:mt-[4px]">
         <StatStrip
           items={[
-            { icon: Users, tone: "green", value: ms.length, label: "Verified Partners", delta: <span className="flex items-center gap-[4px]"><ArrowUp className="size-[13px]" strokeWidth={2} />{ms.filter((m) => m.contacted).length} contacted so far</span> },
-            { icon: Bookmark, tone: "orange", value: count("shortlisted"), label: "Active Shortlists", delta: <span className="flex items-center gap-[4px]"><ArrowUp className="size-[13px]" strokeWidth={2} />{quoted.size} have sent quotes</span> },
+            { icon: Users, tone: "green", value: ms.length, label: "Verified Partners", delta: `${ms.filter((m) => m.contacted).length} contacted so far`, deltaTone: "muted" },
+            { icon: Bookmark, tone: "orange", value: count("shortlisted"), label: "Active Shortlists", delta: `${quoted.size} have sent quotes`, deltaTone: "muted" },
             { icon: Clock3, tone: "green", value: `${avg(ms.map((m) => m.avgResponse)).toFixed(1)} days`, label: "Avg. Response Time", delta: <span className="flex items-center gap-[4px]"><ArrowDown className="size-[13px]" strokeWidth={2} />Fastest: {fastest?.short} {fastest?.avgResponse}d</span> },
-            { icon: Truck, tone: "blue", value: `${Math.round(avg(ms.map((m) => m.onTime)))}%`, label: "On-Time Delivery", delta: <span className="flex items-center gap-[4px]"><ArrowUp className="size-[13px]" strokeWidth={2} />Best: {best?.short} {best?.onTime}%</span> },
-            { icon: ShieldCheck, tone: "orange", value: `${avg(ms.map((m) => m.rating)).toFixed(1)} / 5`, label: "Avg. Quality Score", delta: <span className="flex items-center gap-[4px]"><ArrowUp className="size-[13px]" strokeWidth={2} />Top: {top?.short} {top?.rating}</span> },
+            { icon: Truck, tone: "blue", value: `${Math.round(avg(ms.map((m) => m.onTime)))}%`, label: "On-Time Delivery", delta: `Best: ${best?.short} ${best?.onTime}%`, deltaTone: "muted" },
+            { icon: ShieldCheck, tone: "orange", value: `${avg(ms.map((m) => m.rating)).toFixed(1)} / 5`, label: "Avg. Quality Score", delta: `Top: ${top?.short} ${top?.rating}`, deltaTone: "muted" },
           ]}
         />
         </div>
