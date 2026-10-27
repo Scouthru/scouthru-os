@@ -80,8 +80,8 @@ export function StagePill({ stage, className }: { stage: Stage; className?: stri
   return <span className={cn("inline-flex whitespace-nowrap rounded-full px-[8px] py-[2px] text-[11px] font-semibold", STAGE_TONE[stage], className)}>{stage}</span>;
 }
 
-/** The member's onboarding stages as a track, done ones ticked. */
-export function StageTrack({ s, m }: { s: HqState; m: Member }) {
+/** The member's onboarding stages as a track, done ones ticked. `compact` drops the labels. */
+export function StageTrack({ s, m, compact }: { s: HqState; m: Member; compact?: boolean }) {
   const p = progress(s, m);
   return (
     <ol className="flex gap-[4px]">
@@ -91,9 +91,11 @@ export function StageTrack({ s, m }: { s: HqState; m: Member }) {
         return (
           <li key={st} className="flex-1">
             <span className={cn("block h-[6px] rounded-full", done ? "bg-cs-green" : now ? "bg-cs-orange/70" : "bg-[#ece8df]")} />
-            <span className={cn("mt-[6px] flex items-center gap-[3px] text-[11.5px]", done ? "text-cs-green-2" : now ? "font-semibold text-cs-ink" : "text-cs-ink-2")}>
-              {done && <Check className="size-[11px]" />}{st}
-            </span>
+            {!compact && (
+              <span className={cn("mt-[6px] flex items-center gap-[3px] text-[11.5px]", done ? "text-cs-green-2" : now ? "font-semibold text-cs-ink" : "text-cs-ink-2")}>
+                {done && <Check className="size-[11px]" />}{st}
+              </span>
+            )}
           </li>
         );
       })}
@@ -249,5 +251,55 @@ export function FilePreview({ file, onClose }: { file: { fileKey?: string; name:
         <p className="py-[30px] text-center text-[13px] text-cs-ink-2">Opening…</p>
       )}
     </Modal>
+  );
+}
+
+/**
+ * One box in a member's onboarding kit: a single required document or photo. Drop a file on it
+ * (or click when empty) and it's saved as exactly that item, so nothing has to be guessed.
+ */
+export function UploadTile({ label, tone, accept, onFiles, empty, compact, icon: Icon = UploadCloud, children }: {
+  label: string;
+  tone: "missing" | "check" | "approved" | "rejected";
+  accept?: string;
+  onFiles: (files: File[]) => void;
+  /** Click-to-upload when nothing is there yet. */
+  empty?: boolean;
+  compact?: boolean;
+  /** Shown in the empty box: a document or a camera. */
+  icon?: LucideIcon;
+  children?: React.ReactNode;
+}) {
+  const [over, setOver] = useState(false);
+  const input = useRef<HTMLInputElement>(null);
+  const ring = { missing: "border-dashed border-[#ddd5c6] bg-[#fcfaf6]", check: "border-cs-orange/50 bg-cs-orange-bg/40", approved: "border-cs-ok/40 bg-cs-ok-bg/40", rejected: "border-cs-red/40 bg-cs-red-bg/40" }[tone];
+  return (
+    <div
+      onDragOver={(e) => { e.preventDefault(); setOver(true); }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(e) => { e.preventDefault(); setOver(false); const f = [...e.dataTransfer.files]; if (f.length) onFiles(f); }}
+      className={cn("relative flex flex-col rounded-[12px] border-2 transition-colors", compact ? "min-h-[118px] p-[9px]" : "min-h-[148px] p-[11px]", ring, over && "border-solid border-cs-green bg-cs-mint/70")}
+    >
+      <p className="pr-[24px] text-[12.5px] font-semibold leading-tight">{label}</p>
+      {empty ? (
+        <button type="button" onClick={() => input.current?.click()} className="mt-[6px] grid flex-1 place-items-center rounded-[8px] text-cs-ink-2 hover:bg-white/60 hover:text-cs-green">
+          <span className="grid place-items-center">
+            <span className="relative">
+              <Icon className={compact ? "size-[22px]" : "size-[26px]"} strokeWidth={1.5} />
+              <UploadCloud className="absolute -bottom-[5px] -right-[8px] size-[14px] rounded-full bg-[#fcfaf6] text-cs-green-2" strokeWidth={2} />
+            </span>
+            <span className="mt-[6px] text-[11.5px]">{compact ? "Drop or click" : "Drop or click to upload"}</span>
+          </span>
+        </button>
+      ) : (
+        <div className="mt-[6px] flex flex-1 flex-col">{children}</div>
+      )}
+      {!empty && (
+        <button type="button" onClick={() => input.current?.click()} aria-label={`Upload a new ${label}`} title="Upload a new copy" className="absolute right-[8px] top-[8px] grid size-[24px] place-items-center rounded-[6px] text-cs-ink-2 hover:bg-white hover:text-cs-green">
+          <UploadCloud className="size-[15px]" />
+        </button>
+      )}
+      <input ref={input} type="file" multiple={accept?.startsWith("image")} accept={accept} className="hidden" onChange={(e) => { const f = [...(e.target.files ?? [])]; e.target.value = ""; if (f.length) onFiles(f); }} />
+    </div>
   );
 }

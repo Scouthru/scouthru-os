@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { BellRing, CalendarDays, CornerDownLeft, Inbox, LayoutDashboard, Search, Send, UserPlus, Users } from "lucide-react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowRight, BellRing, CalendarDays, ChevronDown, CornerDownLeft, IndianRupee, Inbox, LayoutDashboard, Lock, LogOut, MessagesSquare, MessageSquareText, Search, Send, UserCog, UserPlus, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Toasts } from "@/components/console/kit";
 import { TYPE_LABEL, dueReminders, progress } from "@/lib/hq/rules";
 import { useHq } from "@/lib/hq/store";
+import { ROLE_ICON, ROLE_JOB, ROLE_LABEL, TABS_FOR, canOpen, ownersOf, unread, useMe } from "@/lib/hq/team";
+import type { Teammate } from "@/lib/hq/types";
 import { AddMemberDialog, SendDialog, StagePill } from "./ui";
 import { cn } from "@/lib/cn";
 
@@ -16,13 +18,25 @@ export type HqAction = "add" | "send";
 const OPEN = "scouthru-hq-action";
 export const openHq = (action: HqAction, detail?: { name?: string; memberId?: string; pack?: string }) => window.dispatchEvent(new CustomEvent(OPEN, { detail: { action, ...detail } }));
 
-const TABS: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: "/hq", label: "Today", icon: LayoutDashboard },
-  { href: "/hq/inbox", label: "Inbox", icon: Inbox },
-  { href: "/hq/members", label: "Members", icon: Users },
-  { href: "/hq/outbox", label: "Outbox", icon: Send },
-  { href: "/hq/visits", label: "Visits", icon: CalendarDays },
-];
+const TAB: Record<string, { label: string; icon: LucideIcon }> = {
+  "/hq": { label: "Home", icon: LayoutDashboard },
+  "/hq/chat": { label: "Chat", icon: MessagesSquare },
+  "/hq/enquiries": { label: "Enquiries", icon: MessageSquareText },
+  "/hq/members": { label: "Onboarding", icon: Users },
+  "/hq/inbox": { label: "Inbox", icon: Inbox },
+  "/hq/outbox": { label: "Outbox", icon: Send },
+  "/hq/visits": { label: "Visits", icon: CalendarDays },
+  "/hq/finance": { label: "Finance", icon: IndianRupee },
+  "/hq/team": { label: "Team", icon: UserCog },
+};
+
+/** The teammate signed in on this tab. Pages under the HQ frame always have one. */
+const MeCtx = createContext<Teammate | null>(null);
+export function useHqMe() {
+  const me = useContext(MeCtx);
+  if (!me) throw new Error("useHqMe outside a signed-in HQ page");
+  return me;
+}
 
 /**
  * The "ask anything" bar: type a member, a city, or what you want to do.
@@ -113,6 +127,7 @@ export function HqShell({ children }: { children: React.ReactNode }) {
   const { s, ready, toasts, toInbox } = useHq();
   const router = useRouter();
   const path = usePathname();
+  const { me, signIn, signOut } = useMe(s.team);
   const [action, setAction] = useState<{ action: HqAction; name?: string; memberId?: string; pack?: string } | null>(null);
   // On a member's file, anything dropped or pasted is filed straight to that member.
   const memberId = /^\/hq\/members\/([^/]+)/.exec(path)?.[1];
@@ -164,8 +179,18 @@ export function HqShell({ children }: { children: React.ReactNode }) {
     };
   }, [toInbox]);
 
-  const counts: Record<string, number> = { "/hq/inbox": s.inbox.length, "/hq/outbox": dueReminders(s).length };
+  const counts: Record<string, number> = {
+    "/hq/inbox": s.inbox.length,
+    "/hq/outbox": dueReminders(s).length,
+    "/hq/enquiries": s.enquiries.filter((e) => e.status === "New").length,
+    "/hq/chat": me ? Object.values(unread(s, me)).reduce((a, n) => a + n, 0) : 0,
+  };
   const active = (href: string) => (href === "/hq" ? path === "/hq" : path.startsWith(href));
+
+  if (ready && !me) return <SignInScreen team={s.team} onPick={signIn} toasts={toasts} />;
+  const tabs = me ? TABS_FOR[me.role] : [];
+  const homeLabel = !me || me.role === "owner" ? "Home" : me.role === "field" ? "My visits" : "My work";
+  const allowed = !me || canOpen(me.role, path);
 
   return (
     <div className="min-h-dvh bg-[#f6f3ec]">
@@ -175,22 +200,30 @@ export function HqShell({ children }: { children: React.ReactNode }) {
             <span className="serif text-[26px] font-semibold leading-none tracking-[-0.02em] text-cs-green">Scouthru</span>
             <span className="rounded-[5px] bg-cs-deep px-[6px] py-[2px] text-[10.5px] font-semibold tracking-[0.14em] text-white">HQ</span>
           </Link>
-          <div className="order-last w-full sm:order-none sm:w-auto sm:flex-1"><CommandBar /></div>
-          <button type="button" onClick={() => setAction({ action: "add" })} className="ml-auto inline-flex h-[40px] items-center gap-[7px] rounded-[9px] bg-cs-green px-[14px] text-[13px] font-medium text-white hover:bg-[#8f3a18]">
-            <UserPlus className="size-[16px]" />Add member
-          </button>
+          <div className="order-last w-full sm:order-none sm:w-auto sm:flex-1">{me && (me.role === "owner" || me.role === "onboarding") && <CommandBar />}</div>
+          <div className="ml-auto flex items-center gap-[10px]">
+            {me && (me.role === "owner" || me.role === "onboarding") && (
+              <button type="button" onClick={() => setAction({ action: "add" })} className="inline-flex h-[40px] items-center gap-[7px] rounded-[9px] bg-cs-green px-[14px] text-[13px] font-medium text-white hover:bg-[#8f3a18]">
+                <UserPlus className="size-[16px]" /><span className="hidden sm:inline">Add member</span>
+              </button>
+            )}
+            {me && <MeMenu me={me} onSwitch={signOut} />}
+          </div>
         </div>
         <nav className="mx-auto flex max-w-[1400px] gap-[2px] overflow-x-auto px-3 pt-[10px] sm:px-5" aria-label="HQ">
-          {TABS.map((t) => (
-            <Link key={t.href} href={t.href} className={cn("flex items-center gap-[7px] whitespace-nowrap border-b-2 px-[12px] pb-[10px] pt-[4px] text-[13.5px] font-medium", active(t.href) ? "border-cs-green text-cs-green" : "border-transparent text-[#3e4440] hover:text-cs-ink")}>
-              <t.icon className="size-[16px]" strokeWidth={1.8} />{t.label}
-              {!!counts[t.href] && <span className="rounded-full bg-cs-green px-[6px] text-[10.5px] font-semibold leading-[17px] text-white">{counts[t.href]}</span>}
-            </Link>
-          ))}
+          {tabs.map((href) => {
+            const t = TAB[href];
+            return (
+              <Link key={href} href={href} className={cn("flex items-center gap-[7px] whitespace-nowrap border-b-2 px-[12px] pb-[10px] pt-[4px] text-[13.5px] font-medium", active(href) ? "border-cs-green text-cs-green" : "border-transparent text-[#3e4440] hover:text-cs-ink")}>
+                <t.icon className="size-[16px]" strokeWidth={1.8} />{href === "/hq" ? homeLabel : t.label}
+                {!!counts[href] && <span className="rounded-full bg-cs-green px-[6px] text-[10.5px] font-semibold leading-[17px] text-white">{counts[href]}</span>}
+              </Link>
+            );
+          })}
         </nav>
       </header>
       <main className="mx-auto max-w-[1400px] px-4 py-[20px] sm:px-6">
-        {ready ? children : <div className="h-[60vh]" aria-busy="true" />}
+        {!ready || !me ? <div className="h-[60vh]" aria-busy="true" /> : allowed ? <MeCtx.Provider value={me}>{children}</MeCtx.Provider> : <NotYours path={path} />}
       </main>
       {action?.action === "add" && <AddMemberDialog name={action.name} onClose={() => setAction(null)} onAdded={(id) => { setAction(null); router.push(`/hq/members/${id}`); }} />}
       {action?.action === "send" && <SendDialog pack={action.pack} memberId={action.memberId ?? memberId} onClose={() => setAction(null)} />}
@@ -202,6 +235,77 @@ export function HqShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
       <Toasts toasts={toasts} />
+    </div>
+  );
+}
+
+/** Signed-in teammate, with a way to switch to another seat (demo) or sign out. */
+function MeMenu({ me, onSwitch }: { me: Teammate; onSwitch: () => void }) {
+  const [open, setOpen] = useState(false);
+  const Icon = ROLE_ICON[me.role];
+  return (
+    <div className="relative">
+      <button type="button" onClick={() => setOpen((o) => !o)} onBlur={() => setTimeout(() => setOpen(false), 150)} aria-expanded={open} className="flex h-[40px] items-center gap-[8px] rounded-[9px] border border-cs-line bg-white pl-[6px] pr-[10px] text-left hover:border-[#cfcac0]">
+        <span className="grid size-[28px] place-items-center rounded-full bg-cs-mint text-cs-green-2"><Icon className="size-[15px]" strokeWidth={1.8} /></span>
+        <span className="hidden leading-tight sm:block">
+          <span className="block max-w-[140px] truncate text-[12.5px] font-semibold">{me.name}</span>
+          <span className="block text-[11px] text-cs-ink-2">{ROLE_LABEL[me.role]}</span>
+        </span>
+        <ChevronDown className="size-[14px] text-cs-ink-2" />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-[6px] w-[240px] rounded-[11px] border border-cs-line bg-white p-[6px] shadow-[0_18px_48px_rgba(20,30,25,0.16)]">
+          <p className="px-[10px] pb-[6px] pt-[4px] text-[11.5px] text-cs-ink-2">{ROLE_JOB[me.role]}</p>
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={onSwitch} className="flex w-full items-center gap-[9px] rounded-[8px] px-[10px] py-[8px] text-left text-[13px] hover:bg-[#f7f5f0]"><LogOut className="size-[15px] text-cs-ink-2" />Sign out / switch person</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Staff sign-in. Demo: pick a seat. Real logins (email or Google, staff only) arrive with the backend. */
+function SignInScreen({ team, onPick, toasts }: { team: Teammate[]; onPick: (id: string) => void; toasts: { id: number; text: string; tone: "ok" | "info" | "bad" }[] }) {
+  return (
+    <div className="grid min-h-dvh place-items-center bg-[#f6f3ec] px-4 py-[40px]">
+      <div className="w-full max-w-[560px]">
+        <p className="flex items-baseline gap-[7px]">
+          <span className="serif text-[30px] font-semibold leading-none tracking-[-0.02em] text-cs-green">Scouthru</span>
+          <span className="rounded-[5px] bg-cs-deep px-[6px] py-[2px] text-[11px] font-semibold tracking-[0.14em] text-white">HQ</span>
+        </p>
+        <h1 className="serif mt-[18px] text-[28px] font-semibold leading-tight">Team sign in</h1>
+        <p className="mt-[4px] text-[13.5px] text-cs-ink-2">Each person sees only their own work. Pick who you are.</p>
+        <ul className="mt-[18px] grid gap-[8px]">
+          {team.filter((t) => t.active).map((t) => {
+            const Icon = ROLE_ICON[t.role];
+            return (
+              <li key={t.id}>
+                <button type="button" onClick={() => onPick(t.id)} className="group flex w-full items-center gap-[12px] rounded-[12px] border border-cs-line bg-white p-[12px] text-left hover:border-cs-green-2/60">
+                  <span className="grid size-[42px] shrink-0 place-items-center rounded-full bg-cs-mint text-cs-green-2"><Icon className="size-[19px]" strokeWidth={1.7} /></span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[14px] font-semibold">{t.name}</span>
+                    <span className="block text-[12px] text-cs-ink-2">{ROLE_LABEL[t.role]} · {ROLE_JOB[t.role]}</span>
+                  </span>
+                  <ArrowRight className="size-[16px] text-cs-ink-2 group-hover:text-cs-green" />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-[14px] text-[11.5px] text-cs-ink-2">Demo: real staff logins arrive with the backend. Open a second tab and sign in as someone else to chat between them.</p>
+      </div>
+      <Toasts toasts={toasts} />
+    </div>
+  );
+}
+
+/** An area that belongs to other roles. */
+function NotYours({ path }: { path: string }) {
+  return (
+    <div className="grid place-items-center py-[80px] text-center">
+      <span className="grid size-[52px] place-items-center rounded-full bg-[#f1efe9] text-cs-ink-2"><Lock className="size-[22px]" /></span>
+      <p className="serif mt-[12px] text-[22px] font-semibold">This area isn&apos;t part of your work</p>
+      <p className="mt-[4px] text-[13.5px] text-cs-ink-2">It belongs to {ownersOf(path).map((r) => ROLE_LABEL[r]).join(", ")}.</p>
+      <Link href="/hq" className="mt-[14px] inline-flex items-center gap-[5px] text-[13.5px] font-medium text-cs-green hover:underline">Back to your dashboard <ArrowRight className="size-[14px]" /></Link>
     </div>
   );
 }

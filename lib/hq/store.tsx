@@ -5,6 +5,7 @@ import type { Doc, HqState, InboxItem, Member, Photo, Send } from "./types";
 import { HQ_VERSION, hqSeed } from "./seed";
 import { deleteFile, putFile, thumbnail } from "./files";
 import { PHOTO_KINDS, TYPE_LABEL, dueReminders, guessDoc, guessPhoto, progress } from "./rules";
+import { handoffs } from "./team";
 
 /** HQ's own state, kept in this browser until the backend arrives. Separate from the console demo. */
 
@@ -87,11 +88,27 @@ export function HqProvider({ children }: { children: React.ReactNode }) {
     }
   }, [s, ready]);
 
+  // Another tab (another teammate) changed something: take their version, so chat and work stay live.
+  useEffect(() => {
+    const on = (e: StorageEvent) => {
+      if (e.key !== KEY || !e.newValue) return;
+      try {
+        const next = JSON.parse(e.newValue) as HqState;
+        if (next.v === HQ_VERSION) { live.current = next; setS(next); }
+      } catch { /* ignore a half-written value */ }
+    };
+    window.addEventListener("storage", on);
+    return () => window.removeEventListener("storage", on);
+  }, []);
+
   const live = useRef(s);
   live.current = s;
+  // Every change also runs the hand-offs between teammates (new member → onboarding, documents done → field, …).
   const update = useCallback((fn: (d: HqState) => void) => {
-    const d = structuredClone(live.current);
+    const prev = live.current;
+    const d = structuredClone(prev);
     fn(d);
+    handoffs(prev, d);
     live.current = d;
     setS(d);
   }, []);

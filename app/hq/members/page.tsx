@@ -6,6 +6,7 @@ import { Moon, Search } from "lucide-react";
 import { StagePill, TypeBadge } from "@/components/hq/ui";
 import { STAGES, TYPE_LABEL, progress, quietDays } from "@/lib/hq/rules";
 import { useHq } from "@/lib/hq/store";
+import { useHqMe } from "@/components/hq/shell";
 import type { MemberType } from "@/lib/hq/types";
 import { cn } from "@/lib/cn";
 
@@ -17,7 +18,8 @@ export default function Members() {
   const { s } = useHq();
   const [filter, setFilter] = useState<"all" | MemberType>("all");
   const [q, setQ] = useState("");
-  const list = s.members.filter((m) => (filter === "all" || m.type === filter) && `${m.name} ${m.city} ${m.state}`.toLowerCase().includes(q.trim().toLowerCase()));
+  const me = useHqMe();
+  const list = s.members.filter((m) => (me.role !== "field" || m.fieldId === me.id) && (filter === "all" || m.type === filter) && `${m.name} ${m.city} ${m.state}`.toLowerCase().includes(q.trim().toLowerCase()));
 
   return (
     <div className="grid gap-[16px]">

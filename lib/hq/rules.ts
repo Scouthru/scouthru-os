@@ -187,3 +187,48 @@ export function nextActions(s: HqState, now = Date.now()): NextAction[] {
   }
   return out.sort((a, b) => a.rank - b.rank);
 }
+
+/** How urgent an update is, for the home page. */
+export const urgency = (rank: number) => (rank <= 1 ? "Urgent" : rank <= 3 ? "Today" : "This week");
+
+export type Insight = { tone: "good" | "watch" | "risk"; text: string };
+
+/** What's going on in operations, and problems building up, worked out from HQ's own data. */
+export function insights(s: HqState, now = Date.now()): Insight[] {
+  const out: Insight[] = [];
+  const week = (from: number, to: number) => s.enquiries.filter((e) => { const d = (now - new Date(e.at).getTime()) / DAY; return d >= from && d < to; });
+  const thisWeek = week(0, 7);
+  const lastWeek = week(7, 14);
+  if (thisWeek.length) {
+    const cats = Object.entries(thisWeek.reduce<Record<string, number>>((a, e) => ({ ...a, [e.category]: (a[e.category] ?? 0) + 1 }), {})).sort((a, b) => b[1] - a[1]);
+    const change = lastWeek.length ? Math.round((thisWeek.length / lastWeek.length - 1) * 100) : null;
+    out.push({ tone: change !== null && change < 0 ? "watch" : "good", text: `${thisWeek.length} enquiries this week${change !== null ? ` (${change >= 0 ? "up" : "down"} ${Math.abs(change)}% on last week)` : ""}, mostly ${cats[0][0]}.` });
+  }
+  const regular = s.enquiries.filter((e) => e.channel !== "Marketplace").length;
+  if (s.enquiries.length) out.push({ tone: "good", text: `${Math.round((regular / s.enquiries.length) * 100)}% of enquiries come from outside the marketplace (WhatsApp, IndiaMART, calls).` });
+  const decided = s.enquiries.filter((e) => e.status === "Won" || e.status === "Lost");
+  if (decided.length) out.push({ tone: "good", text: `${decided.filter((e) => e.status === "Won").length} of ${decided.length} decided enquiries were won.` });
+
+  const stuck = s.members.filter((m) => quietDays(s, m, now) >= 5);
+  if (stuck.length) out.push({ tone: "risk", text: `${stuck.map((m) => m.name).join(", ")} ${stuck.length === 1 ? "has" : "have"} been quiet for 5+ days. Onboarding is stalling.` });
+  const toCheck = s.members.reduce((a, m) => a + progress(s, m).toCheck.length, 0);
+  if (toCheck) out.push({ tone: "watch", text: `${toCheck} document${toCheck === 1 ? " is" : "s are"} waiting to be checked. Members can't move on until they are.` });
+  const toBook = s.members.filter((m) => progress(s, m).stage === "Visit" && !m.visit?.date).length;
+  if (toBook) out.push({ tone: "watch", text: `${toBook} member${toBook === 1 ? " is" : "s are"} ready for a visit that isn't booked yet.` });
+  const soon = renewals(s, now).filter((r) => r.days <= 30);
+  if (soon.length) out.push({ tone: "risk", text: `${soon.map((r) => `${r.doc.kind}`).join(", ")} run${soon.length === 1 ? "s" : ""} out within 30 days. A lapsed licence pauses the listing.` });
+  const order = { risk: 0, watch: 1, good: 2 };
+  return out.sort((a, b) => order[a.tone] - order[b.tone]);
+}
+
+export type Upcoming = { date: string; title: string; kind: "visit" | "renewal" | "payment" | "event"; href?: string };
+
+/** Dated things ahead: visits, renewals, invoices falling due, and events added by hand. */
+export function upcoming(s: HqState, now = Date.now()): Upcoming[] {
+  const out: Upcoming[] = [];
+  s.members.forEach((m) => { if (m.visit?.date && !m.visit.done) out.push({ date: m.visit.date, title: `Visit ${m.name}`, kind: "visit", href: `/hq/members/${m.id}#visit` }); });
+  renewals(s, now).forEach((r) => out.push({ date: r.doc.validTill, title: `${r.doc.kind} runs out · ${s.members.find((m) => m.id === r.doc.memberId)?.name}`, kind: "renewal", href: `/hq/members/${r.doc.memberId}#documents` }));
+  s.invoices.filter((v) => !v.paidAt).forEach((v) => out.push({ date: v.due, title: `${v.direction === "receive" ? "Payment due from" : "Pay"} ${v.party} · ₹${v.amount.toLocaleString("en-IN")}`, kind: "payment", href: "/hq/finance" }));
+  s.events.forEach((e) => out.push({ date: e.date, title: e.title, kind: "event", href: e.memberId ? `/hq/members/${e.memberId}` : undefined }));
+  return out.filter((x) => daysFromToday(x.date, now) >= -14).sort((a, b) => a.date.localeCompare(b.date));
+}

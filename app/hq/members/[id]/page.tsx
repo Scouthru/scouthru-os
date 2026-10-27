@@ -4,33 +4,27 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import {
-  ArrowLeft, BadgeCheck, CalendarDays, Camera, Check, CheckCircle2, FileText, Mail, MessageCircle, NotebookPen, Phone, Send, Star, Trash2, UserRound, X,
+  ArrowLeft, BadgeCheck, CalendarDays, Camera, Check, CheckCircle2, FileText, Mail, MessageCircle, NotebookPen, Phone, Send, Star, UserRound,
 } from "lucide-react";
 import { Btn, Field, inputCls, textareaCls } from "@/components/console/kit";
-import { Box, DropZone, FilePreview, StagePill, StageTrack, TypeBadge } from "@/components/hq/ui";
-import { openHq } from "@/components/hq/shell";
-import { EXPIRING, NEEDS_VISIT, PACKS, PHOTO_KINDS, VISIT_CHECKS, guessDoc, guessPhoto, progress } from "@/lib/hq/rules";
+import { Box, StagePill, StageTrack, TypeBadge } from "@/components/hq/ui";
+import { DocBoxes, PhotoBoxes } from "@/components/hq/onboarding-kit";
+import { openHq, useHqMe } from "@/components/hq/shell";
+import { Conversation } from "@/components/hq/chat";
+import { ROLE_LABEL } from "@/lib/hq/team";
+import { NEEDS_VISIT, PACKS, VISIT_CHECKS, progress } from "@/lib/hq/rules";
 import { goLive, log, useHq } from "@/lib/hq/store";
-import { fmtSize } from "@/lib/hq/files";
-import type { Doc, Member } from "@/lib/hq/types";
+import type { Member, Role } from "@/lib/hq/types";
 import { ago, fmtDate } from "@/lib/console/format";
 import { cn } from "@/lib/cn";
-
-const REJECT_REASONS = ["Scan is unreadable", "Expired", "Wrong document", "Name doesn't match the company"];
-const STATE_BADGE = {
-  approved: ["Approved", "bg-cs-ok-bg text-cs-ok"],
-  check: ["To check", "bg-cs-orange-bg text-[#b8641f]"],
-  rejected: ["Rejected", "bg-cs-red-bg text-cs-red"],
-  missing: ["Missing", "bg-[#f1efe9] text-cs-ink-2"],
-} as const;
 
 /** One member's file: details, documents, visit and photos, messages, notes. */
 export default function MemberFile() {
   const { id } = useParams<{ id: string }>();
-  const { s, update, toast, addDocs, addPhotos, removeDoc, removePhoto } = useHq();
+  const { s, update, toast } = useHq();
+  const me = useHqMe();
   const m = s.members.find((x) => x.id === id);
   const [note, setNote] = useState("");
-  const [preview, setPreview] = useState<{ fileKey?: string; name: string; thumb?: string; title: string } | null>(null);
 
   if (!m) {
     return (
@@ -54,13 +48,16 @@ export default function MemberFile() {
     : p.stage === "Review" ? <Btn kind="primary" icon={BadgeCheck} onClick={() => { update((d) => goLive(d, m.id)); toast(`${m.name} is live · login details sent`); }}>Approve and go live</Btn>
     : null;
 
-  const SECTIONS: [string, string, boolean][] = [
+  const ALL_SECTIONS: [string, string, boolean][] = [
     ["details", "Details", p.detailsOk],
     ["documents", `Documents · ${p.checklist.filter((c) => c.state === "approved").length}/${p.checklist.length}`, p.checklist.every((c) => c.state === "approved")],
     ...(NEEDS_VISIT[m.type] ? [["visit", "Visit and photos", !!m.visit?.done && p.photos >= p.needPhotos] as [string, string, boolean]] : []),
     ["messages", `Messages · ${sends.length}`, p.welcomed],
+    ["discuss", "Team discussion", false],
     ["notes", "Notes", false],
   ];
+  // Field visits see only what their job needs on a member's file.
+  const SECTIONS = me.role === "field" ? ALL_SECTIONS.filter(([k]) => k !== "documents" && k !== "messages") : ALL_SECTIONS;
 
   return (
     <div className="grid gap-[16px]">
@@ -83,6 +80,17 @@ export default function MemberFile() {
         </div>
         <div className="mt-[16px]"><StageTrack s={s} m={m} /></div>
         <p className="mt-[10px] text-[13px]"><b className="font-semibold">Next:</b> {p.nextText}</p>
+        <div className="mt-[12px] flex flex-wrap gap-x-[18px] gap-y-[8px] border-t border-cs-line pt-[12px] text-[12.5px]">
+          {(([["ownerId", "onboarding", "Onboarding by"], ["fieldId", "field", "Visit by"]] as [keyof Pick<Member, "ownerId" | "fieldId">, Role, string][]).filter(([k]) => k === "ownerId" || NEEDS_VISIT[m.type])).map(([key, role, label]) => (
+            <label key={key} className="flex items-center gap-[8px] text-cs-ink-2">
+              {label}
+              <select value={m[key] ?? ""} disabled={me.role !== "owner" && me.role !== "onboarding"} onChange={(e) => edit((x) => { x[key] = e.target.value || undefined; })} className="h-[32px] rounded-[7px] border border-cs-line bg-white px-[8px] text-[12.5px] font-medium text-cs-ink" aria-label={label}>
+                <option value="">Nobody yet</option>
+                {s.team.filter((t) => t.active && (t.role === role || t.role === "owner")).map((t) => <option key={t.id} value={t.id}>{t.name} · {ROLE_LABEL[t.role]}</option>)}
+              </select>
+            </label>
+          ))}
+        </div>
       </section>
 
       <div className="grid gap-[16px] lg:grid-cols-[220px_minmax(0,1fr)]">
@@ -114,6 +122,7 @@ export default function MemberFile() {
             </Box>
           </div>
 
+          {me.role !== "field" && (<>
           {/* 2 Documents */}
           <div id="documents" className="scroll-mt-[130px]">
             <Box title="2 · Documents" icon={FileText} sub={p.missingDocs.length ? `${p.missingDocs.length} missing${p.toCheck.length ? ` · ${p.toCheck.length} to check` : ""}` : p.toCheck.length ? `${p.toCheck.length} to check` : "All approved"}
@@ -123,15 +132,12 @@ export default function MemberFile() {
                   Chase missing documents every 3 days
                 </label>
               }>
-              <ul className="divide-y divide-cs-line">
-                {p.checklist.map((c) => <DocRow key={c.kind} m={m} c={c} onOpen={(d) => setPreview({ fileKey: d.fileKey, name: d.name, title: `${d.kind} · ${m.name}` })} onRemove={removeDoc} />)}
-              </ul>
-              <div className="mt-[12px]">
-                <DropZone compact onFiles={(files) => addDocs(m.id, files.map((file) => ({ file, kind: guessDoc(file.name, p.missingDocs) })))} label="Drop documents for this member" hint="Each file is matched by its name · you can change it after" />
-              </div>
+              <DocBoxes m={m} />
+              <p className="mt-[10px] text-[11.5px] text-cs-ink-2">Drop a file on a box to save it as that document. Several files at once? Drop them anywhere on this page and HQ sorts them by name.</p>
               {p.missingDocs.length > 0 && <Btn icon={MessageCircle} className="mt-[10px]" onClick={() => send("Missing documents reminder")}>Ask for the {p.missingDocs.length} missing</Btn>}
             </Box>
           </div>
+          </>)}
 
           {/* 3 Visit and photos */}
           {NEEDS_VISIT[m.type] && (
@@ -169,32 +175,15 @@ export default function MemberFile() {
                     </Btn>
                   </div>
                   <div id="photos" className="scroll-mt-[130px]">
-                    <p className="mb-[6px] flex items-center gap-[7px] text-[13px] font-semibold"><Camera className="size-[15px] text-cs-green-2" />Photos · {p.photos} of {p.needPhotos} needed</p>
-                    <DropZone compact accept="image/*" onFiles={(files) => { const have = photos.map((x) => x.kind); addPhotos(m.id, files.map((file) => { const kind = guessPhoto(file.name, PHOTO_KINDS[m.type], have); have.push(kind); return { file, kind }; })); }} label="Drop visit photos" hint={PHOTO_KINDS[m.type].join(" · ")} />
-                    {photos.length > 0 && (
-                      <div className="mt-[10px] grid grid-cols-2 gap-[8px] sm:grid-cols-3">
-                        {photos.map((x) => (
-                          <figure key={x.id} className="overflow-hidden rounded-[9px] border border-cs-line bg-[#f3f0e9]">
-                            <button type="button" onClick={() => setPreview({ fileKey: x.fileKey, name: x.name, thumb: x.thumb, title: `${x.kind} · ${m.name}` })} className="block aspect-[4/3] w-full" title="Open">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={x.thumb} alt={x.kind} className="size-full object-cover" />
-                            </button>
-                            <figcaption className="flex items-center gap-[4px] bg-white px-[7px] py-[5px]">
-                              <select value={x.kind} onChange={(e) => update((d) => { d.photos.find((y) => y.id === x.id)!.kind = e.target.value; })} className="min-w-0 flex-1 truncate bg-transparent text-[11.5px] outline-none" aria-label="Photo of">
-                                {PHOTO_KINDS[m.type].map((k) => <option key={k}>{k}</option>)}
-                              </select>
-                              <button type="button" onClick={() => { removePhoto(x.id); toast("Photo removed", "info"); }} aria-label="Remove photo" className="text-cs-ink-2 hover:text-cs-red"><Trash2 className="size-[13px]" /></button>
-                            </figcaption>
-                          </figure>
-                        ))}
-                      </div>
-                    )}
+                    <p className="mb-[8px] flex items-center gap-[7px] text-[13px] font-semibold"><Camera className="size-[15px] text-cs-green-2" />Photos · {p.photos} of {p.needPhotos} needed</p>
+                    <PhotoBoxes m={m} />
                   </div>
                 </div>
               </Box>
             </div>
           )}
 
+          {me.role !== "field" && (<>
           {/* 4 Messages */}
           <div id="messages" className="scroll-mt-[130px]">
             <Box title={`${NEEDS_VISIT[m.type] ? 4 : 3} · Messages`} icon={Send} sub="WhatsApp and email · automatic ones marked">
@@ -216,6 +205,18 @@ export default function MemberFile() {
               </div>
             </Box>
           </div>
+          </>)}
+
+          {/* Team discussion: everything said about this member, in one thread */}
+          <div id="discuss" className="scroll-mt-[130px]">
+            <section className="flex flex-col overflow-hidden rounded-[14px] border border-cs-line bg-white">
+              <div className="border-b border-cs-line px-[18px] py-[12px]">
+                <h2 className="serif text-[19px] font-semibold leading-tight">Team discussion</h2>
+                <p className="text-[12px] text-cs-ink-2">Talk about {m.name} here so it stays with their file. @mention someone to bring them in.</p>
+              </div>
+              <Conversation to={`m:${m.id}`} compact />
+            </section>
+          </div>
 
           {/* 5 Notes */}
           <div id="notes" className="scroll-mt-[130px]">
@@ -233,76 +234,6 @@ export default function MemberFile() {
         </div>
       </div>
 
-      {preview && <FilePreview file={preview} onClose={() => setPreview(null)} />}
     </div>
   );
 }
-
-type CheckItem = ReturnType<typeof progress>["checklist"][number];
-
-/** One required document: its state, the copy on file, and approve / reject. */
-function DocRow({ m, c, onOpen, onRemove }: { m: Member; c: CheckItem; onOpen: (d: Doc) => void; onRemove: (id: string) => void }) {
-  const { update, toast } = useHq();
-  const [validTill, setValidTill] = useState("");
-  const [rejecting, setRejecting] = useState(false);
-  const [label, tone] = STATE_BADGE[c.state];
-  const d = c.best;
-  const needsDate = EXPIRING.includes(c.kind);
-
-  const approve = () => {
-    update((st) => {
-      const x = st.docs.find((y) => y.id === d!.id)!;
-      x.status = "Approved";
-      if (needsDate) x.validTill = validTill;
-      log(st, `${x.kind} approved for ${m.name}`, m.id);
-    });
-    toast(`${c.kind} approved`);
-  };
-  const reject = (reason: string) => {
-    update((st) => {
-      const x = st.docs.find((y) => y.id === d!.id)!;
-      x.status = "Rejected";
-      x.reason = reason;
-      log(st, `${x.kind} from ${m.name} rejected: ${reason.toLowerCase()}`, m.id);
-    });
-    setRejecting(false);
-    toast(`${c.kind} rejected`, "info");
-  };
-
-  return (
-    <li className="py-[11px]">
-      <div className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px]">
-        <span className={cn("grid size-[22px] shrink-0 place-items-center rounded-full", c.state === "approved" ? "bg-cs-ok-bg text-cs-ok" : "bg-[#f3f0e9] text-cs-ink-2")}>
-          {c.state === "approved" ? <Check className="size-[13px]" /> : <span className="size-[6px] rounded-full bg-current" />}
-        </span>
-        <span className="min-w-[150px] flex-1 text-[13.5px] font-medium">{c.kind}</span>
-        <span className={cn("rounded-full px-[8px] py-[2px] text-[11px] font-medium", tone)}>{label}</span>
-        {c.state === "approved" && d?.validTill && <span className="text-[11.5px] text-cs-ink-2">valid till {fmtDate(d.validTill)}</span>}
-        {c.state === "rejected" && d?.reason && <span className="text-[11.5px] text-cs-red">{d.reason}</span>}
-      </div>
-      {d && (
-        <div className="ml-[32px] mt-[7px] flex flex-wrap items-center gap-x-[10px] gap-y-[6px] rounded-[8px] bg-[#faf8f4] px-[10px] py-[7px] text-[12.5px]">
-          <button type="button" onClick={() => onOpen(d)} className="min-w-0 flex-1 truncate text-left hover:text-cs-green hover:underline" title="Open">{d.name}</button>
-          <span className="text-[11.5px] text-cs-ink-2">{fmtSize(d.size)} · {ago(d.at)}</span>
-          {c.state === "check" && !rejecting && (
-            <>
-              {needsDate && <input type="date" value={validTill} onChange={(e) => setValidTill(e.target.value)} className="h-[30px] rounded-[6px] border border-cs-line bg-white px-[6px] text-[12px]" aria-label="Valid till" title="Valid till" />}
-              <button type="button" disabled={needsDate && !validTill} onClick={approve} className="inline-flex items-center gap-[3px] font-medium text-cs-ok hover:underline disabled:opacity-40 disabled:no-underline" title={needsDate && !validTill ? "Enter the valid-till date first" : undefined}><Check className="size-[13px]" />Approve</button>
-              <button type="button" onClick={() => setRejecting(true)} className="inline-flex items-center gap-[3px] text-cs-red hover:underline"><X className="size-[13px]" />Reject</button>
-            </>
-          )}
-          {rejecting && (
-            <span className="flex flex-wrap items-center gap-[6px]">
-              <span className="text-[11.5px] text-cs-ink-2">Why?</span>
-              {REJECT_REASONS.map((r) => <button key={r} type="button" onClick={() => reject(r)} className="rounded-full border border-cs-red/40 px-[8px] py-[2px] text-[11.5px] text-cs-red hover:bg-cs-red-bg">{r}</button>)}
-              <button type="button" onClick={() => setRejecting(false)} className="text-[11.5px] text-cs-ink-2 hover:underline">Cancel</button>
-            </span>
-          )}
-          <button type="button" onClick={() => onRemove(d.id)} aria-label={`Remove ${d.name}`} className="text-cs-ink-2 hover:text-cs-red"><Trash2 className="size-[14px]" /></button>
-        </div>
-      )}
-      {needsDate && c.state === "check" && !validTill && !rejecting && <p className="ml-[32px] mt-[4px] text-[11px] text-cs-ink-2">Enter the valid-till date to approve. HQ reminds them before it runs out.</p>}
-    </li>
-  );
-}
-

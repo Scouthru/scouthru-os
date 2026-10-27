@@ -5,6 +5,7 @@ import { CalendarDays, CalendarPlus, CheckCircle2, Star } from "lucide-react";
 import { Box, TypeBadge } from "@/components/hq/ui";
 import { daysFromToday, progress } from "@/lib/hq/rules";
 import { log, useHq } from "@/lib/hq/store";
+import { useHqMe } from "@/components/hq/shell";
 import type { Member } from "@/lib/hq/types";
 import { fmtDate, fmtDay } from "@/lib/console/format";
 import { cn } from "@/lib/cn";
@@ -13,7 +14,10 @@ const daysTo = (date: string) => daysFromToday(date);
 
 /** Visits: overdue, coming up, still to book, and recent reports. */
 export default function Visits() {
-  const { s, update, toast } = useHq();
+  const { s: all, update, toast } = useHq();
+  const me = useHqMe();
+  // Field visits see only the members they visit.
+  const s = me.role === "field" ? { ...all, members: all.members.filter((m) => m.fieldId === me.id) } : all;
   const booked = s.members.filter((m) => m.visit?.date && !m.visit.done).sort((a, b) => a.visit!.date.localeCompare(b.visit!.date));
   const overdue = booked.filter((m) => daysTo(m.visit!.date) < 0);
   const upcoming = booked.filter((m) => daysTo(m.visit!.date) >= 0);
