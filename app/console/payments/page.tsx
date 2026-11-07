@@ -11,6 +11,7 @@ import {
 import { Btn, Check, CardTitle, Empty, Field, FilterSelect, Hero, Modal, Pill, RowMenu, SearchBox, StatStrip, Tabs, ViewAllBtn, inputCls, type Tone } from "@/components/console/kit";
 import { Bar } from "@/components/console/ops";
 import { useConsole } from "@/lib/console/store";
+import { milestoneProof } from "@/lib/console/results";
 import { PhoneList } from "@/components/console/phone-list";
 import { NextAction, Timeline } from "@/components/console/flow";
 import { paymentNext, paymentTimeline } from "@/lib/console/flow";
@@ -185,7 +186,7 @@ function Payments() {
             {checked.length > 0 && (
               <div className="mt-[8px] flex items-center gap-[12px] rounded-[7px] bg-cs-mint px-[12px] py-[7px] text-[12px]">
                 <span className="font-medium text-cs-green">{checked.length} invoice{checked.length === 1 ? "" : "s"} selected</span>
-                <button type="button" disabled={!checkedUnpaid.length} className="font-medium text-cs-green hover:underline disabled:opacity-40" onClick={() => setRecord({ orderId: "", invoices: checkedUnpaid.map((x) => x.m.invoice) })}>Record payment ({checkedUnpaid.length})</button>
+                <button type="button" disabled={!checkedUnpaid.length} className="font-medium text-cs-green hover:underline disabled:opacity-40" onClick={() => setRecord({ orderId: "", invoices: checkedUnpaid.map((x) => x.m.invoice) })}>Release payment ({checkedUnpaid.length})</button>
                 <button type="button" disabled={!checkedUnpaid.length} className="font-medium text-cs-green hover:underline disabled:opacity-40" onClick={() => { const by = new Map<string, Milestone[]>(); checkedUnpaid.forEach((x) => by.set(x.p.orderId, [...(by.get(x.p.orderId) ?? []), x.m])); by.forEach((ms, id) => remind(s.payments.find((p) => p.orderId === id)!, ms)); }}>Send reminder</button>
                 <button type="button" className="ml-auto text-cs-ink-2 hover:text-cs-ink" onClick={() => setChecked([])}>Clear</button>
               </div>
@@ -244,7 +245,7 @@ function Payments() {
                         <td className="pr-[6px]">
                           <RowMenu items={[
                             { label: "Open", icon: ExternalLink, onClick: () => setSel(p.orderId) },
-                            { label: "Record payment", icon: CreditCard, disabled: !p.milestones.some((m) => m.status !== "Paid"), onClick: () => setRecord({ orderId: p.orderId, invoices: [] }) },
+                            { label: "Release payment", icon: CreditCard, disabled: !p.milestones.some((m) => m.status !== "Paid"), onClick: () => setRecord({ orderId: p.orderId, invoices: [] }) },
                             { label: "Send reminder", icon: Bell, onClick: () => remind(p, p.milestones) },
                             { label: "Download statement", icon: Download, onClick: () => { download(`${p.orderId}-statement.csv`, csv([["Invoice", "Milestone", "Due", "Amount", "Status", "Paid on", "Reference"], ...p.milestones.map((m) => [m.invoice, m.name, fmtDate(m.due), m.amount, statusOf(m), m.paidAt ? fmtDate(m.paidAt) : "", m.ref ?? ""])])); toast("Statement downloaded"); } },
                           ]} />
@@ -261,7 +262,7 @@ function Payments() {
                           <td className="px-[6px]"><Pill tone={TONE[statusOf(m)]} className="!w-[68px] justify-center !py-[2px] !text-[10px]">{statusOf(m)}</Pill></td>
                           <td className="pr-[6px] opacity-0 focus-within:opacity-100 group-hover/ms:opacity-100">
                             <RowMenu items={[
-                              { label: "Record payment", icon: CreditCard, disabled: m.status === "Paid", onClick: () => setRecord({ orderId: p.orderId, invoices: [m.invoice] }) },
+                              { label: "Release payment", icon: CreditCard, disabled: m.status === "Paid" || !milestoneProof(s, p, m).met, onClick: () => setRecord({ orderId: p.orderId, invoices: [m.invoice] }) },
                               { label: "Download invoice", icon: Download, onClick: () => invoiceFile(s, p, m, toast) },
                               { label: "Send reminder", icon: Bell, disabled: m.status === "Paid", onClick: () => remind(p, [m]) },
                             ]} />
@@ -389,6 +390,10 @@ function PaymentPanel({ p, onRecord, onRemind, onAllMs, onAllDocs }: { p: Paymen
                 <div className="min-w-0 flex-1 leading-tight">
                   <p className="text-[12px] text-[#221f1c]">{m.name}</p>
                   <p className="text-[10.5px] text-cs-ink-2">{st === "Paid" ? `Paid on ${fmtDate(m.paidAt ?? m.due)}` : `Due on ${fmtDate(m.due)}`}</p>
+                  {st !== "Paid" && (() => {
+                    const pr = milestoneProof(s, p, m);
+                    return <p className={cn("mt-[1px] text-[10.5px]", pr.met ? "text-cs-ok" : "text-[#a9713f]")}>{pr.met ? "✓ Result proven · ready to release" : `Needs proof: ${pr.missing.join(", ").toLowerCase()}`}</p>;
+                  })()}
                 </div>
                 <span className="w-[76px] text-right text-[12px]">{inr(m.amount)}</span>
                 <Pill tone={TONE[st]} className="!w-[74px] justify-center !text-[10.5px]">{st === "Scheduled" ? "Pending" : st}</Pill>
@@ -440,7 +445,7 @@ function PaymentPanel({ p, onRecord, onRemind, onAllMs, onAllDocs }: { p: Paymen
 
       </div>
       <div className="grid shrink-0 grid-cols-[1.1fr_1fr_1.1fr] gap-[8px] pt-[10px]">
-        <Btn kind="primary" icon={Wallet} className="!px-[8px] !text-[12px]" disabled={!next} onClick={onRecord}>Record Payment</Btn>
+        <Btn kind="primary" icon={Wallet} className="!px-[8px] !text-[12px]" disabled={!next} onClick={onRecord}>Release Payment</Btn>
         <Btn icon={Bell} className="!px-[8px] !text-[12px]" disabled={!next} onClick={onRemind}>Send Reminder</Btn>
         <Btn icon={Download} className="!px-[8px] !text-[12px]" onClick={() => invoiceFile(s, p, next ?? p.milestones[p.milestones.length - 1], toast)}>Download Invoice</Btn>
       </div>
@@ -453,15 +458,19 @@ function RecordModal({ init, onClose, onDone }: { init: { orderId: string; invoi
   const plan = s.payments.find((p) => p.orderId === init.orderId);
   const bulk = !init.orderId;
   const options = bulk ? [] : plan?.milestones.filter((m) => m.status !== "Paid") ?? [];
-  const [inv, setInv] = useState(init.invoices[0] ?? options[0]?.invoice ?? "");
+  const proven = (pl: PaymentPlan, m: Milestone) => milestoneProof(s, pl, m).met;
+  const [inv, setInv] = useState(init.invoices.find((i) => plan && options.some((m) => m.invoice === i && proven(plan, m))) ?? (plan ? options.find((m) => proven(plan, m))?.invoice : undefined) ?? "");
   const [paidOn, setPaidOn] = useState(new Date().toISOString().slice(0, 10));
   const [ref, setRef] = useState("");
-  const ms = bulk ? s.payments.flatMap((p) => p.milestones.filter((m) => init.invoices.includes(m.invoice)).map((m) => ({ p, m }))) : options.filter((m) => m.invoice === inv).map((m) => ({ p: plan!, m }));
+  const chosen = bulk ? s.payments.flatMap((p) => p.milestones.filter((m) => init.invoices.includes(m.invoice)).map((m) => ({ p, m }))) : options.filter((m) => m.invoice === inv).map((m) => ({ p: plan!, m }));
+  // Results as a Service: anything without its proof stays held, even if it was selected.
+  const ms = chosen.filter((x) => proven(x.p, x.m));
+  const held = chosen.filter((x) => !proven(x.p, x.m));
   const sum = ms.reduce((a, x) => a + x.m.amount, 0);
 
   const save = () => {
     update((d) => ms.forEach(({ p, m }) => recordPayment(d, p.orderId, m.invoice, ref.trim(), new Date(paidOn).toISOString())));
-    toast(`Recorded ${ms.length} payment${ms.length === 1 ? "" : "s"} · ${inr(sum)}`);
+    toast(`Released ${ms.length} payment${ms.length === 1 ? "" : "s"} · ${inr(sum)}`);
     onDone();
     onClose();
   };
@@ -470,9 +479,9 @@ function RecordModal({ init, onClose, onDone }: { init: { orderId: string; invoi
     <Modal
       open
       onClose={onClose}
-      title="Record payment"
+      title="Release payment"
       sub={bulk ? `${ms.length} selected invoices` : `${plan?.orderId} · ${plan?.name}`}
-      footer={<><Btn onClick={onClose}>Cancel</Btn><Btn kind="primary" icon={CheckIcon} disabled={!ms.length || !ref.trim() || !paidOn} onClick={save}>Record {inr(sum)}</Btn></>}
+      footer={<><Btn onClick={onClose}>Cancel</Btn><Btn kind="primary" icon={CheckIcon} disabled={!ms.length || !ref.trim() || !paidOn} onClick={save}>Release {inr(sum)}</Btn></>}
     >
       <div className="space-y-[12px]">
         {bulk ? (
@@ -482,10 +491,18 @@ function RecordModal({ init, onClose, onDone }: { init: { orderId: string; invoi
         ) : (
           <Field label="Milestone">
             <select className={inputCls} value={inv} onChange={(e) => setInv(e.target.value)}>
-              {options.map((m) => <option key={m.invoice} value={m.invoice}>{m.name} · {m.invoice} · due {fmtDate(m.due)}</option>)}
+              {options.map((m) => <option key={m.invoice} value={m.invoice} disabled={!proven(plan!, m)}>{m.name} · {m.invoice} · {proven(plan!, m) ? `due ${fmtDate(m.due)}` : "waiting for proof"}</option>)}
             </select>
           </Field>
         )}
+        {!bulk && plan && options.map((m) => m.invoice === inv && (
+          <ul key={m.invoice} className="space-y-[3px] rounded-[8px] bg-[#f8f3eb] px-[11px] py-[8px] text-[12px]">
+            <li className="font-medium">Proof for this milestone</li>
+            {milestoneProof(s, plan, m).items.map((it) => <li key={it.label} className={it.done ? "text-cs-ok" : "text-[#a9713f]"}>{it.done ? "✓" : "○"} {it.label}</li>)}
+          </ul>
+        ))}
+        {!bulk && plan && !inv && <p className="rounded-[8px] bg-[#f8f3eb] px-[11px] py-[8px] text-[12px] text-[#a9713f]">Nothing is ready to release yet. Each milestone is released once the factory has proven its result.</p>}
+        {held.length > 0 && <p className="rounded-[8px] bg-[#f8f3eb] px-[11px] py-[8px] text-[12px] text-[#a9713f]">Held until proven: {held.map((x) => `${x.m.invoice} (${milestoneProof(s, x.p, x.m).missing.join(", ").toLowerCase()})`).join("; ")}.</p>}
         <div className="grid grid-cols-2 gap-[12px]">
           <Field label="Amount"><input className={cn(inputCls, "bg-[#f9f6f0]")} readOnly value={inr(sum)} /></Field>
           <Field label="Paid on"><input type="date" className={inputCls} value={paidOn} onChange={(e) => setPaidOn(e.target.value)} /></Field>

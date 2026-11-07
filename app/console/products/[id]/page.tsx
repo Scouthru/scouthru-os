@@ -6,7 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowRight, Boxes, ClipboardList, FileText, FlaskConical, IndianRupee, ShieldCheck, Truck } from "lucide-react";
 import { CardTitle, Crumbs, Empty, Hero, Pill, Stepper, type Tone } from "@/components/console/kit";
 import { CT, Loading } from "@/components/console/making";
-import { NextAction, Timeline } from "@/components/console/flow";
+import { GuaranteeCard, NextAction, Timeline } from "@/components/console/flow";
+import { orderGuarantee } from "@/lib/console/results";
 import { useConsole } from "@/lib/console/store";
 import { productNext, productRecords, productSteps, productTimeline, type LinkedStep, type ProductRecords } from "@/lib/console/flow";
 import { fmtDate, fmtNum } from "@/lib/console/format";
@@ -65,6 +66,8 @@ export default function ProductWorkspacePage() {
         </section>
 
         <div className="grid items-start gap-[12px] min-[1024px]:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+          <div className="min-w-0 space-y-[12px]">
+          {r.orders.map((o) => <GuaranteeCard key={o.id} g={orderGuarantee(s, o)} title={r.orders.length > 1 ? `Result guarantee · ${o.id}` : "Result guarantee"} />)}
           {/* who is responsible for what */}
           <section className="cs-card px-[15px] pb-[12px] pt-[14px]">
             <CardTitle sub="Every record linked to this product and whose turn it is."><CT>Linked records</CT></CardTitle>
@@ -73,6 +76,7 @@ export default function ProductWorkspacePage() {
               {steps.length === 0 && <Empty>Nothing linked yet. Start with an enquiry from the Products page.</Empty>}
             </ul>
           </section>
+          </div>
 
           {/* what changed */}
           <section className="cs-card px-[15px] pb-[14px] pt-[14px]">

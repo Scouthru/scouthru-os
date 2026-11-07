@@ -211,6 +211,8 @@ export type ConsoleState = {
   exports: Export[];
   messages: Message[];
   readNotifications: ID[];
+  /** Notification categories each portal has switched off (notification settings). */
+  notifyOff?: Partial<Record<Portal, string[]>>;
   /** Who is signed in to each portal. `user` stays the brand user. */
   people: Record<Portal, Person>;
   /** The factory, supplier and distributor this demo's portals belong to. */

@@ -12,7 +12,8 @@ import type { LucideIcon } from "lucide-react";
 import { Btn, CardTitle, Crumbs, Empty, Field, IconDot, Menu, Modal, Pill, RowMenu, ViewAllBtn, inputCls, textareaCls, type Tone } from "@/components/console/kit";
 import { Avatar, BATCH_TONE, Lightbox, Loading, MessageModal, WideHero, CT } from "@/components/console/making";
 import { useConsole } from "@/lib/console/store";
-import { NextAction, Timeline as FlowTimeline } from "@/components/console/flow";
+import { GuaranteeCard, NextAction, Timeline as FlowTimeline } from "@/components/console/flow";
+import { orderGuarantee } from "@/lib/console/results";
 import { orderNext, orderTimeline } from "@/lib/console/flow";
 import { confirmOrder, log, updateBatch } from "@/lib/console/actions";
 import { csv, daysUntil, download, fmtDate, fmtDateTime, fmtMon, fmtNum, inr, ist } from "@/lib/console/format";
@@ -284,6 +285,7 @@ function ProductionInner() {
           </div>
 
           <div className="min-w-0 space-y-[10px]">
+            <GuaranteeCard g={orderGuarantee(s, order)} />
             <section className="cs-card px-[14px] pb-[12px] pt-[14px]">
               <CardTitle sub={`Shared with ${m?.name ?? "the manufacturer"}`}><CT>Timeline</CT></CardTitle>
               <FlowTimeline items={orderTimeline(s, order)} next={flow} className="mt-[10px]" />

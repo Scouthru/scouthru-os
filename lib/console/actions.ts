@@ -1,5 +1,6 @@
 import type { Activity, ConsoleState, Enquiry, EnquiryStage, Order, QualityBatch, Sample, SampleStatus, Shipment } from "./types";
 import { SHIP_STEPS } from "./types";
+import { milestoneProof } from "./results";
 
 /**
  * Cross-screen flows. Each takes the draft state (inside `update`) and keeps
@@ -240,6 +241,8 @@ export function recordPayment(d: ConsoleState, orderId: string, invoice: string,
   const plan = d.payments.find((p) => p.orderId === orderId);
   const m = plan?.milestones.find((x) => x.invoice === invoice);
   if (!plan || !m || m.status === "Paid") return;
+  // Results as a Service: nothing is released until the milestone's result is proven.
+  if (!milestoneProof(d, plan, m).met) return;
   m.status = "Paid";
   m.paidAt = paidOn;
   m.ref = ref;

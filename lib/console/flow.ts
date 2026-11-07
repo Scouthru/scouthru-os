@@ -1,7 +1,8 @@
 import type { ConsoleState, Enquiry, Order, PaymentPlan, PurchaseOrder, QualityBatch, Sample, SampleStatus, Shipment } from "./types";
 import { SHIP_STEPS } from "./types";
 import { fmtDay } from "./format";
-import { milestoneStatus, mine } from "./actions-maker";
+import { mine } from "./actions-maker";
+import { milestoneProof } from "./results";
 
 /**
  * Shared "what happens next" and timeline rules. Every portal reads the same record
@@ -237,8 +238,8 @@ export function qualityNext(s: ConsoleState, q: QualityBatch, side: Side): NextS
           { title: `Waiting for ${L.brand} to approve the batch`, then: "Dispatch" });
     case "Issues Found":
       return step("brand",
-        { title: "Decide on the failed tests", detail: failed.length ? `Failed: ${failed.join(", ")}.` : "An issue was raised on this batch.", blocker: failed[0], action: "decide", actionLabel: "Review results", then: "Ask for a re-test, or approve with a note" },
-        { title: `${L.brand} is reviewing the failed tests`, detail: failed.length ? `Failed: ${failed.join(", ")}.` : undefined, then: "A re-test request, or approval" });
+        { title: "Result missed: decide on the failed tests", detail: failed.length ? `Failed: ${failed.join(", ")}.` : "An issue was raised on this batch.", blocker: failed[0], action: "decide", actionLabel: "Review results", then: "Ask for a re-test, or approve with a note" },
+        { title: `Result missed: ${L.brand} is reviewing the failed tests`, detail: failed.length ? `Failed: ${failed.join(", ")}.` : undefined, then: "A re-test request, or approval" });
     case "Passed":
       return done("Passed · released for dispatch", q.shipmentId ? `Shipment ${q.shipmentId}.` : undefined, q.shipmentId ? { action: "shipment", actionLabel: `View ${q.shipmentId}` } : {});
   }
@@ -272,7 +273,7 @@ export function shipmentNext(s: ConsoleState, sh: Shipment, side: Side): NextSte
   }
   if (sh.status !== "Delivered") {
     const stage = SHIP_STEPS[sh.step];
-    return { title: sh.status === "Delayed" ? "Delayed in transit" : `${stage} · on its way`, owner: sh.carrier, yours: false, state: "open", detail: `With ${sh.carrier} to ${sh.destination}.`, due: sh.eta, blocker: sh.status === "Delayed" ? sh.note : undefined, action: side === "brand" ? "advance" : undefined, actionLabel: side === "brand" ? "Mark next stage" : undefined, then: toDistributor(s, sh) ? `${L.distributor} counts it in` : "Delivered" };
+    return { title: sh.status === "Delayed" ? "Result at risk: delayed in transit" : `${stage} · on its way`, owner: sh.carrier, yours: false, state: "open", detail: `With ${sh.carrier} to ${sh.destination}.`, due: sh.eta, blocker: sh.status === "Delayed" ? sh.note : undefined, action: side === "brand" ? "advance" : undefined, actionLabel: side === "brand" ? "Mark next stage" : undefined, then: toDistributor(s, sh) ? `${L.distributor} counts it in` : "Delivered" };
   }
   if (toDistributor(s, sh) && !received) {
     return step("distributor",
@@ -294,19 +295,31 @@ export function shipmentTimeline(s: ConsoleState, sh: Shipment): Milestone[] {
 
 /* --------------------------------- payments -------------------------------- */
 
+/**
+ * Results as a Service: the next unpaid milestone is payable only once its result is
+ * proven (lib/console/results.ts). Until then it waits on the factory to show proof;
+ * after that it is the brand's to release, and the factory's to chase if it runs late.
+ */
 export function paymentNext(s: ConsoleState, p: PaymentPlan, side: Side): NextStep {
   const L = labels(s, factoryName(s, p.mfrId));
-  const step = stepper(side, L);
-  const nextDue = p.milestones.find((m) => m.status === "Overdue") ?? p.milestones.find((m) => m.status === "Due Soon") ?? p.milestones.find((m) => m.status === "Pending");
-  const upcoming = p.milestones.find((m) => m.status === "Scheduled");
-  if (nextDue) {
-    const late = nextDue.status === "Overdue";
-    return step("brand",
-      { title: `${late ? "Overdue" : "Pay"}: ${nextDue.name} · ${rupees(nextDue.amount)}`, detail: `Invoice ${nextDue.invoice}.`, due: nextDue.due, blocker: late ? "Past due date" : undefined, action: "pay", actionLabel: "Record payment", then: upcoming ? `${upcoming.name} payment later` : "All paid" },
-      { title: `Waiting for ${L.brand} to pay ${nextDue.name}`, detail: `${rupees(nextDue.amount)} · invoice ${nextDue.invoice}.`, due: nextDue.due, blocker: late ? "Past due date" : undefined, then: upcoming ? `${upcoming.name} payment later` : "All paid" });
+  const unpaid = p.milestones.filter((m) => m.status !== "Paid");
+  const m = unpaid[0];
+  if (!m) return done("Fully paid", `${rupees(p.milestones.reduce((a, x) => a + x.amount, 0))} released across ${p.milestones.length} proven milestones.`);
+  const later = unpaid[1];
+  const proof = milestoneProof(s, p, m);
+  const late = new Date(m.due) < new Date();
+  if (!proof.met) {
+    const missing = proof.missing.join(", ").toLowerCase();
+    return stepper(side, L)("maker",
+      { title: `Share proof to get paid ${rupees(m.amount)}`, detail: `${m.name} needs: ${missing}.`, due: m.due, action: "proof", actionLabel: "Open order", then: `${L.brand} releases the payment` },
+      { title: `Waiting for proof: ${m.name}`, detail: `${rupees(m.amount)} is released once ${L.maker} shows: ${missing}.`, then: "You release the payment" });
   }
-  if (upcoming) return { title: `Next payment: ${upcoming.name}`, owner: L.brand, yours: false, state: "open", detail: `${rupees(upcoming.amount)}, due when the milestone is reached.`, due: upcoming.due };
-  return done("Fully paid", `${rupees(p.milestones.reduce((a, m) => a + m.amount, 0))} across ${p.milestones.length} payments.`);
+  if (side === "maker" && late) {
+    return { title: `Proof is in · chase ${rupees(m.amount)}`, owner: "You", yours: true, state: "open", detail: `${m.name} · invoice ${m.invoice} is past due.`, due: m.due, actionLabel: "Open payments", then: later ? `${later.name} after its proof` : "Fully paid" };
+  }
+  return stepper(side, L)("brand",
+    { title: `Proof is in · release ${rupees(m.amount)}`, detail: `${m.name} · invoice ${m.invoice}.`, due: m.due, blocker: late ? "Past due date" : undefined, action: "pay", actionLabel: "Release payment", then: later ? `${later.name} after its proof` : "Fully paid" },
+    { title: `Proof accepted · waiting for ${L.brand} to release ${rupees(m.amount)}`, detail: `${m.name} · invoice ${m.invoice}.`, due: m.due, then: later ? `${later.name} after its proof` : "Fully paid" });
 }
 
 export function paymentTimeline(s: ConsoleState, p: PaymentPlan): Milestone[] {
@@ -462,14 +475,22 @@ export function attention(s: ConsoleState, side: Side): LinkedStep[] {
     m.quality.forEach((x) => add("Quality", x.id, `/console/maker/quality?id=${x.id}`, qualityNext(s, x, side)));
     m.shipments.forEach((x) => add("Dispatch", x.id, `/console/maker/dispatch?id=${x.id}`, shipmentNext(s, x, side)));
     m.pos.forEach((x) => add("Materials", x.id, `/console/maker/materials?id=${x.id}`, poNext(s, x, side)));
-    // The brand pays, but chasing an overdue payment is the factory's job.
-    m.plans.forEach((p) => p.milestones.filter((x) => milestoneStatus(x) === "Overdue").forEach((x) =>
-      add("Payment", x.invoice, "/console/maker/payments", { title: `Chase overdue payment · ${rupees(x.amount)}`, detail: `${x.name} on ${p.orderId}.`, due: x.due, owner: "You", yours: true, state: "open", actionLabel: "Open payments" })));
+    // Payments: share the proof that releases the next milestone, or chase it once proven and late.
+    m.plans.forEach((p) => {
+      const st = paymentNext(s, p, side);
+      add("Payment", p.orderId, st.action === "proof" ? `/console/maker/orders?id=${p.orderId}` : "/console/maker/payments", st);
+    });
   } else if (side === "supplier") {
     s.purchaseOrders.filter((x) => x.supplierId === s.supplierId).forEach((x) => {
       const st = poNext(s, x, side);
       add(x.status === "RFQ" ? "Request" : "Order", x.id, x.status === "RFQ" ? `/console/supplier/requests?id=${x.id}` : x.status === "Confirmed" ? `/console/supplier/dispatch?id=${x.id}` : `/console/supplier/pos?id=${x.id}`, st);
+      // The factory pays, but chasing an overdue invoice is the supplier's job.
+      if (x.invoice && !x.invoice.paidAt && new Date(x.invoice.due) < new Date())
+        add("Payment", x.invoice.no, "/console/supplier/payments", { title: `Remind ${factoryName(s, x.mfrId)} to pay ${rupees(x.invoice.amount)}`, detail: `${x.id} · ${x.title}.`, due: x.invoice.due, owner: "You", yours: true, state: "open", actionLabel: "Open payments" });
     });
+    // Stock that can't cover a minimum order any more (same rule the supplier bell used).
+    s.supplierStock.filter((x) => x.onHand - x.reserved < x.moq).forEach((x) =>
+      add("Stock", x.sku, `/console/supplier/stock?sku=${x.sku}`, { title: `Low stock: ${x.name}`, detail: `${(x.onHand - x.reserved).toLocaleString("en-IN")} free, minimum order ${x.moq.toLocaleString("en-IN")}.`, owner: "You", yours: true, state: "open", actionLabel: "Update stock" }));
   } else {
     s.shipments.filter((x) => toDistributor(s, x)).forEach((x) => add("Inbound", x.id, `/console/distributor/inbound?id=${x.id}`, shipmentNext(s, x, side)));
     // Distributor's own work (same rules the dashboard always used): money more than a week

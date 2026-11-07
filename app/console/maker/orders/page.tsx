@@ -8,7 +8,8 @@ import { Btn, Empty, Field, Modal, Pill, RowMenu, StatStrip, Stepper, inputCls, 
 import { Lightbox, WideHero } from "@/components/console/making";
 import { Meter, Page, Panel, Split, tdc, thc } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
-import { NextAction, Timeline } from "@/components/console/flow";
+import { GuaranteeCard, NextAction, Timeline } from "@/components/console/flow";
+import { orderGuarantee } from "@/lib/console/results";
 import { orderNext, orderTimeline } from "@/lib/console/flow";
 import { updateBatch } from "@/lib/console/actions";
 import { acceptOrder, addEvidence, postFactoryUpdate } from "@/lib/console/actions-network";
@@ -165,6 +166,7 @@ function OrderDetail({ o }: { o: Order }) {
         <Btn type="submit" kind="primary" icon={Send} className="h-[36px] text-[12.5px]" disabled={!text.trim()}>Post</Btn>
       </form>
       <Timeline items={orderTimeline(s, o)} next={flow} className="mt-[10px]" />
+      <GuaranteeCard g={orderGuarantee(s, o)} title="What you promised" className="mt-[14px] !shadow-none" />
 
       <div className="mt-[16px] grid gap-[12px] min-[700px]:grid-cols-2">
         <div>

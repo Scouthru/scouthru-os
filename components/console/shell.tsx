@@ -4,10 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  AlertTriangle, ArrowRight, Bell, Boxes, Building2, ChevronDown, ClipboardList, CreditCard, FileBarChart2, FlaskConical, Home, LogOut,
-  Menu as Menu2, PackageCheck, RotateCcw, Search, Settings, ShieldCheck, Store, Truck, Wallet, X,
-} from "lucide-react";
+import { ArrowRight, ChevronDown, Home, LogOut, Menu as Menu2, RotateCcw, Search, Settings, Store, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useConsole } from "@/lib/console/store";
 import { useAccount } from "@/lib/console/account";
@@ -15,6 +12,7 @@ import { Btn, Menu, Modal, Toasts } from "./kit";
 import { NAVS, PHONE_NAV, PORTAL_HOME, PORTAL_ICON, PORTAL_LABEL, PORTAL_PROMO, orgName, portalOf } from "./portals";
 import type { ConsoleState, Portal } from "@/lib/console/types";
 import { BrandMark } from "@/components/brand-mark";
+import { NotificationBell } from "./notifications";
 
 const NAV = NAVS.brand;
 
@@ -101,47 +99,6 @@ function searchHits(s: ConsoleState, portal: Portal, q: string): Hit[] {
   ].slice(0, 9);
 }
 
-type Note = { id: string; icon: typeof Bell; tone: string; title: string; sub: string; href: string };
-
-/** Bell items per portal, built from the live data. */
-function notesFor(s: ConsoleState, portal: Portal): Note[] {
-  const out: Note[] = [];
-  const red = "text-cs-red bg-cs-red-bg";
-  const orange = "text-cs-orange bg-cs-orange-bg";
-  const violet = "text-cs-violet bg-cs-violet-bg";
-  const gray = "text-[#564e47] bg-[#f6f0e7]";
-  const green = "text-cs-green-2 bg-cs-mint";
-  if (portal === "maker") {
-    s.enquiries.filter((e) => e.stage !== "Closed" && e.responses.some((r) => r.mfrId === s.makerId && (r.status === "Awaiting Reply" || r.status === "Shared Proposal"))).forEach((e) => out.push({ id: `mq-${e.id}`, icon: ClipboardList, tone: orange, title: `Quote requested · ${e.id}`, sub: e.name, href: `/console/maker/enquiries?id=${e.id}` }));
-    s.samples.filter((x) => x.mfrId === s.makerId && x.status === "Submitted").forEach((x) => out.push({ id: `ms-${x.id}`, icon: FlaskConical, tone: orange, title: `Sample to make · ${x.id}`, sub: x.name, href: `/console/maker/samples?id=${x.id}` }));
-    s.orders.filter((o) => o.mfrId === s.makerId && !o.confirmed).forEach((o) => out.push({ id: `mo-${o.id}`, icon: Boxes, tone: green, title: `New production order · ${o.id}`, sub: o.name, href: `/console/maker/orders?id=${o.id}` }));
-    s.purchaseOrders.filter((p) => p.mfrId === s.makerId && (p.status === "Quoted" || p.status === "Dispatched")).forEach((p) => out.push({ id: `mp-${p.id}-${p.status}`, icon: Truck, tone: violet, title: p.status === "Quoted" ? `Supplier quoted · ${p.id}` : `Materials on the way · ${p.id}`, sub: p.title, href: `/console/maker/materials?id=${p.id}` }));
-    return out;
-  }
-  if (portal === "supplier") {
-    const mine = s.purchaseOrders.filter((p) => p.supplierId === s.supplierId);
-    mine.filter((p) => p.status === "RFQ").forEach((p) => out.push({ id: `sr-${p.id}`, icon: ClipboardList, tone: orange, title: `New request · ${p.id}`, sub: p.title, href: `/console/supplier/requests?id=${p.id}` }));
-    mine.filter((p) => p.status === "Confirmed").forEach((p) => out.push({ id: `sc-${p.id}`, icon: Truck, tone: green, title: `Ready to dispatch · ${p.id}`, sub: p.title, href: `/console/supplier/dispatch?id=${p.id}` }));
-    mine.filter((p) => p.invoice && !p.invoice.paidAt && new Date(p.invoice.due).getTime() < Date.now()).forEach((p) => out.push({ id: `so-${p.id}`, icon: CreditCard, tone: red, title: `Payment overdue · ${p.invoice!.no}`, sub: `₹${p.invoice!.amount.toLocaleString("en-IN")}`, href: "/console/supplier/payments" }));
-    s.supplierStock.filter((x) => x.onHand - x.reserved < x.moq).forEach((x) => out.push({ id: `sl-${x.sku}-${x.onHand}`, icon: AlertTriangle, tone: gray, title: `Low stock · ${x.sku}`, sub: x.name, href: `/console/supplier/stock?sku=${x.sku}` }));
-    return out;
-  }
-  if (portal === "distributor") {
-    s.shipments.filter((x) => x.destination.includes(s.distributor.city) && !s.grns.some((g) => g.shipmentId === x.id)).forEach((x) => out.push({ id: `di-${x.id}-${x.status}`, icon: Truck, tone: violet, title: x.status === "Delivered" ? `At the dock · ${x.id}` : `Inbound · ${x.id}`, sub: `${x.name} · ${x.status}`, href: `/console/distributor/inbound?id=${x.id}` }));
-    s.retailOrders.filter((o) => o.status === "New").forEach((o) => out.push({ id: `dn-${o.id}`, icon: ClipboardList, tone: orange, title: `New order · ${o.id}`, sub: o.retailer, href: `/console/distributor/orders?id=${o.id}` }));
-    s.retailOrders.filter((o) => o.status === "Delivered" && o.payment === "Due").forEach((o) => out.push({ id: `dc-${o.id}`, icon: CreditCard, tone: red, title: `Collect ₹${o.value.toLocaleString("en-IN")} · ${o.id}`, sub: o.retailer, href: `/console/distributor/collections?id=${o.id}` }));
-    s.distStock.filter((x) => x.onHand < x.reorderAt).forEach((x) => out.push({ id: `dl-${x.sku}-${x.onHand}`, icon: AlertTriangle, tone: gray, title: `Below reorder level · ${x.sku}`, sub: x.product, href: `/console/distributor/stock?sku=${x.sku}` }));
-    return out;
-  }
-  s.payments.forEach((p) => p.milestones.filter((m) => m.status === "Overdue").forEach((m) => out.push({ id: `pay-${m.invoice}`, icon: CreditCard, tone: red, title: `Payment overdue · ${m.invoice}`, sub: `${p.name} · ₹${m.amount.toLocaleString("en-IN")}`, href: `/console/payments?id=${p.orderId}` })));
-  s.issues.filter((i) => !i.resolved && i.level === "High").forEach((i) => out.push({ id: `iss-${i.id}`, icon: AlertTriangle, tone: red, title: i.title, sub: i.ref, href: "/console/quality" }));
-  s.samples.filter((x) => x.status === "Submitted" || x.status === "In Review").slice(0, 4).forEach((x) => out.push({ id: `smp-${x.id}-${x.status}`, icon: FlaskConical, tone: orange, title: `Sample to review · ${x.id}`, sub: x.name, href: `/console/samples?id=${x.id}` }));
-  s.shipments.filter((x) => x.status === "Delayed").forEach((x) => out.push({ id: `sh-${x.id}`, icon: Truck, tone: violet, title: `Shipment delayed · ${x.id}`, sub: `${x.name} · ${x.note}`, href: `/console/shipments?id=${x.id}` }));
-  s.orders.filter((o) => !o.confirmed).forEach((o) => out.push({ id: `ord-${o.id}`, icon: Boxes, tone: gray, title: `Confirm production start · ${o.id}`, sub: o.name, href: `/console/production?id=${o.id}` }));
-  return out;
-}
-
-
 function GlobalSearch({ portal }: { portal: Portal }) {
   const { s } = useConsole();
   const router = useRouter();
@@ -204,50 +161,6 @@ function GlobalSearch({ portal }: { portal: Portal }) {
         </div>
       )}
     </div>
-  );
-}
-
-/** Bell: live list built from the data (overdue payments, high issues, samples to review, delays, unconfirmed orders). */
-function Notifications({ portal }: { portal: Portal }) {
-  const { s, update } = useConsole();
-  const router = useRouter();
-  const items = useMemo(() => notesFor(s, portal), [s, portal]);
-  const unread = items.filter((i) => !s.readNotifications.includes(i.id)).length;
-  return (
-    <Menu
-      align="right"
-      trigger={
-        <button type="button" aria-label={`Notifications, ${unread} unread`} className="relative grid size-[34px] place-items-center rounded-full hover:bg-cs-cream">
-          <Bell className="size-[21px] text-[#36312d]" strokeWidth={1.6} />
-          {unread > 0 && <span className="absolute right-[6px] top-[5px] size-[8px] rounded-full border-[1.5px] border-cs-ground bg-cs-red" />}
-        </button>
-      }
-    >
-      {(close) => (
-        <div className="w-[360px]">
-          <div className="flex items-center justify-between px-[14px] pb-[8px] pt-[6px]">
-            <p className="serif text-[17px] font-semibold">Notifications</p>
-            <button type="button" className="text-[12px] font-medium text-cs-green disabled:opacity-40" disabled={unread === 0} onClick={() => update((d) => { d.readNotifications = Array.from(new Set([...d.readNotifications, ...items.map((i) => i.id)])); })}>Mark all read</button>
-          </div>
-          <div className="max-h-[380px] overflow-y-auto">
-            {items.length === 0 && <p className="px-[14px] py-[18px] text-[13px] text-cs-ink-2">You&apos;re all caught up.</p>}
-            {items.map((n) => {
-              const read = s.readNotifications.includes(n.id);
-              return (
-                <button key={n.id} type="button" onClick={() => { update((d) => { if (!d.readNotifications.includes(n.id)) d.readNotifications.push(n.id); }); close(); router.push(n.href); }} className="flex w-full items-start gap-[10px] px-[14px] py-[9px] text-left hover:bg-[#f8f3eb]">
-                  <span className={cn("grid size-[32px] shrink-0 place-items-center rounded-[7px]", n.tone)}><n.icon className="size-[16px]" strokeWidth={1.7} /></span>
-                  <span className="min-w-0 flex-1">
-                    <span className={cn("block truncate text-[12.5px]", read ? "text-cs-ink-2" : "font-semibold")}>{n.title}</span>
-                    <span className="block truncate text-[11.5px] text-cs-ink-2">{n.sub}</span>
-                  </span>
-                  {!read && <span className="mt-[6px] size-[7px] shrink-0 rounded-full bg-cs-green-2" />}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </Menu>
   );
 }
 
@@ -333,7 +246,7 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
                 </button>
               }
             />
-            <Notifications portal={portal} />
+            <NotificationBell portal={portal} />
             <Menu
               align="right"
               items={[

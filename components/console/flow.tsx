@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Check, CircleDashed, MessageSquare, TriangleAlert, X } from "lucide-react";
 import type { LinkedStep, Milestone, NextStep } from "@/lib/console/flow";
+import type { Guarantee } from "@/lib/console/results";
 // Dates always in India time, like the rest of the app, so the server and browser render the same text.
 import { ago, fmtDateTime, fmtDay } from "@/lib/console/format";
 import { cn } from "@/lib/cn";
@@ -190,6 +191,38 @@ export function NeedsAttention({ items, waiting, className }: { items: LinkedSte
       {ordered.length > 5 && (
         <button type="button" onClick={() => setAll((v) => !v)} className="mt-[6px] text-[12.5px] font-medium text-cs-green hover:underline">{all ? "Show fewer" : `Show all ${ordered.length} rows`}</button>
       )}
+    </section>
+  );
+}
+
+/**
+ * Results as a Service guarantee for one order: what was promised, what has been
+ * proven so far (each line links to its record), and what protects the brand.
+ */
+export function GuaranteeCard({ g, className, title = "Result guarantee" }: { g: Guarantee; className?: string; title?: string }) {
+  return (
+    <section aria-label={title} className={cn("cs-card px-[14px] pb-[13px] pt-[13px]", className)}>
+      <p className="eyebrow">Results as a Service</p>
+      <h2 className="serif mt-[6px] text-[18px] font-semibold">{title}</h2>
+      <dl className="mt-[8px] divide-y divide-cs-line text-[12.5px]">
+        {g.promised.map(([k, v]) => (
+          <div key={k} className="grid grid-cols-[78px_1fr] gap-[8px] py-[5px]"><dt className="text-cs-ink-2">{k}</dt><dd>{v}</dd></div>
+        ))}
+      </dl>
+      <p className="mt-[10px] text-[12px] font-medium">Proven so far</p>
+      <ul className="mt-[4px] space-y-[3px] text-[12.5px]">
+        {g.proven.map((p) => (
+          <li key={p.label}>
+            <Link href={p.href ?? "#"} className={cn("flex items-center gap-[7px] hover:underline", p.done ? "text-cs-ok" : "text-[#48413b]")}>
+              {p.done ? <Check className="size-[13px] shrink-0" strokeWidth={2.4} /> : <CircleDashed className="size-[13px] shrink-0 text-cs-ink-2" />}{p.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-[10px] text-[12px] font-medium">If a result is missed</p>
+      <ul className="mt-[4px] list-disc space-y-[2px] pl-[16px] text-[12px] text-cs-ink-2">
+        {g.remedies.map((r) => <li key={r}>{r}</li>)}
+      </ul>
     </section>
   );
 }
