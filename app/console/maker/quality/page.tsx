@@ -8,6 +8,7 @@ import { Btn, Check, Empty, Pill, StatStrip, Tabs, inputCls, type Tone } from "@
 import { Avatar, WideHero } from "@/components/console/making";
 import { KV, Meter, Page, Panel, Split, tdc, thc } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { NextAction, Timeline } from "@/components/console/flow";
 import { qualityNext, qualityTimeline } from "@/lib/console/flow";
 import { submitLabResults } from "@/lib/console/actions-network";
@@ -65,7 +66,9 @@ function MakerQuality() {
                 { key: "testing", label: `In Testing (${count("testing")})` }, { key: "issues", label: `Issues Found (${count("issues")})` }, { key: "passed", label: `Released (${count("passed")})` }, { key: "all", label: `All (${batches.length})` },
               ]} />
             </div>
-            <div className="mt-[10px] overflow-x-auto px-[7px]">
+            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="No batches here." className="mt-[10px]" items={list.map((b) => ({ key: b.id, img: b.img, title: b.name, sub: b.id, pill: { tone: STATUS_TONE[b.status], label: b.status },
+              meta: [`${b.tests.filter((t) => t.status === "Pass" || t.status === "Fail").length}/${b.tests.length} tests`, `${fmtNum(b.size)} units`, `Release ${fmtDate(b.release)}`], selected: cur?.id === b.id, onSelect: () => setSel(b.id) }))} />
+            <div className="mt-[10px] overflow-x-auto px-[7px] max-lg:hidden">
               <table className="w-full min-w-[540px] border-separate border-spacing-0">
                 <thead><tr><th className={thc}>Batch</th><th className={thc}>Order</th><th className={thc}>Tests</th><th className={thc}>Status</th><th className={thc}>Updated</th></tr></thead>
                 <tbody>

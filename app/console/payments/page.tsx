@@ -11,6 +11,7 @@ import {
 import { Btn, Check, CardTitle, Empty, Field, FilterSelect, Hero, Modal, Pill, RowMenu, SearchBox, StatStrip, Tabs, ViewAllBtn, inputCls, type Tone } from "@/components/console/kit";
 import { Bar } from "@/components/console/ops";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { NextAction, Timeline } from "@/components/console/flow";
 import { paymentNext, paymentTimeline } from "@/lib/console/flow";
 import { recordPayment, sendMessage } from "@/lib/console/actions";
@@ -190,7 +191,15 @@ function Payments() {
               </div>
             )}
 
-            <div className="mt-[6px] min-h-0 flex-1 overflow-auto pb-[10px]">
+            <PhoneList detail="#payment-panel" empty="No payments match these filters." className="mt-[8px] !px-0" items={groups.map(({ p }) => {
+              const cur = current(p);
+              return {
+                key: p.orderId, img: p.img, title: p.name, sub: `${p.orderId} · ${s.manufacturers.find((m) => m.id === p.mfrId)?.name ?? ""}`, pill: { tone: TONE[statusOf(cur)], label: statusOf(cur) },
+                meta: [`${cur.name} · ${inr(cur.amount)}`, cur.status === "Paid" ? "All paid" : `Due ${fmtDate(cur.due)}`, `${p.milestones.filter((m) => m.status === "Paid").length}/${p.milestones.length} paid`], selected: p.orderId === sel,
+                onSelect: () => { setSel(p.orderId); router.replace(`/console/payments?id=${p.orderId}`, { scroll: false }); },
+              };
+            })} />
+            <div className="mt-[6px] min-h-0 flex-1 overflow-auto pb-[10px] max-lg:hidden">
               <table className="w-full min-w-[700px] border-separate border-spacing-0 text-[11px]">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[#f9f6f0] text-left text-[10.5px] font-medium text-[#564e47]">
@@ -351,7 +360,7 @@ function PaymentPanel({ p, onRecord, onRemind, onAllMs, onAllDocs }: { p: Paymen
   const flow = paymentNext(s, p, "brand");
 
   return (
-    <aside className="cs-card flex min-h-0 min-w-0 flex-col px-[15px] pb-[12px] pt-[14px]">
+    <aside id="payment-panel" className="cs-card flex min-h-0 min-w-0 scroll-mt-[76px] flex-col px-[15px] pb-[12px] pt-[14px]">
       <div className="-mx-[4px] min-h-0 flex-1 overflow-y-auto px-[4px]">
       <div className="flex items-start gap-[13px]">
         <Image src={p.img} alt="" width={96} height={80} className="h-[80px] w-[96px] shrink-0 rounded-[8px] object-cover" />

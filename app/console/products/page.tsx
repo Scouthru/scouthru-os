@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Btn, Check, Empty, Field, FilterSelect, Hero, Menu, Modal, Pill, RowMenu, SearchBox, StatStrip, Tabs, inputCls, textareaCls, type Tone } from "@/components/console/kit";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { reorder } from "@/lib/console/actions";
 import { setPrimaryPackaging, setProductBrief, setProductStage } from "@/lib/console/actions-ops";
 import { ago, download, csv, fmtDate, fmtNum } from "@/lib/console/format";
@@ -147,7 +148,12 @@ function Products() {
               </div>
             )}
 
-            <div className="mt-[12px] min-h-0 flex-1 overflow-auto">
+            <PhoneList detail="#product-panel" empty="No products match these filters." className="mt-[10px] !px-0" items={list.map((x) => ({
+              key: x.id, img: x.img, title: x.name, sub: `${x.id} · ${x.category}`, pill: { tone: STAGE_TONE[x.stage], label: x.stage },
+              meta: [mfrName(x.mfrId), `MOQ ${fmtNum(x.moq)}`, `Updated ${ago(x.updatedAt)}`], selected: p?.id === x.id,
+              onSelect: () => { setSel(x.id); setEditing(false); router.replace(`/console/products?id=${x.id}`, { scroll: false }); },
+            }))} />
+            <div className="mt-[12px] min-h-0 flex-1 overflow-auto max-lg:hidden">
               <table className="w-full min-w-[720px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10 bg-white">
                   <tr className="text-left text-[11px] text-[#564e47]">
@@ -248,7 +254,7 @@ function ProductPanel({ p, editing, setEditing, onClose, onArchive, onPack, onRe
   };
 
   return (
-    <aside className="cs-card flex min-h-0 min-w-0 flex-col px-[14px] pb-[12px] pt-[12px]">
+    <aside id="product-panel" className="cs-card flex min-h-0 min-w-0 scroll-mt-[76px] flex-col px-[14px] pb-[12px] pt-[12px]">
       <div className="-mx-[4px] min-h-0 flex-1 overflow-y-auto px-[4px]">
       <div className="flex items-center justify-between">
         <button type="button" aria-label="Close panel" onClick={onClose} className="grid size-[24px] place-items-center rounded-[5px] hover:bg-[#f6f0e7]"><X className="size-[16px]" /></button>

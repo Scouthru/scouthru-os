@@ -10,6 +10,7 @@ import { NextAction, Timeline } from "@/components/console/flow";
 import { sampleNext, sampleTimeline } from "@/lib/console/flow";
 import { KV, MAKER_SAMPLE_TONE, Page, Panel, Split, tdc, thc } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { attachToSample, dispatchSample, replyOnSample } from "@/lib/console/actions-network";
 import { mine } from "@/lib/console/actions-maker";
 import { ago, download, fmtDate, fmtNum } from "@/lib/console/format";
@@ -66,7 +67,9 @@ function MakerSamples() {
               ]} />
               <SearchBox value={q} onChange={setQ} placeholder="Search sample or product..." className="mt-[12px] w-full min-[1024px]:w-[300px]" />
             </div>
-            <div className="mt-[10px] overflow-x-auto px-[7px]">
+            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="No samples here." className="mt-[10px]" items={list.map((x) => ({ key: x.id, img: x.img, title: x.name, sub: `${x.id} · Rev. ${String(x.rev).padStart(2, "0")}`, pill: { tone: MAKER_SAMPLE_TONE[x.status], label: x.status },
+              meta: [`${fmtNum(x.qty)} ${x.unit}`, `Requested ${fmtDate(x.requestedAt)}`], selected: current?.id === x.id, onSelect: () => setSel(x.id) }))} />
+            <div className="mt-[10px] overflow-x-auto px-[7px] max-lg:hidden">
               <table className="w-full min-w-[560px] border-separate border-spacing-0">
                 <thead><tr><th className={thc}>Sample</th><th className={thc}>Quantity</th><th className={thc}>Requested</th><th className={thc}>Status</th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
                 <tbody>

@@ -106,7 +106,7 @@ export default function SupplierDashboard() {
             <CardTitle sub="Get going with the usual jobs.">Quick Actions</CardTitle>
             <div className="mt-[14px] grid grid-cols-2 gap-[9px]">
               {ACTIONS.map((a, i) => {
-                const cls = cn("flex h-[52px] items-center gap-[10px] rounded-[7px] px-[12px] text-left text-[12.5px] font-medium leading-tight", i === 0 ? "bg-cs-green text-white hover:bg-[#163b29]" : "border border-cs-line bg-white text-[#25211e] hover:border-[#d0c7bf]");
+                const cls = cn("flex h-[52px] items-center gap-[10px] rounded-[7px] px-[12px] text-left text-[12.5px] font-medium leading-tight", i === 0 ? "bg-cs-green text-white hover:bg-[#7c2c14]" : "border border-cs-line bg-white text-[#25211e] hover:border-[#d0c7bf]");
                 const inner = <><a.icon className={cn("size-[20px] shrink-0", a.color)} strokeWidth={1.6} />{a.label}<ChevronRight className="ml-auto size-[15px]" /></>;
                 return a.href ? <Link key={a.label} href={a.href} className={cls}>{inner}</Link> : <button key={a.label} type="button" onClick={a.run} className={cls}>{inner}</button>;
               })}

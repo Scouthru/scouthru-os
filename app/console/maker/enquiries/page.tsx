@@ -7,6 +7,7 @@ import { CheckCircle2, ClipboardList, Gauge, IndianRupee, Inbox, Mail, MessageCi
 import { Btn, Empty, Field, FilterSelect, Hero, Modal, Pill, RowMenu, SearchBox, StatStrip, Tabs, inputCls, textareaCls, type Tone } from "@/components/console/kit";
 import { KV, Page, Panel, Split, thc, tdc } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { NextAction, Timeline } from "@/components/console/flow";
 import { enquiryNext, enquiryTimeline } from "@/lib/console/flow";
 import { addLead, declineEnquiry, submitQuote, updateLead } from "@/lib/console/actions-network";
@@ -108,7 +109,9 @@ function MakerEnquiries() {
                 <Btn kind="primary" icon={Plus} className="ml-auto h-[34px] text-[12.5px]" onClick={() => setLeadOpen(true)}>Log a lead</Btn>
               </div>
             </div>
-            <div className="mt-[10px] overflow-x-auto px-[7px]">
+            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="Nothing here." className="mt-[10px]" items={list.map((r) => ({ key: r.key, img: r.img, title: r.name, sub: `${r.id} · ${r.buyer} · via ${r.source}`, pill: { tone: STATUS_TONE[r.status], label: r.status },
+              meta: [`${fmtNum(r.qty)} units`, `Received ${ago(r.at)}`], selected: current?.key === r.key, onSelect: () => setSel(r.key) }))} />
+            <div className="mt-[10px] overflow-x-auto px-[7px] max-lg:hidden">
               <table className="w-full min-w-[620px] border-separate border-spacing-0">
                 <thead><tr><th className={thc}>Product & Buyer</th><th className={thc}>Source</th><th className={thc}>Quantity</th><th className={thc}>Received</th><th className={thc}>Status</th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
                 <tbody>

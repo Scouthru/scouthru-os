@@ -8,6 +8,7 @@ import { Btn, CardTitle, Empty, FilterSelect, Hero, Pill, RowMenu, SearchBox, St
 import { th } from "@/components/console/ops";
 import { AdjustModal, RestockModal, daysTo, stockValue } from "@/components/console/distributor-kit";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { setReorderLevel } from "@/lib/console/actions-distributor";
 import { csv, download, fmtDate, fmtNum, inr, lakh } from "@/lib/console/format";
 import { cn } from "@/lib/cn";
@@ -81,7 +82,9 @@ function Stock() {
               <FilterSelect label="All statuses" value={status} onChange={setStatus} options={["Below reorder", "Expiring soon", "Healthy"]} className="w-[140px]" />
               <Btn icon={Download} className="h-[34px]" onClick={exportCsv}>Export CSV</Btn>
             </div>
-            <div className="mt-[14px] min-h-0 flex-1 overflow-auto">
+            <PhoneList detail="#dist-detail" empty="No stock matches." className="mt-[12px] !px-0" items={list.map((x) => ({ key: x.sku, img: x.img, title: x.product, sub: `${x.sku} · batch ${x.batch}`, pill: x.onHand < x.reorderAt ? { tone: "red", label: "Reorder" } : { tone: "green", label: "OK" },
+              meta: [`${fmtNum(x.onHand)} on hand`, `Reorder at ${fmtNum(x.reorderAt)}`, `Expires ${fmtDate(x.expiry)}`], selected: cur?.sku === x.sku, onSelect: () => pick(x.sku) }))} />
+            <div className="mt-[14px] min-h-0 flex-1 overflow-auto max-lg:hidden">
               <table className="w-full min-w-[720px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[#f9f6f0]">
@@ -134,7 +137,7 @@ function Stock() {
           </section>
 
           {cur && (
-            <section className="cs-card flex min-h-0 min-w-0 flex-col px-[16px] pb-[14px] pt-[14px]">
+            <section id="dist-detail" className="cs-card flex min-h-0 min-w-0 scroll-mt-[76px] flex-col px-[16px] pb-[14px] pt-[14px]">
               <div className="flex items-start gap-[12px]">
                 <Image src={cur.img} alt="" width={70} height={70} className="size-[64px] shrink-0 rounded-[8px] object-cover" />
                 <div className="min-w-0 flex-1">

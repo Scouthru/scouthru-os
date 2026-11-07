@@ -5,8 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { CalendarClock, ClipboardList, FileText, IndianRupee, Inbox, Plus, Send, Trash2, X, XCircle } from "lucide-react";
 import { Btn, Empty, Field, FilterSelect, Hero, Modal, RowMenu, SearchBox, StatStrip, Tabs, inputCls } from "@/components/console/kit";
-import { Board, DeclineModal, EventLog, SupplierNext, LinesTable, PoStepper, QuoteModal, SourceBadge, StatusPill, buyerName, minePOs, poValue, td, th } from "@/components/console/supplier-kit";
+import { PO_LABEL, PO_TONE, Board, DeclineModal, EventLog, SupplierNext, LinesTable, PoStepper, QuoteModal, SourceBadge, StatusPill, buyerName, minePOs, poValue, td, th } from "@/components/console/supplier-kit";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { addSupplierRequest } from "@/lib/console/actions-network";
 import { ago, daysUntil, fmtDate, fmtNum, inr } from "@/lib/console/format";
 import type { MaterialLine, PurchaseOrder } from "@/lib/console/types";
@@ -92,7 +93,9 @@ function Requests() {
                 <FilterSelect label="Source" value={source} onChange={setSource} options={["Scouthru", "IndiaMART", "WhatsApp", "Phone"]} className="w-[110px]" />
                 <FilterSelect label="Need by" value={need} onChange={setNeed} options={Object.keys(NEED)} className="w-[120px]" />
               </div>
-              <div className="mt-[12px] min-h-0 flex-1 overflow-auto">
+              <PhoneList detail={"[data-board] > aside"} empty="No requests here." className="mt-[12px] !px-0" items={list.map((p) => ({ key: p.id, title: p.title, sub: `${p.id} · ${buyerName(s, p.mfrId)}`, pill: { tone: PO_TONE[p.status], label: PO_LABEL[p.status] },
+                meta: [inr(poValue(s, p)), `Need by ${fmtDate(p.needBy)}`, p.source], selected: po?.id === p.id, onSelect: () => setSel(p.id) }))} />
+              <div className="mt-[12px] min-h-0 flex-1 overflow-auto max-lg:hidden">
                 <table className="w-full min-w-[640px] border-separate border-spacing-0 text-[12px]">
                   <thead><tr><th className={cn(th, "rounded-l-[6px]")}>Request</th><th className={th}>Buyer</th><th className={th}>Source</th><th className={th}>Items</th><th className={th}>Value</th><th className={th}>Need by</th><th className={th}>Status</th><th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th></tr></thead>
                   <tbody>

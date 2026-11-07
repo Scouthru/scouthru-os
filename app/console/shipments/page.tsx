@@ -11,6 +11,7 @@ import {
 import { Btn, Check, Empty, Field, FilterSelect, Hero, Modal, Pill, RowMenu, SearchBox, StatStrip, Tabs, inputCls, textareaCls, type Tone } from "@/components/console/kit";
 import { Carrier, WINDOWS, copyText, inWindow, th } from "@/components/console/ops";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { NextAction, Timeline as FlowTimeline } from "@/components/console/flow";
 import { shipmentNext, shipmentTimeline } from "@/lib/console/flow";
 import { advanceShipment, sendMessage } from "@/lib/console/actions";
@@ -160,7 +161,12 @@ function Shipments() {
               </div>
             )}
 
-            <div className="mt-[22px] min-h-0 flex-1 overflow-auto">
+            <PhoneList detail="#shipment-panel" empty="No shipments match these filters." className="mt-[14px] !px-0" items={list.map((x) => ({
+              key: x.id, img: x.img, title: x.name, sub: `${x.id} · ${x.carrier}`, pill: { tone: STATUS_TONE[x.status], label: x.status },
+              meta: [`${fmtNum(x.qty)} units`, x.destination.split(",")[0], x.status === "Delivered" ? `Delivered ${fmtDate(x.eta)}` : `ETA ${fmtDate(x.eta)}`], selected: ship?.id === x.id,
+              onSelect: () => { setSel(x.id); setPtab("overview"); router.replace(`/console/shipments?id=${x.id}`, { scroll: false }); },
+            }))} />
+            <div className="mt-[22px] min-h-0 flex-1 overflow-auto max-lg:hidden">
               <table className="w-full min-w-[760px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[#f9f6f0]">
@@ -254,7 +260,7 @@ function ShipmentPanel({ x, tab, setTab, allEvents, setAllEvents, onClose, onAdv
   const flow = shipmentNext(s, x, "brand");
 
   return (
-    <aside className="cs-card flex min-h-0 min-w-0 flex-col px-[13px] pb-[13px] pt-[11px]">
+    <aside id="shipment-panel" className="cs-card flex min-h-0 min-w-0 scroll-mt-[76px] flex-col px-[13px] pb-[13px] pt-[11px]">
       <div className="-mx-[4px] min-h-0 flex-1 overflow-y-auto px-[4px]">
       <div className="flex items-center justify-between">
         <button type="button" aria-label="Close panel" onClick={onClose} className="grid size-[24px] place-items-center rounded-[5px] hover:bg-[#f6f0e7]"><X className="size-[16px]" /></button>
@@ -428,7 +434,7 @@ function ProgressDots({ x }: { x: Shipment }) {
         const date = x.stepDates[i];
         return (
           <div key={st} className="relative flex flex-col items-center text-center">
-            <span className={cn("grid size-[23px] place-items-center rounded-full border-2", done ? "border-cs-mint bg-[#4f9a62] text-white" : on ? "border-[#cfe3d3] bg-cs-green" : "border-[#e3dbcd] bg-white")}>
+            <span className={cn("grid size-[23px] place-items-center rounded-full border-2", done ? "border-cs-mint bg-cs-green text-white" : on ? "border-cs-mint bg-cs-green" : "border-[#e3dbcd] bg-white")}>
               {done ? <CheckIcon className="size-[12px]" strokeWidth={3} /> : on ? <span className="size-[8px] rounded-full bg-white" /> : null}
             </span>
             <p className="mt-[5px] text-[11px] font-medium leading-tight">{st}</p>

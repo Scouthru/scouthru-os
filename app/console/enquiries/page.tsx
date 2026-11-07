@@ -12,6 +12,7 @@ import {
   Btn, Check, Empty, Field, FilterSelect, Hero, Menu, Modal, Pill, RowMenu, SearchBox, StatStrip, Tabs, inputCls, textareaCls, type Tone,
 } from "@/components/console/kit";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { NextAction, Timeline } from "@/components/console/flow";
 import { enquiryNext, enquiryTimeline } from "@/lib/console/flow";
 import { createEnquiry, requestSample, setEnquiryStage } from "@/lib/console/actions";
@@ -224,7 +225,11 @@ function Enquiries() {
               </label>
             </div>
 
-            <div className={cn("mt-[5px] flex flex-col max-lg:overflow-x-auto", showPanel && "min-[1024px]:min-h-0 min-[1024px]:shrink min-[1024px]:grow min-[1024px]:basis-0")}>
+            <PhoneList detail="#enquiry-panel" empty="No enquiries match these filters." className="mt-[8px]" items={list.map((e) => ({
+              key: e.id, img: e.img, title: e.name, sub: `${e.id} · ${e.category}`, pill: { tone: STAGE_TONE[e.stage], label: e.stage },
+              meta: [`${e.moq.toLocaleString("en-IN")} units`, `${e.responses.length} manufacturers`, `Updated ${ago(e.updatedAt)}`], selected: showPanel && sel?.id === e.id, onSelect: () => select(e.id),
+            }))} />
+            <div className={cn("mt-[5px] flex flex-col max-lg:hidden", showPanel && "min-[1024px]:min-h-0 min-[1024px]:shrink min-[1024px]:grow min-[1024px]:basis-0")}>
               <div className="mx-[8px] grid max-lg:min-w-[720px] grid-cols-[28px_minmax(0,187fr)_minmax(0,89fr)_minmax(0,97fr)_minmax(0,90fr)_minmax(0,121fr)_minmax(0,113fr)_30px] items-center rounded-[6px] bg-[#fbf8f4] py-[10px] pl-[10px] text-[11.5px] font-medium text-[#48413b]">
                 <Check checked={allChecked} onChange={(on) => setBulk(on ? new Set(list.map((e) => e.id)) : new Set())} label="Select all" />
                 <span>Product &amp; Enquiry</span><span>Category</span><span>Manufacturers</span><span>Target MOQ</span><span>Stage</span><span>Last Update</span><span />
@@ -320,7 +325,7 @@ function EnquiryPanel({ e, startTab = "overview", onClose, onSample, onMessage, 
   };
 
   return (
-    <aside className="flex min-w-0 flex-col gap-[7px]">
+    <aside id="enquiry-panel" className="flex min-w-0 scroll-mt-[76px] flex-col gap-[7px]">
       <NextAction step={next} onAction={doNext} />
       <div className="cs-card overflow-hidden">
       <div className="px-[18px] pt-[4px]">

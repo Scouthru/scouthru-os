@@ -26,7 +26,7 @@ export function Page({ children }: { children: React.ReactNode }) {
  */
 export function Split({ children, side = "1fr", hero = 177, className }: { children: React.ReactNode; side?: string; hero?: number; className?: string }) {
   return (
-    <div className={cn("mt-[14px] grid gap-[12px] min-[1024px]:h-[var(--mainh)] min-[1024px]:grid-cols-[minmax(0,1.75fr)_minmax(0,var(--side))]", className)} style={{ ["--side" as string]: side, ["--mainh" as string]: `${887 - hero}px` }}>
+    <div data-split className={cn("mt-[14px] grid gap-[12px] [&>*:nth-child(2)]:scroll-mt-[76px] min-[1024px]:h-[var(--mainh)] min-[1024px]:grid-cols-[minmax(0,1.75fr)_minmax(0,var(--side))]", className)} style={{ ["--side" as string]: side, ["--mainh" as string]: `${887 - hero}px` }}>
       {children}
     </div>
   );

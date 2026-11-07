@@ -8,6 +8,7 @@ import { Btn, CardTitle, Empty, Hero, Pill, RowMenu, SearchBox, StatStrip, Tabs 
 import { Carrier, th } from "@/components/console/ops";
 import { INBOUND_TONE, ReceiveModal, grnText, inboundFor, inboundState, type InboundState } from "@/components/console/distributor-kit";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { NextAction, Timeline } from "@/components/console/flow";
 import { shipmentNext, shipmentTimeline } from "@/lib/console/flow";
 import { messageBrand } from "@/lib/console/actions-distributor";
@@ -78,7 +79,9 @@ function Inbound() {
               { key: "Received", label: `Received (${count("Received")})` },
             ]} />
             <div className="mt-[14px]"><SearchBox value={q} onChange={setQ} placeholder="Search by shipment ID, product or carrier..." /></div>
-            <div className="mt-[14px] min-h-0 flex-1 overflow-auto">
+            <PhoneList detail="#dist-detail" empty="No shipments here." className="mt-[12px] !px-0" items={list.map((r) => ({ key: r.sh.id, img: r.sh.img, title: r.sh.name, sub: `${r.sh.id} · ${r.sh.carrier}`, pill: { tone: INBOUND_TONE[r.state], label: r.state },
+              meta: [`${fmtNum(r.sh.qty)} units`, r.grn ? `Counted ${fmtDate(r.grn.at)}` : `ETA ${fmtDate(r.sh.eta)}`], selected: cur?.sh.id === r.sh.id, onSelect: () => pick(r.sh.id) }))} />
+            <div className="mt-[14px] min-h-0 flex-1 overflow-auto max-lg:hidden">
               <table className="w-full min-w-[640px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[#f9f6f0]">
@@ -126,7 +129,7 @@ function Inbound() {
           </section>
 
           {cur && (
-            <section className="cs-card flex min-h-0 min-w-0 flex-col px-[16px] pb-[14px] pt-[14px]">
+            <section id="dist-detail" className="cs-card flex min-h-0 min-w-0 scroll-mt-[76px] flex-col px-[16px] pb-[14px] pt-[14px]">
               <div className="flex items-start gap-[12px]">
                 <Image src={cur.sh.img} alt="" width={70} height={70} className="size-[64px] shrink-0 rounded-[8px] object-cover" />
                 <div className="min-w-0 flex-1">

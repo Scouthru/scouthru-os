@@ -14,6 +14,7 @@ import {
 } from "@/components/console/kit";
 import { Avatar, Loading, QB_TONE, WideHero, CT } from "@/components/console/making";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { NextAction, Timeline as FlowTimeline } from "@/components/console/flow";
 import { qualityNext, qualityTimeline } from "@/lib/console/flow";
 import { approveBatch, log, raiseIssue, retestBatch } from "@/lib/console/actions";
@@ -241,7 +242,11 @@ function QualityInner() {
                   <button type="button" onClick={clearSel} className="ml-auto text-cs-ink-2 hover:underline">Clear</button>
                 </div>
               )}
-              <div className="max-lg:overflow-x-auto"><table className="mt-[10px] w-full max-lg:min-w-[640px] table-fixed text-[11px] [&_td]:pr-[6px] [&_th]:pr-[6px] [&_th]:whitespace-nowrap">
+              <PhoneList detail="#batch-details" empty="No batches match these filters." className="mt-[10px] !px-0" items={list.map((x) => ({
+                key: x.id, img: x.img, title: x.name, sub: `${x.id} · ${s.manufacturers.find((m) => m.id === x.mfrId)?.name ?? ""}`, pill: { tone: QB_TONE[x.status], label: x.status },
+                meta: [`${x.tests.filter((t) => t.status === "Pass" || t.status === "Fail").length}/${x.tests.length} tests`, `${fmtNum(x.size)} units`, `Release ${fmtDate(x.release)}`], selected: batch?.id === x.id, onSelect: () => select(x.id),
+              }))} />
+              <div className="max-lg:hidden"><table className="mt-[10px] w-full max-lg:min-w-[640px] table-fixed text-[11px] [&_td]:pr-[6px] [&_th]:pr-[6px] [&_th]:whitespace-nowrap">
                 <colgroup><col className="w-[34px]" /><col className="w-[112px]" /><col className="w-[83px]" /><col className="w-[83px]" /><col className="w-[45px]" /><col className="w-[85px]" /><col /><col className="w-[28px]" /></colgroup>
                 <thead>
                   <tr className="text-left text-[11px] text-[#48413b]">

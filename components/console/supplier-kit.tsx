@@ -41,9 +41,9 @@ export function StatusPill({ status }: { status: POStatus }) {
 /** List on the left, detail panel on the right; the pair keeps a fixed height on desktop so lists scroll inside. */
 export function Board({ height, list, panel }: { height: number; list: React.ReactNode; panel?: React.ReactNode }) {
   return (
-    <div className={cn("mt-[11px] grid gap-[11px]", !!panel && "min-[1024px]:grid-cols-[minmax(0,2.05fr)_minmax(0,1fr)]")} style={{ ["--bh" as string]: `${height}px` }}>
+    <div data-board className={cn("mt-[11px] grid gap-[11px]", !!panel && "min-[1024px]:grid-cols-[minmax(0,2.05fr)_minmax(0,1fr)]")} style={{ ["--bh" as string]: `${height}px` }}>
       <section className="cs-card flex min-h-0 min-w-0 flex-col px-[14px] pt-[13px] min-[1024px]:h-[var(--bh)]">{list}</section>
-      {panel && <aside className="cs-card flex min-h-0 min-w-0 flex-col px-[14px] pb-[13px] pt-[12px] min-[1024px]:h-[var(--bh)]">{panel}</aside>}
+      {panel && <aside className="cs-card flex min-h-0 min-w-0 scroll-mt-[76px] flex-col px-[14px] pb-[13px] pt-[12px] min-[1024px]:h-[var(--bh)]">{panel}</aside>}
     </div>
   );
 }

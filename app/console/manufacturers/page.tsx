@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Btn, Check, Empty, Field, FilterSelect, Hero, Menu, Modal, Pill, RowMenu, SearchBox, StatStrip, Tabs, inputCls, textareaCls } from "@/components/console/kit";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { messageMany, setShortlist, toggleShortlist } from "@/lib/console/actions-sourcing";
 import type { ConsoleState, Manufacturer } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
@@ -197,7 +198,11 @@ function Manufacturers() {
             )}
 
             {/* Phones: the 8-column list scrolls sideways instead of crushing its columns together. */}
-            <div className={cn("flex flex-col max-lg:overflow-x-auto", showPanel && "min-[1024px]:min-h-0 min-[1024px]:shrink min-[1024px]:grow min-[1024px]:basis-0")}>
+            <PhoneList detail="#mfr-panel" empty="No manufacturers match these filters." className="mt-[8px]" items={list.map((m) => ({
+              key: m.id, img: m.img, title: m.name, sub: `${m.city}, ${m.state} · ★ ${m.rating} (${m.reviews})`, pill: m.shortlisted ? { tone: "green", label: "Shortlisted" } : undefined,
+              meta: [`MOQ ${fmtNum(m.moq)}`, `Replies in ${respDays(m)}`, m.certs.slice(0, 2).join(", ")], selected: showPanel && sel?.id === m.id, onSelect: () => select(m.id),
+            }))} />
+            <div className={cn("flex flex-col max-lg:hidden", showPanel && "min-[1024px]:min-h-0 min-[1024px]:shrink min-[1024px]:grow min-[1024px]:basis-0")}>
               <div className={cn("mx-[8px] mt-[2px] grid items-center max-lg:min-w-[720px] py-[10px] pl-[10px] text-[11.5px] font-medium text-[#48413b]", COLS)}>
                 <Check checked={allChecked} onChange={(on) => setBulk(on ? new Set(list.map((m) => m.id)) : new Set())} label="Select all" />
                 <span>Manufacturer</span><span>Location</span><span>Certifications</span><span>Capabilities</span><span>Min. MOQ</span><span>Response Time</span><span />
@@ -275,7 +280,7 @@ function MfrPanel({ m, onClose, onProfile, onShortlist, onMessage }: { m: Manufa
   const pct = (a: number, b: number) => Math.round(Math.abs((a - b) / b) * 100);
 
   return (
-    <aside className="cs-card min-w-0 overflow-hidden">
+    <aside id="mfr-panel" className="cs-card min-w-0 scroll-mt-[76px] overflow-hidden">
       <div className="px-[15px] pt-[6px]">
         <div className="flex items-center justify-between">
           <button type="button" aria-label="Close panel" onClick={onClose} className="-ml-[4px] grid size-[26px] place-items-center rounded-[6px] hover:bg-[#f6f0e7]"><X className="size-[17px]" /></button>

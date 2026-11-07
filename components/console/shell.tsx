@@ -12,7 +12,7 @@ import { cn } from "@/lib/cn";
 import { useConsole } from "@/lib/console/store";
 import { useAccount } from "@/lib/console/account";
 import { Btn, Menu, Modal, Toasts } from "./kit";
-import { NAVS, PORTAL_HOME, PORTAL_ICON, PORTAL_LABEL, PORTAL_PROMO, orgName, portalOf } from "./portals";
+import { NAVS, PHONE_NAV, PORTAL_HOME, PORTAL_ICON, PORTAL_LABEL, PORTAL_PROMO, orgName, portalOf } from "./portals";
 import type { ConsoleState, Portal } from "@/lib/console/types";
 import { BrandMark } from "@/components/brand-mark";
 
@@ -314,9 +314,7 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
 
       <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-30 flex h-[68px] items-center gap-3 border-b border-cs-line bg-cs-ground px-[12px] sm:gap-4 lg:pl-[28px] lg:pr-[26px]">
-          <button type="button" aria-label="Open menu" onClick={() => setDrawer(true)} className="grid size-[40px] shrink-0 place-items-center rounded-[8px] border border-cs-line bg-white lg:hidden">
-            <Menu2 className="size-[19px]" strokeWidth={1.7} />
-          </button>
+          {/* Phones open the full menu from More in the bottom bar. */}
           <GlobalSearch portal={portal} />
           <div className="ml-auto flex shrink-0 items-center gap-[10px] sm:gap-[18px] min-[1024px]:gap-[30px]">
             <Menu
@@ -355,8 +353,27 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
             />
           </div>
         </header>
-        <main>{children}</main>
+        <main className="pb-[76px] lg:pb-0">{children}</main>
       </div>
+
+      {/* Phones and tablets: the four main places plus More (the full menu). */}
+      <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-cs-line bg-cs-ground/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+        {PHONE_NAV[portal].map((href) => {
+          const item = nav.find((n) => n.href === href);
+          if (!item) return null;
+          const on = section === href;
+          return (
+            <Link key={href} href={href} aria-current={on ? "page" : undefined} className={cn("flex h-[62px] flex-col items-center justify-center gap-[3px] text-[11px]", on ? "font-semibold text-cs-green" : "text-[#5f564e]")}>
+              <item.icon className="size-[21px]" strokeWidth={on ? 2 : 1.6} />
+              <span className="max-w-full truncate px-[2px]">{href === PORTAL_HOME[portal] ? "Home" : item.label}</span>
+            </Link>
+          );
+        })}
+        <button type="button" onClick={() => setDrawer(true)} aria-label="More pages" className={cn("flex h-[62px] flex-col items-center justify-center gap-[3px] text-[11px]", !PHONE_NAV[portal].includes(section) ? "font-semibold text-cs-green" : "text-[#5f564e]")}>
+          <Menu2 className="size-[21px]" strokeWidth={1.6} />
+          <span>More</span>
+        </button>
+      </nav>
 
       {drawer && (
         <div className="fixed inset-0 z-50 lg:hidden" onMouseDown={() => setDrawer(false)}>

@@ -7,6 +7,7 @@ import { Btn, CardTitle, Empty, FilterSelect, Hero, Pill, RowMenu, SearchBox, St
 import { th } from "@/components/console/ops";
 import { CollectModal, NewOrderModal, RO_TONE, invoiceText, skuName } from "@/components/console/distributor-kit";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { assignRoute, cancelRetailOrder, deliverRetailOrder, packRetailOrder } from "@/lib/console/actions-network";
 import { ago, download, fmtDate, inr, lakh } from "@/lib/console/format";
 import type { RetailOrder } from "@/lib/console/types";
@@ -89,7 +90,9 @@ function Orders() {
               <SearchBox value={q} onChange={setQ} placeholder="Search by order, retailer or area..." className="min-w-[200px] flex-1" />
               <FilterSelect label="All areas" value={area} onChange={setArea} options={areas} className="w-[130px]" />
             </div>
-            <div className="mt-[14px] min-h-0 flex-1 overflow-auto">
+            <PhoneList detail="#dist-detail" empty="No orders here." className="mt-[12px] !px-0" items={list.map((o) => ({ key: o.id, title: o.retailer, sub: `${o.id} · ${o.area}`, pill: { tone: RO_TONE[o.status], label: o.status },
+              meta: [inr(o.value), `${o.lines.length} line${o.lines.length === 1 ? "" : "s"}`, `Placed ${ago(o.at)}`], selected: cur?.id === o.id, onSelect: () => pick(o.id) }))} />
+            <div className="mt-[14px] min-h-0 flex-1 overflow-auto max-lg:hidden">
               <table className="w-full min-w-[720px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[#f9f6f0]">
@@ -137,7 +140,7 @@ function Orders() {
           </section>
 
           {cur && (
-            <section className="cs-card flex min-h-0 min-w-0 flex-col px-[16px] pb-[14px] pt-[14px]">
+            <section id="dist-detail" className="cs-card flex min-h-0 min-w-0 scroll-mt-[76px] flex-col px-[16px] pb-[14px] pt-[14px]">
               <div className="flex items-start gap-[10px]">
                 <span className="grid size-[46px] shrink-0 place-items-center rounded-[8px] bg-cs-mint text-cs-green"><ShoppingCart className="size-[22px]" strokeWidth={1.6} /></span>
                 <div className="min-w-0 flex-1">

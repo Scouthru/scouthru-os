@@ -282,9 +282,9 @@ export const textareaCls = "w-full rounded-[7px] border border-[#e1d8ca] bg-whit
 
 export function Toasts({ toasts }: { toasts: { id: number; text: string; tone: "ok" | "info" | "bad" }[] }) {
   return (
-    <div aria-live="polite" className="pointer-events-none fixed bottom-[22px] right-[22px] z-[60] flex flex-col items-end gap-[8px]">
+    <div aria-live="polite" className="pointer-events-none fixed bottom-[86px] right-[16px] z-[60] flex flex-col items-end gap-[8px] lg:bottom-[22px] lg:right-[22px]">
       {toasts.map((t) => (
-        <div key={t.id} className="rise flex items-center gap-[10px] rounded-[9px] bg-[#13281f] px-[15px] py-[11px] text-[13px] text-white shadow-[0_8px_24px_rgba(0,0,0,0.2)]">
+        <div key={t.id} className="rise flex items-center gap-[10px] rounded-[9px] bg-[#221e1b] px-[15px] py-[11px] text-[13px] text-white shadow-[0_8px_24px_rgba(0,0,0,0.2)]">
           <span className={cn("size-[8px] rounded-full", t.tone === "bad" ? "bg-[#f87171]" : t.tone === "info" ? "bg-[#93c5fd]" : "bg-[#86efac]")} />
           {t.text}
         </div>

@@ -64,6 +64,14 @@ export const NAVS: Record<Portal, NavItem[]> = {
 };
 
 /** Bottom-left promo card per portal section. Brand sections keep their mockup copy (see shell.tsx). */
+/** Phone bottom bar: the four places each portal uses most; everything else sits under More. */
+export const PHONE_NAV: Record<Portal, string[]> = {
+  brand: ["/console", "/console/enquiries", "/console/samples", "/console/products"],
+  maker: ["/console/maker", "/console/maker/enquiries", "/console/maker/orders", "/console/maker/dispatch"],
+  supplier: ["/console/supplier", "/console/supplier/requests", "/console/supplier/pos", "/console/supplier/dispatch"],
+  distributor: ["/console/distributor", "/console/distributor/inbound", "/console/distributor/orders", "/console/distributor/collections"],
+};
+
 export const PORTAL_PROMO: Record<Exclude<Portal, "brand">, { title: string; text: string; img: string; href: string }> = {
   maker: { title: "Better manufacturing partners. Stronger brands.", text: "Every enquiry, batch and payment in one place.", img: "/console/promo-production.jpg", href: "/console/maker/enquiries" },
   supplier: { title: "Stock running low?", text: "Keep stock and prices current so factories see you as available.", img: "/console/promo-products.jpg", href: "/console/supplier/stock" },

@@ -6,8 +6,9 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { CheckCircle2, ClipboardList, Download, FileText, IndianRupee, MessageSquare, PackageCheck, Truck } from "lucide-react";
 import { Btn, Empty, FilterSelect, Hero, RowMenu, SearchBox, StatStrip, Tabs } from "@/components/console/kit";
 import { MessageModal } from "@/components/console/making";
-import { Board, EventLog, SupplierNext, LinesTable, PoStepper, SourceBadge, StatusPill, buyerName, minePOs, poText, poValue, td, th } from "@/components/console/supplier-kit";
+import { PO_LABEL, PO_TONE, Board, EventLog, SupplierNext, LinesTable, PoStepper, SourceBadge, StatusPill, buyerName, minePOs, poText, poValue, td, th } from "@/components/console/supplier-kit";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { ago, download, fmtDate, fmtNum, inr } from "@/lib/console/format";
 import type { PurchaseOrder } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
@@ -73,7 +74,9 @@ function POs() {
                 <FilterSelect label="Buyer" value={buyer} onChange={setBuyer} options={Array.from(new Set(all.map((p) => buyerName(s, p.mfrId))))} className="w-[160px]" />
                 <Btn icon={Download} className="ml-auto h-[34px] text-[12px]" onClick={() => download(`purchase-orders-${tab.toLowerCase()}.csv`, ["PO,Title,Buyer,Status,Need by,Value", ...list.map((p) => `${p.id},"${p.title}","${buyerName(s, p.mfrId)}",${p.status},${fmtDate(p.needBy)},${poValue(s, p)}`)].join("\n"))}>Export</Btn>
               </div>
-              <div className="mt-[12px] min-h-0 flex-1 overflow-auto">
+              <PhoneList detail={"[data-board] > aside"} empty="No orders here." className="mt-[12px] !px-0" items={list.map((p) => ({ key: p.id, title: p.title, sub: `${p.id} · ${buyerName(s, p.mfrId)}`, pill: { tone: PO_TONE[p.status], label: PO_LABEL[p.status] },
+                meta: [inr(poValue(s, p)), `Need by ${fmtDate(p.needBy)}`], selected: po?.id === p.id, onSelect: () => setSel(p.id) }))} />
+              <div className="mt-[12px] min-h-0 flex-1 overflow-auto max-lg:hidden">
                 <table className="w-full min-w-[620px] border-separate border-spacing-0 text-[12px]">
                   <thead><tr><th className={cn(th, "rounded-l-[6px]")}>Purchase order</th><th className={th}>Buyer</th><th className={th}>For order</th><th className={th}>Value</th><th className={th}>Need by</th><th className={th}>Updated</th><th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th></tr></thead>
                   <tbody>

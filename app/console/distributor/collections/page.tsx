@@ -8,6 +8,7 @@ import { Btn, CardTitle, Empty, Hero, Pill, RowMenu, SearchBox, StatStrip, Tabs 
 import { th } from "@/components/console/ops";
 import { CollectModal, ageDays, invoiceText } from "@/components/console/distributor-kit";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { csv, download, fmtDate, inr, lakh } from "@/lib/console/format";
 import type { RetailOrder } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
@@ -93,7 +94,10 @@ function Collections() {
               <Btn icon={Download} className="h-[34px] shrink-0" onClick={exportCsv}>Export CSV</Btn>
             </div>
             <div className="mt-[14px]"><SearchBox value={q} onChange={setQ} placeholder="Search by order, retailer or area..." /></div>
-            <div className="mt-[14px] min-h-0 flex-1 overflow-auto">
+            <PhoneList empty="Nothing here." className="mt-[12px] !px-0" items={list.map((o) => ({ key: o.id, title: o.retailer, sub: `${o.id} · ${o.area}`, pill: o.payment === "Collected" ? { tone: "green", label: "Collected" } : ageDays(o.deliveredAt ?? o.at) > 7 ? { tone: "red", label: "Overdue" } : { tone: "orange", label: "Due" },
+              meta: [inr(o.value), o.collected ? `Collected ${fmtDate(o.collected.at)} · ${o.collected.mode}` : `Delivered ${fmtDate(o.deliveredAt ?? o.at)}`, o.payment === "Due" && "Tap to record payment"], selected: o.id === sel,
+              onSelect: () => { setSel(o.id); if (o.payment === "Due") setCollect(o); } }))} />
+            <div className="mt-[14px] min-h-0 flex-1 overflow-auto max-lg:hidden">
               <table className="w-full min-w-[700px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[#f9f6f0]">

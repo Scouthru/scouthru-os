@@ -6,6 +6,7 @@ import { AlertTriangle, BellRing, CheckCircle2, Clock, Download, FileText, India
 import { Btn, Empty, FilterSelect, Hero, Pill, RowMenu, SearchBox, StatStrip, Tabs } from "@/components/console/kit";
 import { Board, EventLog, SupplierNext, buyerName, isOverdue, minePOs, td, th } from "@/components/console/supplier-kit";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { remindInvoice } from "@/lib/console/actions-supplier";
 import { daysUntil, download, fmtDate, fmtNum, inr } from "@/lib/console/format";
 import type { ConsoleState, PurchaseOrder } from "@/lib/console/types";
@@ -101,7 +102,9 @@ function Payments() {
                 <SearchBox value={q} onChange={setQ} placeholder="Search by invoice, PO or factory..." className="w-full min-[1024px]:w-[280px]" />
                 <FilterSelect label="Buyer" value={buyer} onChange={setBuyer} options={Array.from(new Set(all.map((p) => buyerName(s, p.mfrId))))} className="w-[160px]" />
               </div>
-              <div className="mt-[12px] min-h-0 flex-1 overflow-auto">
+              <PhoneList detail={"[data-board] > aside"} empty="No invoices here." className="mt-[12px] !px-0" items={list.map((p) => ({ key: p.id, title: p.invoice?.no ?? p.id, sub: `${buyerName(s, p.mfrId)} · ${p.title}`, pill: { tone: statusOf(p).tone, label: statusOf(p).label },
+                meta: [p.invoice && inr(p.invoice.amount), p.invoice && (p.invoice.paidAt ? `Paid ${fmtDate(p.invoice.paidAt)}` : `Due ${fmtDate(p.invoice.due)}`)], selected: po?.id === p.id, onSelect: () => setSel(p.id) }))} />
+              <div className="mt-[12px] min-h-0 flex-1 overflow-auto max-lg:hidden">
                 <table className="w-full min-w-[620px] border-separate border-spacing-0 text-[12px]">
                   <thead><tr><th className={cn(th, "rounded-l-[6px]")}>Invoice</th><th className={th}>Buyer</th><th className={th}>Amount</th><th className={th}>Due</th><th className={th}>Status</th><th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th></tr></thead>
                   <tbody>

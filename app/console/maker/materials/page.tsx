@@ -6,6 +6,7 @@ import { CheckCircle2, ClipboardList, IndianRupee, PackageCheck, PackageOpen, Pl
 import { Btn, Empty, Field, Hero, Modal, Pill, RowMenu, StatStrip, Stepper, Tabs, inputCls } from "@/components/console/kit";
 import { KV, PO_STEPS, PO_TONE, Page, Panel, PayModal, Split, tdc, thc } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { NextAction, Timeline } from "@/components/console/flow";
 import { poNext, poTimeline } from "@/lib/console/flow";
 import { confirmPO, receivePO, requestMaterials } from "@/lib/console/actions-network";
@@ -64,7 +65,9 @@ function MakerMaterials() {
               ]} />
               <div className="mt-[12px] flex"><Btn kind="primary" icon={Plus} className="ml-auto h-[34px] text-[12.5px]" onClick={() => setNewOpen(true)}>Request materials</Btn></div>
             </div>
-            <div className="mt-[8px] overflow-x-auto px-[7px]">
+            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="No purchase orders here." className="mt-[10px]" items={list.map((p) => ({ key: p.id, title: p.title, sub: `${p.id} · ${s.suppliers.find((x) => x.id === p.supplierId)?.name ?? ""}`, pill: { tone: PO_TONE[p.status], label: p.status === "RFQ" ? "Waiting for quote" : p.status },
+              meta: [`Need by ${fmtDate(p.needBy)}`, p.quote && inr(p.quote.total)], selected: cur?.id === p.id, onSelect: () => setSel(p.id) }))} />
+            <div className="mt-[8px] overflow-x-auto px-[7px] max-lg:hidden">
               <table className="w-full min-w-[600px] border-separate border-spacing-0">
                 <thead><tr><th className={thc}>Purchase order</th><th className={thc}>Supplier</th><th className={thc}>Need by</th><th className={thc}>Value</th><th className={thc}>Status</th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
                 <tbody>

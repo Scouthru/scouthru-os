@@ -8,6 +8,7 @@ import { Btn, Empty, Field, Hero, Modal, Pill, RowMenu, StatStrip, Stepper, Tabs
 import { Carrier } from "@/components/console/ops";
 import { KV, Page, Panel, Split, tdc, thc } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
+import { PhoneList } from "@/components/console/phone-list";
 import { NextAction, Timeline } from "@/components/console/flow";
 import { shipmentNext, shipmentTimeline } from "@/lib/console/flow";
 import { dispatchShipment } from "@/lib/console/actions-network";
@@ -59,7 +60,9 @@ function MakerDispatch() {
             <div className="px-[15px] pt-[12px]">
               <Tabs<Tab> value={tab} onChange={(t) => { setTab(t); setSel(null); }} tabs={[{ key: "ready", label: `Ready to Dispatch (${count("ready")})` }, { key: "transit", label: `In Transit (${count("transit")})` }, { key: "delivered", label: `Delivered (${count("delivered")})` }]} />
             </div>
-            <div className="mt-[10px] overflow-x-auto px-[7px]">
+            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="No shipments here." className="mt-[10px]" items={list.map((x) => ({ key: x.id, img: x.img, title: x.name, sub: `${x.id} · ${x.destination}`, pill: { tone: TONE[x.status], label: x.status },
+              meta: [`${fmtNum(x.qty)} units`, x.status === "Pending" ? "Not booked" : x.carrier, `ETA ${fmtDay(x.eta)}`], selected: cur?.id === x.id, onSelect: () => setSel(x.id) }))} />
+            <div className="mt-[10px] overflow-x-auto px-[7px] max-lg:hidden">
               <table className="w-full min-w-[600px] border-separate border-spacing-0">
                 <thead><tr><th className={thc}>Shipment</th><th className={thc}>Quantity</th><th className={thc}>Carrier</th><th className={thc}>Destination</th><th className={thc}>ETA</th><th className={thc}>Status</th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
                 <tbody>
