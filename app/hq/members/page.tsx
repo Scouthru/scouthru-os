@@ -35,7 +35,7 @@ export default function Members() {
       </div>
       <div className="flex flex-wrap gap-[6px]">
         {FILTERS.map((f) => (
-          <button key={f} type="button" onClick={() => setFilter(f)} className={cn("rounded-full px-[12px] py-[5px] text-[12.5px]", filter === f ? "bg-cs-deep text-white" : "bg-white text-[#3e4440] ring-1 ring-cs-line hover:bg-[#f3f0e9]")}>
+          <button key={f} type="button" onClick={() => setFilter(f)} className={cn("rounded-full px-[12px] py-[5px] text-[12.5px]", filter === f ? "bg-cs-deep text-white" : "bg-white text-[#48413b] ring-1 ring-cs-line hover:bg-[#f6f0e6]")}>
             {f === "all" ? `All (${s.members.length})` : `${TYPE_LABEL[f]} (${s.members.filter((m) => m.type === f).length})`}
           </button>
         ))}
@@ -45,7 +45,7 @@ export default function Members() {
         {STAGES.map((st) => {
           const col = list.filter((m) => progress(s, m).stage === st);
           return (
-            <section key={st} id={st.toLowerCase()} className="flex min-w-0 scroll-mt-[130px] flex-col rounded-[14px] bg-[#efebe2] p-[10px]">
+            <section key={st} id={st.toLowerCase()} className="flex min-w-0 scroll-mt-[130px] flex-col rounded-[14px] bg-[#f3ebde] p-[10px]">
               <header className="mb-[8px] flex items-center justify-between px-[4px]">
                 <span className="flex items-center gap-[8px]"><StagePill stage={st} /><span className="text-[12px] text-cs-ink-2">{HINT[st]}</span></span>
                 <span className="serif text-[18px] font-semibold">{col.length}</span>
@@ -59,8 +59,8 @@ export default function Members() {
                       <Link href={`/hq/members/${m.id}`} className="block rounded-[10px] border border-cs-line bg-white p-[11px] hover:border-cs-green-2/60 hover:shadow-sm">
                         <p className="truncate text-[13.5px] font-semibold">{m.name}</p>
                         <p className="mt-[4px] flex flex-wrap items-center gap-[6px] text-[11.5px] text-cs-ink-2"><TypeBadge type={m.type} />{m.city}</p>
-                        <p className={cn("mt-[8px] text-[12px]", st === "Review" ? "font-semibold text-cs-green" : "text-[#3e4440]")}>{p.nextText}</p>
-                        {quiet >= 3 && <p className="mt-[6px] inline-flex items-center gap-[4px] rounded-full bg-cs-orange-bg px-[7px] py-[1px] text-[11px] font-medium text-[#b8641f]"><Moon className="size-[11px]" />Quiet {quiet} days</p>}
+                        <p className={cn("mt-[8px] text-[12px]", st === "Review" ? "font-semibold text-cs-green" : "text-[#48413b]")}>{p.nextText}</p>
+                        {quiet >= 3 && <p className="mt-[6px] inline-flex items-center gap-[4px] rounded-full bg-cs-orange-bg px-[7px] py-[1px] text-[11px] font-medium text-[#a9713f]"><Moon className="size-[11px]" />Quiet {quiet} days</p>}
                       </Link>
                     </li>
                   );

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowRight, Check, ChevronDown, LayoutDashboard, LogOut, Sparkles, UserRound } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, LayoutDashboard, LogOut, UserRound } from "lucide-react";
 import { Btn, Modal } from "./kit";
 import { NAVS, PORTAL_HOME, PORTAL_ICON, PORTAL_LABEL } from "./portals";
 import { PLANS, PORTALS } from "./os-info";
@@ -96,32 +96,32 @@ function AccountMenu({ portal, plan, id }: { portal: Portal; plan: Plan; id?: st
         aria-expanded={open}
         aria-haspopup="true"
         aria-label={`Account: ${PORTAL_LABEL[portal]}`}
-        className={cn("flex h-[42px] items-center gap-[8px] rounded-[9px] border bg-white pl-[5px] pr-[10px] text-[13px] font-medium hover:border-[#cfcac0]", open ? "border-cs-green-2/60" : "border-cs-line")}
+        className={cn("flex h-[42px] items-center gap-[8px] rounded-[9px] border bg-white pl-[5px] pr-[10px] text-[13px] font-medium hover:border-[#d0c7bf]", open ? "border-cs-green-2/60" : "border-cs-line")}
       >
         <RoleIcon portal={portal} size={30} />
         <span className="hidden max-w-[130px] truncate sm:inline">{PORTAL_LABEL[portal]}</span>
         <ChevronDown className={cn("size-[14px] text-cs-ink-2 transition-transform", open && "rotate-180")} />
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-[8px] w-[min(92vw,320px)] overflow-hidden rounded-[12px] border border-cs-line bg-white shadow-[0_18px_48px_rgba(20,30,25,0.16)]">
+        <div className="absolute right-0 top-full z-50 mt-[8px] w-[min(92vw,320px)] overflow-hidden rounded-[12px] border border-cs-line bg-white shadow-[0_18px_48px_rgba(60,40,25,0.16)]">
           <div className="flex items-center gap-[11px] border-b border-cs-line bg-cs-cream px-[16px] py-[14px]">
             <RoleIcon portal={portal} size={42} />
             <div className="min-w-0">
               <p className="truncate text-[14px] font-semibold">{PORTAL_LABEL[portal]} account</p>
               {id && <p className="truncate text-[12px] text-cs-ink-2">{id.includes("@") ? id : `+91 ${id.slice(0, 5)} ${id.slice(5)}`}</p>}
               <p className="mt-[5px] flex flex-wrap gap-[5px] text-[11px] font-medium">
-                <span className={cn("rounded-full px-[8px] py-[2px]", plan === "Free" ? "bg-white text-[#3e4440]" : "bg-cs-deep text-white")}>{plan} plan</span>
+                <span className={cn("rounded-full px-[8px] py-[2px]", plan === "Free" ? "bg-white text-[#48413b]" : "bg-cs-deep text-white")}>{plan} plan</span>
               </p>
             </div>
           </div>
           <div className="p-[6px]">
-            <Link href={PORTAL_HOME[portal]} onClick={close} className="flex items-center gap-[10px] rounded-[8px] bg-cs-green px-[11px] py-[10px] text-[13.5px] font-medium text-white hover:bg-[#8f3a18]">
+            <Link href={PORTAL_HOME[portal]} onClick={close} className="flex items-center gap-[10px] rounded-[8px] bg-cs-green px-[11px] py-[10px] text-[13.5px] font-medium text-white hover:bg-[#7c2c14]">
               <LayoutDashboard className="size-[16px]" strokeWidth={1.8} />My dashboard<ArrowRight className="ml-auto size-[15px]" />
             </Link>
             <ul className="mt-[4px]">
               {links.map((l) => (
                 <li key={l.href}>
-                  <Link href={l.href} onClick={close} className="flex items-center gap-[10px] rounded-[8px] px-[11px] py-[8px] text-[13px] hover:bg-[#f7f5f0]">
+                  <Link href={l.href} onClick={close} className="flex items-center gap-[10px] rounded-[8px] px-[11px] py-[8px] text-[13px] hover:bg-[#f9f5ee]">
                     <l.icon className="size-[16px] text-cs-ink-2" strokeWidth={1.7} />{l.label}
                   </Link>
                 </li>
@@ -129,15 +129,10 @@ function AccountMenu({ portal, plan, id }: { portal: Portal; plan: Plan; id?: st
             </ul>
           </div>
           <div className="border-t border-cs-line p-[6px]">
-            {plan === "Free" && (
-              <Link href="/about#pricing" onClick={close} className="flex items-center gap-[10px] rounded-[8px] px-[11px] py-[8px] text-[13px] font-medium text-cs-green hover:bg-[#f7f5f0]">
-                <Sparkles className="size-[16px]" strokeWidth={1.7} />Upgrade to Pro · ₹4,999 / month
-              </Link>
-            )}
             <button
               type="button"
               onClick={() => { signOut(); close(); toast("Signed out", "info"); router.push("/marketplace"); }}
-              className="flex w-full items-center gap-[10px] rounded-[8px] px-[11px] py-[8px] text-left text-[13px] hover:bg-[#f7f5f0]"
+              className="flex w-full items-center gap-[10px] rounded-[8px] px-[11px] py-[8px] text-left text-[13px] hover:bg-[#f9f5ee]"
             >
               <LogOut className="size-[16px] text-cs-ink-2" strokeWidth={1.7} />Sign out
             </button>
@@ -225,8 +220,8 @@ function AuthDialog({ initial, preset, onClose }: { initial: "signin" | "join"; 
     router.push(PORTAL_HOME[portal]);
   };
 
-  const field = "h-[44px] w-full rounded-[8px] border border-[#d6d8d3] bg-white px-[12px] text-[14px] outline-none focus:border-cs-green focus:ring-1 focus:ring-cs-green";
-  const primary = "h-[44px] w-full rounded-[8px] bg-cs-green text-[14px] font-medium text-white hover:bg-[#8f3a18]";
+  const field = "h-[44px] w-full rounded-[8px] border border-[#e1d8ca] bg-white px-[12px] text-[14px] outline-none focus:border-cs-green focus:ring-1 focus:ring-cs-green";
+  const primary = "h-[44px] w-full rounded-[8px] bg-cs-green text-[14px] font-medium text-white hover:bg-[#7c2c14]";
   const err = error && <p role="alert" className="text-[12.5px] text-cs-red">{error}</p>;
 
   if (step.at === "profile") {
@@ -239,7 +234,7 @@ function AuthDialog({ initial, preset, onClose }: { initial: "signin" | "join"; 
         sub={`Signed in with ${step.id.includes("@") ? step.id : `+91 ${step.id}`}. Tell us who you are to open your dashboard.`}
         footer={<><Btn onClick={back}>Back</Btn><Btn kind="primary" disabled={!portal} onClick={create}>Create account</Btn></>}
       >
-        <p className="text-[12.5px] font-semibold text-[#2f3431]">Who are you?</p>
+        <p className="text-[12.5px] font-semibold text-[#36312d]">Who are you?</p>
         <div className="mt-[8px] grid gap-[8px] sm:grid-cols-2" role="radiogroup" aria-label="Account type">
           {PORTALS.map(([, blurb, , , , p]) => (
             <button
@@ -248,7 +243,7 @@ function AuthDialog({ initial, preset, onClose }: { initial: "signin" | "join"; 
               role="radio"
               aria-checked={portal === p}
               onClick={() => setPortal(p)}
-              className={cn("flex items-start gap-[10px] rounded-[10px] border p-[12px] text-left transition-colors", portal === p ? "border-cs-green bg-cs-mint/50" : "border-cs-line bg-white hover:border-[#cfcac0]")}
+              className={cn("flex items-start gap-[10px] rounded-[10px] border p-[12px] text-left transition-colors", portal === p ? "border-cs-green bg-cs-mint/50" : "border-cs-line bg-white hover:border-[#d0c7bf]")}
             >
               <RoleIcon portal={p} size={34} />
               <span className="min-w-0">
@@ -258,7 +253,7 @@ function AuthDialog({ initial, preset, onClose }: { initial: "signin" | "join"; 
             </button>
           ))}
         </div>
-        <p className="mt-[16px] text-[12.5px] font-semibold text-[#2f3431]">Choose a plan</p>
+        <p className="mt-[16px] text-[12.5px] font-semibold text-[#36312d]">Choose a plan</p>
         <div className="mt-[8px] grid gap-[8px] sm:grid-cols-3" role="radiogroup" aria-label="Plan">
           {PLANS.map(([name, price, blurb]) => (
             <button
@@ -267,15 +262,15 @@ function AuthDialog({ initial, preset, onClose }: { initial: "signin" | "join"; 
               role="radio"
               aria-checked={plan === name}
               onClick={() => setPlan(name)}
-              className={cn("flex flex-col gap-[3px] rounded-[10px] border p-[12px] text-left transition-colors", plan === name ? "border-cs-green bg-cs-mint/50" : "border-cs-line bg-white hover:border-[#cfcac0]")}
+              className={cn("flex flex-col gap-[3px] rounded-[10px] border p-[12px] text-left transition-colors", plan === name ? "border-cs-green bg-cs-mint/50" : "border-cs-line bg-white hover:border-[#d0c7bf]")}
             >
               <span className="flex items-center justify-between text-[13.5px] font-semibold">{name}{plan === name && <Check className="size-[14px] text-cs-green" />}</span>
-              <span className="text-[12.5px] font-medium text-cs-green">{price}</span>
+              {price && <span className="text-[12.5px] font-medium text-cs-green">{price}</span>}
               <span className="text-[11px] leading-[1.45] text-cs-ink-2">{blurb}</span>
             </button>
           ))}
         </div>
-        <p className="mt-[12px] text-[11.5px] text-cs-ink-2">Demo: your dashboard opens with example data. Pro price is a placeholder and nothing is charged.</p>
+        <p className="mt-[12px] text-[11.5px] text-cs-ink-2">Demo: your dashboard opens with example data. Nothing is charged.</p>
       </Modal>
     );
   }
@@ -319,11 +314,11 @@ function AuthDialog({ initial, preset, onClose }: { initial: "signin" | "join"; 
       title={joining ? "Create your Scouthru account" : "Sign in to Scouthru"}
       sub={joining ? "Free to join. Your account comes with your own Scouthru OS dashboard." : "Welcome back. Continue to your dashboard."}
     >
-      <button type="button" onClick={() => { setStep({ at: "google" }); setError(""); }} className="flex h-[44px] w-full items-center justify-center gap-[10px] rounded-[8px] border border-[#d6d8d3] bg-white text-[14px] font-medium hover:bg-[#f7f5f0]">
+      <button type="button" onClick={() => { setStep({ at: "google" }); setError(""); }} className="flex h-[44px] w-full items-center justify-center gap-[10px] rounded-[8px] border border-[#e1d8ca] bg-white text-[14px] font-medium hover:bg-[#f9f5ee]">
         <GoogleG />Continue with Google
       </button>
       <div className="my-[16px] flex items-center gap-[10px] text-[11.5px] text-cs-ink-2"><span className="h-px flex-1 bg-cs-line" />or<span className="h-px flex-1 bg-cs-line" /></div>
-      <div className="mb-[12px] grid grid-cols-2 rounded-[8px] bg-[#f1efe9] p-[3px] text-[13px] font-medium" role="tablist" aria-label="Sign in with">
+      <div className="mb-[12px] grid grid-cols-2 rounded-[8px] bg-[#f5efe5] p-[3px] text-[13px] font-medium" role="tablist" aria-label="Sign in with">
         {(["email", "phone"] as const).map((t) => (
           <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => { setTab(t); setError(""); }} className={cn("h-[34px] rounded-[6px]", tab === t ? "bg-white shadow-sm" : "text-cs-ink-2")}>
             {t === "email" ? "Email" : "Mobile number"}
@@ -341,7 +336,7 @@ function AuthDialog({ initial, preset, onClose }: { initial: "signin" | "join"; 
       ) : (
         <form className="grid gap-[10px]" onSubmit={(e) => { e.preventDefault(); sendCode(); }}>
           <div className="flex gap-[8px]">
-            <span className="grid h-[44px] shrink-0 place-items-center rounded-[8px] border border-[#d6d8d3] bg-[#f7f5f0] px-[12px] text-[14px] text-[#3e4440]">+91</span>
+            <span className="grid h-[44px] shrink-0 place-items-center rounded-[8px] border border-[#e1d8ca] bg-[#f9f5ee] px-[12px] text-[14px] text-[#48413b]">+91</span>
             <input className={field} type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="10-digit mobile number" value={phone} onChange={(e) => setPhone(e.target.value)} aria-label="Mobile number" />
           </div>
           {err}

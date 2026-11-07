@@ -8,6 +8,8 @@ import { Btn, CardTitle, Empty, Hero, Pill, RowMenu, SearchBox, StatStrip, Tabs 
 import { Carrier, th } from "@/components/console/ops";
 import { INBOUND_TONE, ReceiveModal, grnText, inboundFor, inboundState, type InboundState } from "@/components/console/distributor-kit";
 import { useConsole } from "@/lib/console/store";
+import { NextAction, Timeline } from "@/components/console/flow";
+import { shipmentNext, shipmentTimeline } from "@/lib/console/flow";
 import { messageBrand } from "@/lib/console/actions-distributor";
 import { download, fmtDate, fmtDateTime, fmtNum } from "@/lib/console/format";
 import type { Shipment } from "@/lib/console/types";
@@ -79,7 +81,7 @@ function Inbound() {
             <div className="mt-[14px] min-h-0 flex-1 overflow-auto">
               <table className="w-full min-w-[640px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10">
-                  <tr className="bg-[#f7f6f2]">
+                  <tr className="bg-[#f9f6f0]">
                     <th className={cn(th, "rounded-l-[6px] pl-[10px]")}>Shipment &amp; Product</th>
                     <th className={th}>Units</th>
                     <th className={th}>Carrier</th>
@@ -92,13 +94,13 @@ function Inbound() {
                   {list.map(({ sh, grn, state }) => {
                     const on = sh.id === sel;
                     return (
-                      <tr key={sh.id} onClick={() => pick(sh.id)} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fbfdfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#faf9f6]")}>
+                      <tr key={sh.id} onClick={() => pick(sh.id)} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
                         <td className="py-[9px] pl-[10px] pr-[8px]">
                           <div className="flex items-center gap-[10px]">
                             <Image src={sh.img} alt="" width={42} height={42} className="size-[42px] shrink-0 rounded-[6px] object-cover" />
                             <div className="min-w-0">
                               <p className="text-[11.5px] font-semibold">{sh.id}</p>
-                              <p className="truncate text-[11px] text-[#3e4440]">{sh.name}</p>
+                              <p className="truncate text-[11px] text-[#48413b]">{sh.name}</p>
                             </div>
                           </div>
                         </td>
@@ -129,11 +131,12 @@ function Inbound() {
                 <Image src={cur.sh.img} alt="" width={70} height={70} className="size-[64px] shrink-0 rounded-[8px] object-cover" />
                 <div className="min-w-0 flex-1">
                   <p className="serif text-[19px] font-semibold leading-tight">{cur.sh.id}</p>
-                  <p className="text-[12.5px] text-[#3e4440]">{cur.sh.name}</p>
+                  <p className="text-[12.5px] text-[#48413b]">{cur.sh.name}</p>
                   <div className="mt-[5px] flex flex-wrap gap-[5px]"><Pill tone={INBOUND_TONE[cur.state]}>{cur.state}</Pill>{cur.grn?.claim && <Pill tone="red">Damage claim</Pill>}</div>
                 </div>
-                <button type="button" aria-label="Close" onClick={() => { setSel(null); router.replace("/console/distributor/inbound", { scroll: false }); }} className="grid size-[28px] place-items-center rounded-[6px] hover:bg-[#f1f0ec]"><X className="size-[16px]" /></button>
+                <button type="button" aria-label="Close" onClick={() => { setSel(null); router.replace("/console/distributor/inbound", { scroll: false }); }} className="grid size-[28px] place-items-center rounded-[6px] hover:bg-[#f6f0e7]"><X className="size-[16px]" /></button>
               </div>
+              {(() => { const flow = shipmentNext(s, cur.sh, "distributor"); return <NextAction step={flow} onAction={flow.action === "receive" ? () => setReceive(cur.sh) : undefined} className="mt-[12px]" />; })()}
               <dl className="mt-[12px] grid grid-cols-2 gap-[8px] text-[12px]">
                 {[["From", s.workspace], ["Carrier", cur.sh.carrier], ["Invoiced", `${fmtNum(cur.sh.qty)} units`], ["Packages", cur.sh.packages], [cur.grn ? "Received on" : "ETA", fmtDate(cur.grn?.at ?? cur.sh.eta)], ["Destination", cur.sh.destination]].map(([k, v]) => (
                   <div key={k} className="rounded-[7px] border border-cs-line px-[10px] py-[7px]"><dt className="text-[10.5px] text-cs-ink-2">{k}</dt><dd className="font-medium">{v}</dd></div>
@@ -157,16 +160,8 @@ function Inbound() {
                   </>
                 ) : (
                   <>
-                    <CardTitle><span className="text-[17px]">Tracking</span></CardTitle>
-                    <ul className="mt-[8px] space-y-[9px] border-l border-cs-line pl-[14px]">
-                      {cur.sh.events.map((e, i) => (
-                        <li key={i} className="relative text-[12px]">
-                          <span className={cn("absolute -left-[19px] top-[4px] size-[9px] rounded-full ring-2 ring-white", e.tone === "green" ? "bg-cs-green-2" : "bg-cs-amber")} />
-                          <p className="text-[10.5px] text-cs-ink-2">{fmtDateTime(e.at)}</p>
-                          <p>{e.text}</p>
-                        </li>
-                      ))}
-                    </ul>
+                    <CardTitle><span className="text-[17px]">Timeline</span></CardTitle>
+                    <Timeline items={shipmentTimeline(s, cur.sh)} next={shipmentNext(s, cur.sh, "distributor")} className="mt-[8px]" />
                   </>
                 )}
               </div>

@@ -16,7 +16,7 @@ import { cn } from "@/lib/cn";
 
 
 type Pri = { key: string; icon: typeof Truck; tone: Tone; title: string; sub: string; due: string; level: "High" | "Medium" | "Low"; href: string; rank: number };
-const LEVEL: Record<string, string> = { High: "bg-cs-red-bg text-cs-red", Medium: "bg-cs-orange-bg text-[#b8641f]", Low: "bg-[#f1f0ec] text-[#4b524e]" };
+const LEVEL: Record<string, string> = { High: "bg-cs-red-bg text-cs-red", Medium: "bg-cs-orange-bg text-[#a9713f]", Low: "bg-[#f6f0e7] text-[#564e47]" };
 
 export default function DistributorDashboard() {
   const { s, update, toast } = useConsole();
@@ -84,10 +84,10 @@ export default function DistributorDashboard() {
             </div>
             <ul className="mt-[10px] min-h-0 flex-1 space-y-[7px] overflow-y-auto pb-[10px]">
               {pri.map((p) => (
-                <li key={p.key + p.title} className="relative flex items-start gap-[10px] rounded-[8px] border border-cs-line px-[8px] py-[7px] hover:border-[#cfcac0]">
+                <li key={p.key + p.title} className="relative flex items-start gap-[10px] rounded-[8px] border border-cs-line px-[8px] py-[7px] hover:border-[#d0c7bf]">
                   <span className={cn("grid size-[36px] shrink-0 place-items-center rounded-[7px]", TONE[p.tone].bg, TONE[p.tone].fg)}><p.icon className="size-[18px]" strokeWidth={1.7} /></span>
                   <Link href={p.href} className="min-w-0 flex-1">
-                    <p className="pr-[64px] text-[12px] font-medium text-[#1d211e]">{p.title}</p>
+                    <p className="pr-[64px] text-[12px] font-medium text-[#221f1c]">{p.title}</p>
                     <p className="mt-[1px] truncate pr-[24px] text-[10.5px] text-cs-ink-2">{p.sub}</p>
                     <p className="mt-[2px] text-[11px] text-cs-red">{p.due}</p>
                   </Link>
@@ -101,7 +101,7 @@ export default function DistributorDashboard() {
 
           {/* routes */}
           <section className="cs-card flex min-h-0 flex-col px-[14px] pt-[14px] min-[1024px]:h-[372px]">
-            <CardTitle sub={`Today is ${today}.`} right={<Link href="/console/distributor/routes" className="flex items-center gap-[6px] whitespace-nowrap pt-[2px] text-[12px] font-medium text-[#2f3431] hover:text-cs-green">All Routes <ArrowRight className="size-[14px]" /></Link>}>Routes</CardTitle>
+            <CardTitle sub={`Today is ${today}.`} right={<Link href="/console/distributor/routes" className="flex items-center gap-[6px] whitespace-nowrap pt-[2px] text-[12px] font-medium text-[#36312d] hover:text-cs-green">All Routes <ArrowRight className="size-[14px]" /></Link>}>Routes</CardTitle>
             <ul className="mt-[10px] min-h-0 flex-1 space-y-[8px] overflow-y-auto pb-[12px]">
               {s.routes.map((r) => {
                 const packed = s.retailOrders.filter((o) => o.routeId === r.id && o.status === "Packed");
@@ -128,7 +128,7 @@ export default function DistributorDashboard() {
 
           {/* low stock */}
           <section className="cs-card flex min-h-0 flex-col px-[14px] pt-[14px] min-[1024px]:h-[372px]">
-            <CardTitle right={<Link href="/console/distributor/stock" className="flex items-center gap-[6px] whitespace-nowrap pt-[2px] text-[12px] font-medium text-[#2f3431] hover:text-cs-green">View Stock <ArrowRight className="size-[14px]" /></Link>}>Stock Watch</CardTitle>
+            <CardTitle right={<Link href="/console/distributor/stock" className="flex items-center gap-[6px] whitespace-nowrap pt-[2px] text-[12px] font-medium text-[#36312d] hover:text-cs-green">View Stock <ArrowRight className="size-[14px]" /></Link>}>Stock Watch</CardTitle>
             <ul className="mt-[10px] min-h-0 flex-1 divide-y divide-cs-line overflow-y-auto pb-[8px]">
               {[...s.distStock].sort((a, b) => a.onHand / Math.max(1, a.reorderAt) - b.onHand / Math.max(1, b.reorderAt)).map((x) => {
                 const lowNow = x.onHand < x.reorderAt;
@@ -155,7 +155,7 @@ export default function DistributorDashboard() {
               {sales.map((r) => (
                 <li key={r.x.sku} className="grid grid-cols-[minmax(0,190px)_minmax(0,1fr)_88px] items-center gap-[12px]">
                   <span className="truncate text-[12px]">{r.x.product}</span>
-                  <span className="h-[14px] overflow-hidden rounded-[4px] bg-[#eef0ec]"><span className="block h-full rounded-[4px] bg-cs-green-2" style={{ width: `${(r.value / maxSale) * 100}%` }} /></span>
+                  <span className="h-[14px] overflow-hidden rounded-[4px] bg-[#f6f0e6]"><span className="block h-full rounded-[4px] bg-cs-green-2" style={{ width: `${(r.value / maxSale) * 100}%` }} /></span>
                   <span className="text-right text-[12px]"><b>{inr(r.value)}</b><span className="block text-[10.5px] text-cs-ink-2">{r.qty} packs</span></span>
                 </li>
               ))}

@@ -11,7 +11,7 @@ import { AiAssistButton } from "@/components/ai-assist";
 import { CATEGORY_SUBS } from "@/lib/seed";
 import { cn } from "@/lib/cn";
 
-// Scouthru logo, cut from the brand artwork (public/logo.png, 1054x428) and used as a mask
+// Scouthru logo, the scouthru.com wordmark (public/wordmark.png, 1047x416) and used as a mask
 // so it takes the text colour: pine on light surfaces, white on dark ones.
 export function Wordmark({ className, light }: { className?: string; light?: boolean }) {
   return (
@@ -20,7 +20,7 @@ export function Wordmark({ className, light }: { className?: string; light?: boo
         role="img"
         aria-label="Scouthru"
         className="inline-block h-[1.45em] bg-current"
-        style={{ aspectRatio: "1054 / 428", WebkitMask: "url(/logo.png) center / contain no-repeat", mask: "url(/logo.png) center / contain no-repeat" }}
+        style={{ aspectRatio: "1047 / 416", WebkitMask: "url(/wordmark.png) center / contain no-repeat", mask: "url(/wordmark.png) center / contain no-repeat" }}
       />
     </span>
   );
@@ -80,7 +80,7 @@ export function MarketHeader({ compact, query = "" }: { compact?: boolean; query
                 {n.cat && (
                   /* pt-1.5 keeps the hover alive while the cursor moves down into the menu */
                   <div className="invisible absolute left-0 top-full z-40 hidden min-w-[220px] pt-1.5 opacity-0 transition-opacity duration-150 group-focus-within/nav:visible group-focus-within/nav:opacity-100 group-hover/nav:visible group-hover/nav:opacity-100 lg:block">
-                    <ul className="rounded-[12px] border border-line bg-white p-1.5 shadow-[0_16px_40px_-20px_rgba(16,32,27,.45)]" role="menu" aria-label={`${n.label} subcategories`}>
+                    <ul className="rounded-[12px] border border-line bg-white p-1.5 shadow-[0_16px_40px_-20px_rgba(34,30,27,.45)]" role="menu" aria-label={`${n.label} subcategories`}>
                       <li><Link role="menuitem" href={n.href} className="block rounded-lg px-3 py-2 text-[13px] font-semibold hover:bg-soft">All {n.label.toLowerCase()}</Link></li>
                       {CATEGORY_SUBS[n.cat].map((x) => (
                         <li key={x.label}><Link role="menuitem" href={`/marketplace?c=${n.cat}&s=${encodeURIComponent(x.label)}#ready`} className="block rounded-lg px-3 py-2 text-[13px] font-normal hover:bg-soft">{x.label}</Link></li>

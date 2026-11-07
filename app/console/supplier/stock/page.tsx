@@ -68,8 +68,8 @@ function Stock() {
                     {list.map((x) => {
                       const on = item?.sku === x.sku;
                       return (
-                        <tr key={x.sku} onClick={() => setSel(x.sku)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#faf9f6]")}>
-                          <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#1d211e]">{x.name}</span><span className="text-[10.5px] text-cs-ink-2">{x.sku} · {x.spec}</span></td>
+                        <tr key={x.sku} onClick={() => setSel(x.sku)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
+                          <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#221f1c]">{x.name}</span><span className="text-[10.5px] text-cs-ink-2">{x.sku} · {x.spec}</span></td>
                           <td className={cn(td, "whitespace-nowrap")}>{fmtNum(x.onHand)}</td>
                           <td className={cn(td, "whitespace-nowrap text-cs-ink-2")}>{fmtNum(x.reserved)}</td>
                           <td className={cn(td, "whitespace-nowrap font-medium", low(x) ? "text-cs-red" : "text-cs-green-2")}>{fmtNum(avail(x))}{low(x) && <span className="block text-[10px] font-normal">below MOQ</span>}</td>
@@ -138,7 +138,7 @@ function Editor({ item, onReceive }: { item: StockItem; onReceive: () => void })
         <p className="mt-[14px] text-[12.5px] font-semibold">Open requests and orders using it</p>
         <ul className="mt-[6px] space-y-[6px]">
           {uses.map((p) => (
-            <li key={p.id}><Link href={`/console/supplier/${p.status === "Confirmed" ? "dispatch" : "requests"}?id=${p.id}`} className="flex items-center justify-between gap-2 rounded-[7px] border border-cs-line px-[10px] py-[7px] text-[11.5px] hover:border-[#cfcac0]"><span className="min-w-0"><span className="block truncate font-medium">{p.title}</span><span className="text-cs-ink-2">{p.id} · {buyerName(s, p.mfrId)} · {fmtNum(p.lines.find((l) => l.sku === item.sku)!.qty)}</span></span><StatusPill status={p.status} /></Link></li>
+            <li key={p.id}><Link href={`/console/supplier/${p.status === "Confirmed" ? "dispatch" : "requests"}?id=${p.id}`} className="flex items-center justify-between gap-2 rounded-[7px] border border-cs-line px-[10px] py-[7px] text-[11.5px] hover:border-[#d0c7bf]"><span className="min-w-0"><span className="block truncate font-medium">{p.title}</span><span className="text-cs-ink-2">{p.id} · {buyerName(s, p.mfrId)} · {fmtNum(p.lines.find((l) => l.sku === item.sku)!.qty)}</span></span><StatusPill status={p.status} /></Link></li>
           ))}
           {uses.length === 0 && <li className="text-[11.5px] text-cs-ink-2">Not on any open request.</li>}
         </ul>

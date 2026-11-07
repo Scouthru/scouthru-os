@@ -57,7 +57,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         <nav className="flex flex-wrap items-center gap-[8px] text-[12.5px] text-cs-ink-2" aria-label="Breadcrumb">
           <Link href="/marketplace" className="hover:text-cs-green">Marketplace</Link><span>›</span>
           <Link href={`/marketplace?c=${p.category}#ready`} className="hover:text-cs-green">{p.categoryLabel}</Link><span>›</span>
-          <span className="text-[#151816]">{p.name}</span>
+          <span className="text-[#191614]">{p.name}</span>
         </nav>
 
         <div className="mt-[18px] grid gap-[28px] lg:grid-cols-2">
@@ -82,11 +82,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <Pill tone="gray">Formula customisable</Pill>
             </div>
             <h1 className="serif mt-[12px] text-[40px] font-semibold leading-[1.05] tracking-[-0.02em]">{p.name}</h1>
-            <p className="mt-[8px] text-[15px] leading-[1.45] text-[#3e4440]">{p.desc}</p>
+            <p className="mt-[8px] text-[15px] leading-[1.45] text-[#48413b]">{p.desc}</p>
 
             <div className="mt-[18px] overflow-hidden rounded-[10px] border border-cs-line bg-white">
               <table className="w-full text-[13.5px]">
-                <thead className="bg-[#f7f5f0] text-left text-[11.5px] font-semibold uppercase tracking-[0.05em] text-cs-ink-2">
+                <thead className="bg-[#f9f5ee] text-left text-[11.5px] font-semibold uppercase tracking-[0.05em] text-cs-ink-2">
                   <tr><th className="px-[14px] py-[9px]">Quantity</th><th className="px-[14px] py-[9px]">Price / unit</th><th className="px-[14px] py-[9px]">Lead time</th></tr>
                 </thead>
                 <tbody>
@@ -106,7 +106,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <p className="text-[12.5px] font-semibold">{o.label}</p>
                 <div className="mt-[7px] flex flex-wrap gap-[7px]">
                   {o.values.map((v) => (
-                    <button type="button" key={v} onClick={() => setPick({ ...pick, [o.label]: v })} className={cn("h-[34px] rounded-full border px-[14px] text-[12.5px] font-medium", pick[o.label] === v ? "border-cs-green bg-cs-green text-white" : "border-cs-line bg-white hover:border-[#9aa19c]")}>
+                    <button type="button" key={v} onClick={() => setPick({ ...pick, [o.label]: v })} className={cn("h-[34px] rounded-full border px-[14px] text-[12.5px] font-medium", pick[o.label] === v ? "border-cs-green bg-cs-green text-white" : "border-cs-line bg-white hover:border-[#ad9c8e]")}>
                       {v}
                     </button>
                   ))}
@@ -122,7 +122,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               )}
               <div className="grid grid-cols-2 gap-[8px]">
                 {sample ? (
-                  <Link href={`/console/samples?id=${sample.id}`} className="inline-flex h-[44px] items-center justify-center gap-[8px] rounded-[7px] border border-[#cfd2cd] bg-white text-[13px] font-medium">Sample {sample.id} · {sample.status}</Link>
+                  <Link href={`/console/samples?id=${sample.id}`} className="inline-flex h-[44px] items-center justify-center gap-[8px] rounded-[7px] border border-[#ddd3c2] bg-white text-[13px] font-medium">Sample {sample.id} · {sample.status}</Link>
                 ) : (
                   <Btn icon={FlaskConical} className="h-[44px]" onClick={() => setModal("sample")}>Request sample</Btn>
                 )}
@@ -165,7 +165,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         <div className="space-y-[12px] text-[13.5px]">
           <Field label="Quantity (units)" hint={`Minimum ${fmtNum(p.moq)}`}><input className={inputCls} inputMode="numeric" value={qty} onChange={(e) => setQty(e.target.value)} /></Field>
           <Field label="Deliver to"><input className={inputCls} value={dest} onChange={(e) => setDest(e.target.value)} /></Field>
-          <div className="rounded-[9px] bg-[#f5f3ee] p-[12px]">
+          <div className="rounded-[9px] bg-[#f8f3eb] p-[12px]">
             <div className="flex justify-between"><span>Price per unit</span><b>₹{tier.price}</b></div>
             <div className="mt-[4px] flex justify-between"><span>Order value</span><b>{inr(n * tier.price)}</b></div>
             <div className="mt-[4px] flex justify-between text-cs-ink-2"><span>Advance (30%)</span><span>{inr(n * tier.price * 0.3)}</span></div>

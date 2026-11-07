@@ -19,17 +19,18 @@ export function WideHero({ eyebrow, title, lede, img, photo, height, quote, quot
   eyebrow: React.ReactNode; title: string; lede: React.ReactNode; img: string; photo: number; height: number; quote?: string[]; quoteTop?: number; quoteWidth?: number; ledeWidth?: number; ledeGap?: number; titleSize?: number; ledeSize?: number;
 }) {
   return (
-    <section className="relative overflow-hidden bg-[#f7f2ea]" style={{ height }}>
-      <Image src={img} alt="" width={1500} height={400} priority className="absolute right-0 top-0 h-full object-cover object-right" style={{ width: `${photo}%` }} />
-      <div className="absolute inset-y-0 w-[140px] bg-gradient-to-r from-[#f7f2ea] to-transparent" style={{ left: `${100 - photo}%` }} />
-      <div className="relative pl-[29px] pt-[24px]">
-        <div className="text-[11px] font-semibold tracking-[0.2em] text-[#2b302d]">{eyebrow}</div>
-        <h1 className="serif mt-[10px] font-semibold leading-none tracking-[-0.02em] text-[#151816]" style={{ fontSize: titleSize }}>{title}</h1>
-        <p className="leading-[1.3] tracking-[-0.005em] text-[#3e4440]" style={{ maxWidth: ledeWidth, marginTop: ledeGap, fontSize: ledeSize }}>{lede}</p>
+    // Phones: no photo or quote card (they covered the title), height follows the text.
+    <section className="relative overflow-hidden bg-[#f7f2ea] pb-[20px] md:h-[var(--hero-h)] md:pb-0" style={{ "--hero-h": `${height}px` } as React.CSSProperties}>
+      <Image src={img} alt="" width={1500} height={400} priority className="absolute right-0 top-0 hidden h-full object-cover object-right md:block" style={{ width: `${photo}%` }} />
+      <div className="absolute inset-y-0 hidden w-[140px] bg-gradient-to-r from-[#f7f2ea] to-transparent md:block" style={{ left: `${100 - photo}%` }} />
+      <div className="relative px-[20px] pt-[24px] md:pl-[29px] md:pr-0">
+        <div className="text-[11px] font-semibold tracking-[0.2em] text-[#322d29]">{eyebrow}</div>
+        <h1 className="serif mt-[10px] text-[32px] font-semibold leading-none tracking-[-0.02em] text-[#191614] md:text-[length:var(--title)]" style={{ "--title": `${titleSize}px` } as React.CSSProperties}>{title}</h1>
+        <p className="text-[15px] leading-[1.3] max-md:[&_*]:whitespace-normal tracking-[-0.005em] text-[#48413b] md:max-w-[var(--lede-w)] md:text-[length:var(--lede)]" style={{ marginTop: ledeGap, "--lede-w": `${ledeWidth}px`, "--lede": `${ledeSize}px` } as React.CSSProperties}>{lede}</p>
       </div>
       {quote && (
-        <div className="absolute right-[11px] rounded-[6px] bg-[#f5efe5] px-[19px] py-[16px] shadow-[0_1px_2px_rgba(0,0,0,0.04)]" style={{ top: quoteTop, width: quoteWidth }}>
-          <p className="serif text-[19.5px] leading-[1.15] tracking-[-0.02em] text-[#1d211e]">
+        <div className="absolute right-[11px] hidden rounded-[6px] bg-[#f5efe5] px-[19px] py-[16px] shadow-[0_1px_2px_rgba(0,0,0,0.04)] md:block" style={{ top: quoteTop, minWidth: quoteWidth }}>
+          <p className="serif pr-[26px] text-[19.5px] leading-[1.15] tracking-[-0.02em] text-[#221f1c]">
             {quote.map((l) => <span key={l} className="block whitespace-nowrap">{l}</span>)}
           </p>
           <Leaf className="absolute bottom-[12px] right-[10px] size-[26px] -rotate-12 text-cs-green-2" strokeWidth={1} />

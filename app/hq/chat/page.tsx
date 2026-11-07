@@ -36,7 +36,7 @@ function Chat() {
 
   return (
     <div className="grid h-[calc(100dvh-170px)] min-h-[480px] overflow-hidden rounded-[14px] border border-cs-line bg-white md:grid-cols-[250px_minmax(0,1fr)]">
-      <aside className="hidden overflow-y-auto border-r border-cs-line bg-[#faf8f4] p-[10px] md:block">
+      <aside className="hidden overflow-y-auto border-r border-cs-line bg-[#fbf8f3] p-[10px] md:block">
         <Side label="Channels">
           {channels.map((c) => <Item key={c.id} active={to === c.id} onClick={() => go(c.id)} icon={<Hash className="size-[15px]" />} label={c.name} n={counts[c.id]} />)}
         </Side>
@@ -87,7 +87,7 @@ function Side({ label, children }: { label: string; children: React.ReactNode })
 function Item({ active, onClick, icon, label, sub, n }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string; sub?: string; n?: number }) {
   return (
     <li>
-      <button type="button" onClick={onClick} className={cn("flex w-full items-center gap-[8px] rounded-[8px] px-[8px] py-[6px] text-left text-[13px]", active ? "bg-white font-semibold text-cs-green shadow-sm" : "text-[#2f3431] hover:bg-white/70")}>
+      <button type="button" onClick={onClick} className={cn("flex w-full items-center gap-[8px] rounded-[8px] px-[8px] py-[6px] text-left text-[13px]", active ? "bg-white font-semibold text-cs-green shadow-sm" : "text-[#36312d] hover:bg-white/70")}>
         <span className="shrink-0 text-cs-green-2">{icon}</span>
         <span className="min-w-0 flex-1"><span className={cn("block truncate", n && "font-semibold")}>{label}</span>{sub && <span className="block truncate text-[11px] font-normal text-cs-ink-2">{sub}</span>}</span>
         {!!n && <span className="rounded-full bg-cs-green px-[6px] text-[10.5px] font-semibold leading-[17px] text-white">{n}</span>}

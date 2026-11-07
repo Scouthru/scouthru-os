@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, BellRing, CheckCircle2, Clock, Download, FileText, IndianRupee, Receipt } from "lucide-react";
 import { Btn, Empty, FilterSelect, Hero, Pill, RowMenu, SearchBox, StatStrip, Tabs } from "@/components/console/kit";
-import { Board, EventLog, buyerName, isOverdue, minePOs, td, th } from "@/components/console/supplier-kit";
+import { Board, EventLog, SupplierNext, buyerName, isOverdue, minePOs, td, th } from "@/components/console/supplier-kit";
 import { useConsole } from "@/lib/console/store";
 import { remindInvoice } from "@/lib/console/actions-supplier";
 import { daysUntil, download, fmtDate, fmtNum, inr } from "@/lib/console/format";
@@ -110,8 +110,8 @@ function Payments() {
                       const st = statusOf(p);
                       const d = daysUntil(p.invoice!.due);
                       return (
-                        <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#faf9f6]")}>
-                          <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#1d211e]">{p.invoice!.no}</span><span className="text-[10.5px] text-cs-ink-2">{p.id} · {p.title}</span></td>
+                        <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
+                          <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#221f1c]">{p.invoice!.no}</span><span className="text-[10.5px] text-cs-ink-2">{p.id} · {p.title}</span></td>
                           <td className={td}>{buyerName(s, p.mfrId)}</td>
                           <td className={cn(td, "whitespace-nowrap font-medium")}>{inr(p.invoice!.amount)}</td>
                           <td className={cn(td, "whitespace-nowrap")}>{fmtDate(p.invoice!.due)}{!p.invoice!.paidAt && <span className={cn("block text-[10.5px]", d < 0 ? "text-cs-red" : "text-cs-ink-2")}>{d < 0 ? `${-d} days late` : `in ${d} days`}</span>}</td>
@@ -143,13 +143,14 @@ function Payments() {
                   </div>
                   <Pill tone={statusOf(po).tone}>{statusOf(po).label}</Pill>
                 </div>
+                <SupplierNext po={po} className="mt-[12px]" />
                 <p className="serif mt-[14px] text-[30px] font-semibold leading-none">{inr(po.invoice.amount)}</p>
                 <dl className="mt-[14px] grid grid-cols-2 gap-[8px] text-[11.5px]">
                   <div className="rounded-[7px] border border-cs-line px-[10px] py-[7px]"><dt className="text-cs-ink-2">Due</dt><dd className="font-semibold">{fmtDate(po.invoice.due)}</dd></div>
                   <div className="rounded-[7px] border border-cs-line px-[10px] py-[7px]"><dt className="text-cs-ink-2">Paid on</dt><dd className="font-semibold">{po.invoice.paidAt ? fmtDate(po.invoice.paidAt) : "Not yet"}</dd></div>
                   <div className="col-span-2 rounded-[7px] border border-cs-line px-[10px] py-[7px]"><dt className="text-cs-ink-2">Payment reference</dt><dd className="font-semibold">{po.invoice.ref ?? "Shared by the factory when they pay"}</dd></div>
                 </dl>
-                <p className="mt-[14px] text-[12.5px] font-semibold">History</p>
+                <p className="mt-[14px] text-[12.5px] font-semibold">Timeline</p>
                 <div className="mt-[6px]"><EventLog po={po} /></div>
               </div>
               <div className="mt-[10px] grid grid-cols-2 gap-[8px] border-t border-cs-line pt-[10px]">

@@ -61,7 +61,7 @@ export default function Finance() {
       <div className="grid gap-[16px] lg:grid-cols-12">
         {/* Pending payments */}
         <Box title="Pending payments" icon={ReceiptIndianRupee} sub="Unpaid invoices, latest due first" className="lg:col-span-4"
-          right={<div className="flex gap-[4px]">{(["receive", "pay"] as const).map((k) => <button key={k} type="button" onClick={() => setTab(k)} className={cn("rounded-full px-[10px] py-[4px] text-[12px]", tab === k ? "bg-cs-deep text-white" : "bg-[#f3f0e9]")}>{k === "receive" ? `To receive (${pend.receive.length})` : `To pay (${pend.pay.length})`}</button>)}</div>}>
+          right={<div className="flex gap-[4px]">{(["receive", "pay"] as const).map((k) => <button key={k} type="button" onClick={() => setTab(k)} className={cn("rounded-full px-[10px] py-[4px] text-[12px]", tab === k ? "bg-cs-deep text-white" : "bg-[#f6f0e6]")}>{k === "receive" ? `To receive (${pend.receive.length})` : `To pay (${pend.pay.length})`}</button>)}</div>}>
           <ul className="divide-y divide-cs-line">
             {(tab === "receive" ? pend.receive : pend.pay).map((v) => (
               <li key={v.id} className="flex items-center gap-[10px] py-[9px]">
@@ -180,9 +180,9 @@ function Ring({ pct }: { pct: number }) {
   const c = 2 * Math.PI * r;
   return (
     <svg viewBox="0 0 80 80" className="size-[78px]" role="img" aria-label={`${pct}% saved`}>
-      <circle cx="40" cy="40" r={r} fill="none" stroke="#f1ece2" strokeWidth="10" />
-      <circle cx="40" cy="40" r={r} fill="none" stroke={pct >= 100 ? "#2f7a4f" : "#a8461f"} strokeWidth="10" strokeLinecap="round" strokeDasharray={`${(pct / 100) * c} ${c}`} transform="rotate(-90 40 40)" />
-      <text x="40" y="45" textAnchor="middle" className="fill-[#1b1f1c] text-[15px] font-semibold">{pct}%</text>
+      <circle cx="40" cy="40" r={r} fill="none" stroke="#f3ece0" strokeWidth="10" />
+      <circle cx="40" cy="40" r={r} fill="none" stroke={pct >= 100 ? "#2f7a4f" : "#9c3a1e"} strokeWidth="10" strokeLinecap="round" strokeDasharray={`${(pct / 100) * c} ${c}`} transform="rotate(-90 40 40)" />
+      <text x="40" y="45" textAnchor="middle" className="fill-[#201d1a] text-[15px] font-semibold">{pct}%</text>
     </svg>
   );
 }
@@ -219,7 +219,7 @@ function Split({ rows, total, tone }: { rows: [string, number][]; total: number;
       {rows.map(([label, v]) => (
         <li key={label} className="text-[12px]">
           <span className="flex justify-between gap-2"><span className="truncate">{label}</span><span className="shrink-0 font-medium">₹{fmt(v)}</span></span>
-          <span className="mt-[3px] block h-[5px] rounded-full bg-[#f1ece2]"><span className={cn("block h-full rounded-full", tone)} style={{ width: `${total ? (v / total) * 100 : 0}%` }} /></span>
+          <span className="mt-[3px] block h-[5px] rounded-full bg-[#f3ece0]"><span className={cn("block h-full rounded-full", tone)} style={{ width: `${total ? (v / total) * 100 : 0}%` }} /></span>
         </li>
       ))}
     </ul>
@@ -239,8 +239,8 @@ function CostCalculator({ className }: { className?: string }) {
   const commission = value * (n("commission") / 100);
   const field = (k: keyof typeof f, label: string, suffix: string) => (
     <label className="block">
-      <span className="mb-[3px] block text-[11.5px] text-[#3e4440]">{label}</span>
-      <span className="flex items-center rounded-[7px] border border-[#d6d8d3] bg-white pr-[8px] focus-within:border-cs-green">
+      <span className="mb-[3px] block text-[11.5px] text-[#48413b]">{label}</span>
+      <span className="flex items-center rounded-[7px] border border-[#e1d8ca] bg-white pr-[8px] focus-within:border-cs-green">
         <input value={f[k]} onChange={(e) => setF((x) => ({ ...x, [k]: e.target.value.replace(/[^\d.]/g, "") }))} inputMode="decimal" className={cn(inputCls, "h-[34px] border-0 focus:ring-0")} />
         <span className="text-[11.5px] text-cs-ink-2">{suffix}</span>
       </span>
@@ -258,7 +258,7 @@ function CostCalculator({ className }: { className?: string }) {
         {field("margin", "Target margin", "%")}
         {field("commission", "Scouthru fee", "%")}
       </div>
-      <div className="mt-[12px] grid grid-cols-2 gap-[8px] rounded-[10px] bg-[#faf8f4] p-[12px] sm:grid-cols-3">
+      <div className="mt-[12px] grid grid-cols-2 gap-[8px] rounded-[10px] bg-[#fbf8f3] p-[12px] sm:grid-cols-3">
         {([["Cost per unit", `₹${unitCost.toFixed(2)}`], ["Price per unit", `₹${price.toFixed(2)}`], ["Order value", `₹${fmt(value)}`], ["Profit on order", `₹${fmt(profit)}`], ["Scouthru fee", `₹${fmt(commission)}`], ["To reserve (10%)", `₹${fmt(profit * RESERVE_SHARE)}`]] as const).map(([l, v]) => (
           <div key={l}>
             <p className="text-[11px] text-cs-ink-2">{l}</p>

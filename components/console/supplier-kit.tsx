@@ -4,6 +4,9 @@ import { useMemo, useState } from "react";
 import { CheckCircle2, ClipboardList, FileText, IndianRupee, PackageCheck, Send, Truck, X } from "lucide-react";
 import { Btn, Field, Modal, Pill, inputCls, textareaCls, type Tone } from "./kit";
 import { useConsole } from "@/lib/console/store";
+import { useRouter } from "next/navigation";
+import { NextAction, Timeline } from "./flow";
+import { poNext, poTimeline } from "@/lib/console/flow";
 import { declinePO, quotePO } from "@/lib/console/actions-network";
 import { fmtDate, fmtDateTime, fmtNum, inr } from "@/lib/console/format";
 import type { ConsoleState, PurchaseOrder, POStatus } from "@/lib/console/types";
@@ -45,8 +48,8 @@ export function Board({ height, list, panel }: { height: number; list: React.Rea
   );
 }
 
-export const th = "sticky top-0 z-10 whitespace-nowrap bg-[#f7f6f2] px-[8px] py-[9px] text-left text-[11px] font-medium text-[#4b524e]";
-export const td = "border-b border-[#f1efea] px-[8px] py-[9px] align-middle";
+export const th = "sticky top-0 z-10 whitespace-nowrap bg-[#f9f6f0] px-[8px] py-[9px] text-left text-[11px] font-medium text-[#564e47]";
+export const td = "border-b border-[#f5efe6] px-[8px] py-[9px] align-middle";
 
 /** Material lines with availability against this supplier's stock. */
 export function LinesTable({ po, prices }: { po: PurchaseOrder; prices?: Record<string, number> }) {
@@ -60,8 +63,8 @@ export function LinesTable({ po, prices }: { po: PurchaseOrder; prices?: Record<
           const avail = st ? st.onHand - st.reserved : 0;
           const ok = avail >= l.qty;
           return (
-            <tr key={l.sku} className="border-t border-[#f1efea]">
-              <td className="py-[6px] pr-2"><span className="block font-medium text-[#1d211e]">{l.name}</span><span className="text-[10.5px] text-cs-ink-2">{l.sku}</span></td>
+            <tr key={l.sku} className="border-t border-[#f5efe6]">
+              <td className="py-[6px] pr-2"><span className="block font-medium text-[#221f1c]">{l.name}</span><span className="text-[10.5px] text-cs-ink-2">{l.sku}</span></td>
               <td className="py-[6px] text-right">{fmtNum(l.qty)} {l.unit}</td>
               <td className={cn("py-[6px] text-right", po.status === "RFQ" || po.status === "Quoted" ? (ok ? "text-cs-green-2" : "text-cs-red") : "text-cs-ink-2")}>{st ? fmtNum(avail) : "—"}</td>
               {prices && <td className="py-[6px] text-right">{inr((prices[l.sku] ?? 0) * l.qty)}</td>}
@@ -83,19 +86,19 @@ const STEPS = [
 ] as const;
 
 export function PoStepper({ po }: { po: PurchaseOrder }) {
-  if (po.status === "Declined") return <p className="rounded-[7px] bg-[#f1f0ec] px-[10px] py-[8px] text-[12px] text-cs-ink-2">This request was declined.</p>;
+  if (po.status === "Declined") return <p className="rounded-[7px] bg-[#f6f0e7] px-[10px] py-[8px] text-[12px] text-cs-ink-2">This request was declined.</p>;
   const cur = STEPS.findIndex((x) => x.key === po.status);
   const all = po.status === "Paid";
   return (
     <div className="relative grid grid-cols-6">
-      <div className="absolute left-[8.3%] right-[8.3%] top-[15px] flex">{STEPS.slice(0, -1).map((x, i) => <span key={x.key} className={cn("h-[2px] flex-1", all || i < cur ? "bg-cs-green" : "bg-[#dedcd6]")} />)}</div>
+      <div className="absolute left-[8.3%] right-[8.3%] top-[15px] flex">{STEPS.slice(0, -1).map((x, i) => <span key={x.key} className={cn("h-[2px] flex-1", all || i < cur ? "bg-cs-green" : "bg-[#e4dcd0]")} />)}</div>
       {STEPS.map((x, i) => {
         const done = all || i < cur;
         const on = !all && i === cur;
         return (
           <div key={x.key} className="relative flex flex-col items-center text-center">
-            <span className={cn("grid size-[32px] place-items-center rounded-full", on ? "bg-cs-green text-white" : done ? "bg-cs-mint text-cs-green" : "border border-[#e2e0da] bg-[#f6f5f1] text-[#4b524e]")}><x.icon className="size-[15px]" strokeWidth={1.7} /></span>
-            <span className={cn("mt-[5px] text-[10px] leading-tight", on ? "font-semibold text-cs-green" : "text-[#3e4440]")}>{x.label}</span>
+            <span className={cn("grid size-[32px] place-items-center rounded-full", on ? "bg-cs-green text-white" : done ? "bg-cs-mint text-cs-green" : "border border-[#e7e0d5] bg-[#f9f5ee] text-[#564e47]")}><x.icon className="size-[15px]" strokeWidth={1.7} /></span>
+            <span className={cn("mt-[5px] text-[10px] leading-tight", on ? "font-semibold text-cs-green" : "text-[#48413b]")}>{x.label}</span>
           </div>
         );
       })}
@@ -103,17 +106,19 @@ export function PoStepper({ po }: { po: PurchaseOrder }) {
   );
 }
 
+/** Shared PO timeline (the same one the factory sees), ending in the pending step. */
 export function EventLog({ po }: { po: PurchaseOrder }) {
-  return (
-    <ul className="space-y-[7px]">
-      {[...po.events].reverse().map((e, i) => (
-        <li key={i} className="flex gap-[9px] text-[11.5px]">
-          <span className={cn("mt-[4px] size-[7px] shrink-0 rounded-full", i === 0 ? "bg-cs-green-2" : "bg-[#cfd2cd]")} />
-          <span><span className="text-[#1d211e]">{e.text}</span><span className="block text-[10.5px] text-cs-ink-2">{fmtDateTime(e.at)}</span></span>
-        </li>
-      ))}
-    </ul>
-  );
+  const { s } = useConsole();
+  return <Timeline items={poTimeline(s, po)} next={poNext(s, po, "supplier")} />;
+}
+
+/** Supplier's next step on a PO. The button opens the page where that step is done, unless the page handles it. */
+export function SupplierNext({ po, onAction, className }: { po: PurchaseOrder; onAction?: () => void; className?: string }) {
+  const { s } = useConsole();
+  const router = useRouter();
+  const flow = poNext(s, po, "supplier");
+  const go = onAction ?? (flow.action === "quote" ? () => router.push(`/console/supplier/requests?id=${po.id}`) : flow.action === "dispatch" ? () => router.push(`/console/supplier/dispatch?id=${po.id}`) : undefined);
+  return <NextAction step={flow} onAction={go} className={className} />;
 }
 
 export function poText(s: ConsoleState, po: PurchaseOrder) {
@@ -164,7 +169,7 @@ function QuoteForm({ po, onClose }: { po: PurchaseOrder; onClose: () => void }) 
               <tr key={l.sku} className="border-t border-cs-line">
                 <td className="py-[7px] pr-2">{l.name}<span className="block text-[10.5px] text-cs-ink-2">{l.sku}</span></td>
                 <td className="py-[7px] text-right">{fmtNum(l.qty)}</td>
-                <td className="py-[7px] text-right"><input aria-label={`Price for ${l.sku}`} type="number" min={0} step={0.05} value={priceT[l.sku] ?? ""} onChange={(e) => setPrices({ ...priceT, [l.sku]: e.target.value })} className="h-[32px] w-[92px] rounded-[6px] border border-[#d6d8d3] px-[8px] text-right outline-none focus:border-cs-green" /></td>
+                <td className="py-[7px] text-right"><input aria-label={`Price for ${l.sku}`} type="number" min={0} step={0.05} value={priceT[l.sku] ?? ""} onChange={(e) => setPrices({ ...priceT, [l.sku]: e.target.value })} className="h-[32px] w-[92px] rounded-[6px] border border-[#e1d8ca] px-[8px] text-right outline-none focus:border-cs-green" /></td>
                 <td className="py-[7px] text-right font-medium">{inr((prices[l.sku] ?? 0) * l.qty)}</td>
               </tr>
             ))}

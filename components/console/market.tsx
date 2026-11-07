@@ -11,6 +11,7 @@ import { parseRequirement } from "@/lib/parse";
 import { CATEGORIES, CATEGORY_SUBS } from "@/lib/seed";
 import { cn } from "@/lib/cn";
 import { AccountArea, openAuth } from "./account-ui";
+import { BrandMark } from "@/components/brand-mark";
 
 const NAV: { label: string; href: string; cat?: string }[] = [
   ...CATEGORIES.map((c) => ({ label: c.label === "Healthy snacks" ? "Snacks" : c.label, href: `/marketplace?c=${c.id}#ready`, cat: c.id })),
@@ -20,9 +21,9 @@ const NAV: { label: string; href: string; cat?: string }[] = [
 
 export function MarketLogo() {
   return (
-    <span className="flex items-baseline gap-[6px]">
-      <span className="serif text-[27px] font-semibold leading-none tracking-[-0.02em] text-cs-green">Scouthru</span>
-      <span className="text-[11px] font-semibold tracking-[0.16em] text-cs-ink-2">MARKETPLACE</span>
+    <span className="flex items-center gap-[8px]">
+      <BrandMark className="h-[30px] text-cs-green" />
+      <span className="font-mono text-[10.5px] tracking-[0.18em] text-[#776c62]">MARKETPLACE</span>
     </span>
   );
 }
@@ -50,8 +51,8 @@ export function MarketHeader({ compact, query = "" }: { compact?: boolean; query
             onSubmit={(e) => { e.preventDefault(); router.push(`/manufacturers?q=${encodeURIComponent(q)}`); }}
           >
             <Search className="size-[17px] shrink-0 text-cs-ink-2" strokeWidth={1.7} />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products, manufacturers, packaging" className="min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-[#6f7571]" aria-label="Search the marketplace" />
-            <button className="hidden h-[34px] rounded-[7px] bg-cs-green px-[14px] text-[12.5px] font-medium text-white hover:bg-[#8f3a18] sm:block">Search</button>
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products, manufacturers, packaging" className="min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-[#7d7167]" aria-label="Search the marketplace" />
+            <button className="hidden h-[34px] rounded-[7px] bg-cs-green px-[14px] text-[12.5px] font-medium text-white hover:bg-[#7c2c14] sm:block">Search</button>
           </form>
           <button type="button" onClick={() => setPost({ assist: true })} className="ml-auto flex h-[42px] shrink-0 items-center gap-[7px] rounded-[9px] border border-cs-line bg-white px-[12px] text-[13px] font-medium text-cs-green hover:border-cs-green-2/60 sm:ml-0" aria-label="AI assist: write my requirement">
             <Sparkles className="size-[16px]" strokeWidth={1.7} /><span className="hidden sm:inline">AI assist</span>
@@ -63,16 +64,16 @@ export function MarketHeader({ compact, query = "" }: { compact?: boolean; query
           <nav className="mx-auto flex max-w-[1240px] gap-[2px] overflow-x-auto px-3 pb-[8px] text-[13.5px] sm:px-5 lg:overflow-visible" aria-label="Categories">
             {NAV.map((n) => (
               <div key={n.label} className="group/nav relative">
-                <Link href={n.href} className="flex items-center gap-[4px] whitespace-nowrap rounded-[7px] px-[10px] py-[6px] text-[#2f3431] hover:bg-cs-cream group-hover/nav:bg-cs-cream">
+                <Link href={n.href} className="flex items-center gap-[4px] whitespace-nowrap rounded-[7px] px-[10px] py-[6px] text-[#36312d] hover:bg-cs-cream group-hover/nav:bg-cs-cream">
                   {n.label}
                   {n.cat && <ChevronDown className="hidden size-[13px] text-cs-ink-2 transition-transform group-hover/nav:rotate-180 lg:block" />}
                 </Link>
                 {n.cat && (
                   <div className="invisible absolute left-0 top-full z-40 hidden min-w-[220px] pt-[6px] opacity-0 transition-opacity duration-150 group-focus-within/nav:visible group-focus-within/nav:opacity-100 group-hover/nav:visible group-hover/nav:opacity-100 lg:block">
-                    <ul className="rounded-[10px] border border-cs-line bg-white p-[5px] shadow-[0_12px_32px_rgba(20,30,25,0.12)]" role="menu" aria-label={`${n.label} subcategories`}>
-                      <li><Link role="menuitem" href={n.href} className="block rounded-[6px] px-[11px] py-[7px] text-[12.5px] font-semibold hover:bg-[#f5f3ee]">All {n.label.toLowerCase()}</Link></li>
+                    <ul className="rounded-[10px] border border-cs-line bg-white p-[5px] shadow-[0_12px_32px_rgba(60,40,25,0.12)]" role="menu" aria-label={`${n.label} subcategories`}>
+                      <li><Link role="menuitem" href={n.href} className="block rounded-[6px] px-[11px] py-[7px] text-[12.5px] font-semibold hover:bg-[#f8f3eb]">All {n.label.toLowerCase()}</Link></li>
                       {CATEGORY_SUBS[n.cat].map((x) => (
-                        <li key={x.label}><Link role="menuitem" href={`/marketplace?c=${n.cat}&s=${encodeURIComponent(x.label)}#ready`} className="block rounded-[6px] px-[11px] py-[7px] text-[12.5px] hover:bg-[#f5f3ee]">{x.label}</Link></li>
+                        <li key={x.label}><Link role="menuitem" href={`/marketplace?c=${n.cat}&s=${encodeURIComponent(x.label)}#ready`} className="block rounded-[6px] px-[11px] py-[7px] text-[12.5px] hover:bg-[#f8f3eb]">{x.label}</Link></li>
                       ))}
                     </ul>
                   </div>
@@ -162,14 +163,12 @@ export function PostRequirement({ open, onClose, preset, assist = false }: { ope
 
 export function MarketFooter() {
   return (
-    <footer className="mt-16 border-t border-cs-line bg-cs-cream">
+    <footer className="mt-16 border-t border-cs-line bg-cs-ground">
       <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-4 px-4 py-[28px] sm:px-6">
         <div className="space-y-[6px]"><MarketLogo /><p className="text-[13px] text-cs-ink-2">From idea to delivery, Scouthru&apos;s got you.</p></div>
-        <nav className="flex flex-wrap gap-[20px] text-[13px] text-[#2f3431]">
+        <nav className="flex flex-wrap gap-[20px] text-[13px] text-[#36312d]">
           <Link href="/marketplace" className="hover:text-cs-green">Products</Link>
           <Link href="/manufacturers" className="hover:text-cs-green">Manufacturers</Link>
-          <Link href="/about#pricing" className="hover:text-cs-green">Pricing</Link>
-          <Link href="/os" className="hover:text-cs-green">For factories</Link>
           <span className="text-cs-ink-2">Hyderabad, India</span>
           <span className="text-cs-ink-2">Product photos: Unsplash</span>
         </nav>

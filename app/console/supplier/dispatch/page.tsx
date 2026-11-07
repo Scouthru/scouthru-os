@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, CalendarClock, CheckCircle2, Download, FileText, PackageCheck, Truck } from "lucide-react";
 import { Btn, Empty, Field, Hero, RowMenu, SearchBox, StatStrip, Tabs, inputCls } from "@/components/console/kit";
-import { Board, EventLog, LinesTable, StatusPill, buyerName, minePOs, poText, poValue, td, th } from "@/components/console/supplier-kit";
+import { Board, EventLog, SupplierNext, LinesTable, StatusPill, buyerName, minePOs, poText, poValue, td, th } from "@/components/console/supplier-kit";
 import { useConsole } from "@/lib/console/store";
 import { dispatchPO } from "@/lib/console/actions-network";
 import { ago, daysUntil, download, fmtDate, fmtDateTime, fmtNum, inr } from "@/lib/console/format";
@@ -95,8 +95,8 @@ function Dispatch() {
                       const short = p.status === "Confirmed" && shortLines(s, p).length > 0;
                       const m = s.manufacturers.find((x) => x.id === p.mfrId);
                       return (
-                        <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#faf9f6]")}>
-                          <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#1d211e]">{p.title}</span><span className="text-[10.5px] text-cs-ink-2">{p.id}</span></td>
+                        <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
+                          <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#221f1c]">{p.title}</span><span className="text-[10.5px] text-cs-ink-2">{p.id}</span></td>
                           <td className={td}>{m?.name}<span className="block text-[10.5px] text-cs-ink-2">{m?.city}, {m?.state}</span></td>
                           <td className={cn(td, "whitespace-nowrap")}>{fmtNum(p.lines.reduce((a, l) => a + l.qty, 0))}</td>
                           <td className={cn(td, "whitespace-nowrap")}>{tab === "ready" ? <>{fmtDate(p.needBy)}<span className={cn("block text-[10.5px]", daysUntil(p.needBy) <= 3 ? "text-cs-red" : "text-cs-ink-2")}>in {daysUntil(p.needBy)} days</span></> : <>{p.vehicle}<span className="block text-[10.5px] text-cs-ink-2">{ago(p.updatedAt)}</span></>}</td>
@@ -127,6 +127,7 @@ function Dispatch() {
                   </div>
                   <StatusPill status={po.status} />
                 </div>
+                <SupplierNext po={po} onAction={po.status === "Confirmed" ? () => document.getElementById("vehicle-no")?.focus() : undefined} className="mt-[12px]" />
                 <p className="mt-[14px] text-[12.5px] font-semibold">Load list</p>
                 <div className="mt-[4px]"><LinesTable po={po} /></div>
                 {po.status === "Confirmed" && shortLines(s, po).length > 0 && (
@@ -134,7 +135,7 @@ function Dispatch() {
                 )}
                 {po.status === "Confirmed" ? (
                   <div className="mt-[14px] space-y-[8px]">
-                    <Field label="Vehicle number" hint="Shared with the factory so they can expect the truck."><input className={inputCls} value={vehicle} onChange={(e) => setVehicle(e.target.value)} placeholder="e.g. GJ-01-KT-4410" /></Field>
+                    <Field label="Vehicle number" hint="Shared with the factory so they can expect the truck."><input id="vehicle-no" className={inputCls} value={vehicle} onChange={(e) => setVehicle(e.target.value)} placeholder="e.g. GJ-01-KT-4410" /></Field>
                     <p className="text-[11.5px] text-cs-ink-2">Dispatching deducts stock and raises invoice for {inr(poValue(s, po))}, due in 30 days.</p>
                   </div>
                 ) : (
@@ -144,7 +145,7 @@ function Dispatch() {
                     {po.invoice && <div className="col-span-2 rounded-[7px] border border-cs-line px-[10px] py-[7px]"><dt className="text-cs-ink-2">Invoice</dt><dd className="font-semibold">{po.invoice.no} · {inr(po.invoice.amount)}</dd></div>}
                   </dl>
                 )}
-                <p className="mt-[14px] text-[12.5px] font-semibold">History</p>
+                <p className="mt-[14px] text-[12.5px] font-semibold">Timeline</p>
                 <div className="mt-[6px]"><EventLog po={po} /></div>
               </div>
               <div className="mt-[10px] grid grid-cols-2 gap-[8px] border-t border-cs-line pt-[10px]">

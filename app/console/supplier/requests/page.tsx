@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { CalendarClock, ClipboardList, FileText, IndianRupee, Inbox, Plus, Send, Trash2, X, XCircle } from "lucide-react";
 import { Btn, Empty, Field, FilterSelect, Hero, Modal, RowMenu, SearchBox, StatStrip, Tabs, inputCls } from "@/components/console/kit";
-import { Board, DeclineModal, EventLog, LinesTable, PoStepper, QuoteModal, SourceBadge, StatusPill, buyerName, minePOs, poValue, td, th } from "@/components/console/supplier-kit";
+import { Board, DeclineModal, EventLog, SupplierNext, LinesTable, PoStepper, QuoteModal, SourceBadge, StatusPill, buyerName, minePOs, poValue, td, th } from "@/components/console/supplier-kit";
 import { useConsole } from "@/lib/console/store";
 import { addSupplierRequest } from "@/lib/console/actions-network";
 import { ago, daysUntil, fmtDate, fmtNum, inr } from "@/lib/console/format";
@@ -100,8 +100,8 @@ function Requests() {
                       const on = po?.id === p.id;
                       const d = daysUntil(p.needBy);
                       return (
-                        <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#faf9f6]")}>
-                          <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#1d211e]">{p.title}</span><span className="text-[10.5px] text-cs-ink-2">{p.id} · {ago(p.createdAt)}</span></td>
+                        <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
+                          <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#221f1c]">{p.title}</span><span className="text-[10.5px] text-cs-ink-2">{p.id} · {ago(p.createdAt)}</span></td>
                           <td className={td}>{buyerName(s, p.mfrId)}</td>
                           <td className={td}><SourceBadge source={p.source} /></td>
                           <td className={td}>{p.lines.length} line{p.lines.length > 1 ? "s" : ""}<span className="block text-[10.5px] text-cs-ink-2">{fmtNum(p.lines.reduce((a, l) => a + l.qty, 0))} units</span></td>
@@ -149,6 +149,7 @@ function Panel({ po, onQuote, onDecline }: { po: PurchaseOrder; onQuote: () => v
           </div>
           <StatusPill status={po.status} />
         </div>
+        <SupplierNext po={po} onAction={po.status === "RFQ" ? onQuote : undefined} className="mt-[12px]" />
         <div className="mt-[14px]"><PoStepper po={po} /></div>
         <dl className="mt-[14px] grid grid-cols-2 gap-[8px] text-[11.5px]">
           <div className="rounded-[7px] border border-cs-line px-[10px] py-[7px]"><dt className="text-cs-ink-2">Need by</dt><dd className="font-semibold">{fmtDate(po.needBy)}</dd></div>
@@ -164,7 +165,7 @@ function Panel({ po, onQuote, onDecline }: { po: PurchaseOrder; onQuote: () => v
             <p className="mt-[2px] text-[10.5px] text-cs-ink-2">Sent {ago(po.quote.at)} · {po.status === "Quoted" ? "waiting for the factory to confirm" : po.status}</p>
           </div>
         )}
-        <p className="mt-[14px] text-[12.5px] font-semibold">History</p>
+        <p className="mt-[14px] text-[12.5px] font-semibold">Timeline</p>
         <div className="mt-[6px]"><EventLog po={po} /></div>
       </div>
       <div className="mt-[10px] grid grid-cols-2 gap-[8px] border-t border-cs-line pt-[10px]">
@@ -196,7 +197,7 @@ function AddRequest({ onClose }: { onClose: (id?: string) => void }) {
         </div>
         <Field label="What do they need?"><input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Bottles and caps for a gummy run" /></Field>
         <div>
-          <p className="mb-[5px] text-[12px] font-medium text-[#3e4440]">Items</p>
+          <p className="mb-[5px] text-[12px] font-medium text-[#48413b]">Items</p>
           <div className="space-y-[6px]">
             {lines.map((l, i) => (
               <div key={i} className="flex gap-[6px]">
@@ -204,7 +205,7 @@ function AddRequest({ onClose }: { onClose: (id?: string) => void }) {
                   {s.supplierStock.map((x) => <option key={x.sku} value={x.sku}>{x.sku} · {x.name}</option>)}
                 </select>
                 <input aria-label="Quantity" type="number" min={1} className={cn(inputCls, "w-[110px]")} value={l.qty || ""} onChange={(e) => setLine(i, { qty: Number(e.target.value) || 0 })} />
-                <button type="button" aria-label="Remove item" disabled={lines.length === 1} onClick={() => setLines(lines.filter((_, k) => k !== i))} className="grid w-[38px] place-items-center rounded-[7px] border border-[#d6d8d3] disabled:opacity-40"><Trash2 className="size-[15px]" /></button>
+                <button type="button" aria-label="Remove item" disabled={lines.length === 1} onClick={() => setLines(lines.filter((_, k) => k !== i))} className="grid w-[38px] place-items-center rounded-[7px] border border-[#e1d8ca] disabled:opacity-40"><Trash2 className="size-[15px]" /></button>
               </div>
             ))}
           </div>

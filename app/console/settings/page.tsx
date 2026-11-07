@@ -18,9 +18,9 @@ export default function SettingsPage() {
 
   return (
     <div className="px-[29px] pb-[30px] pt-[26px]">
-      <p className="text-[11px] font-semibold tracking-[0.2em] text-[#2b302d]">WORKSPACE</p>
+      <p className="text-[11px] font-semibold tracking-[0.2em] text-[#322d29]">WORKSPACE</p>
       <h1 className="serif mt-[10px] text-[45px] font-semibold leading-none tracking-[-0.02em]">Settings</h1>
-      <p className="mt-[12px] text-[16px] text-[#3e4440]">Your profile, workspace name and demo data.</p>
+      <p className="mt-[12px] text-[16px] text-[#48413b]">Your profile, workspace name and demo data.</p>
 
       <div className="mt-[24px] grid max-w-[980px] gap-[14px] min-[1024px]:grid-cols-2">
         <section className="cs-card p-[18px]">

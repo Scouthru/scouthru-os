@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  AlertTriangle, ArrowRight, Bell, Boxes, Building2, ChevronDown, ClipboardList, CreditCard, FileBarChart2, FlaskConical, Globe, Home, LogOut,
+  AlertTriangle, ArrowRight, Bell, Boxes, Building2, ChevronDown, ClipboardList, CreditCard, FileBarChart2, FlaskConical, Home, LogOut,
   Menu as Menu2, PackageCheck, RotateCcw, Search, Settings, ShieldCheck, Store, Truck, Wallet, X,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -14,6 +14,7 @@ import { useAccount } from "@/lib/console/account";
 import { Btn, Menu, Modal, Toasts } from "./kit";
 import { NAVS, PORTAL_HOME, PORTAL_ICON, PORTAL_LABEL, PORTAL_PROMO, orgName, portalOf } from "./portals";
 import type { ConsoleState, Portal } from "@/lib/console/types";
+import { BrandMark } from "@/components/brand-mark";
 
 const NAV = NAVS.brand;
 
@@ -108,7 +109,7 @@ function notesFor(s: ConsoleState, portal: Portal): Note[] {
   const red = "text-cs-red bg-cs-red-bg";
   const orange = "text-cs-orange bg-cs-orange-bg";
   const violet = "text-cs-violet bg-cs-violet-bg";
-  const gray = "text-[#4b524e] bg-[#f1f0ec]";
+  const gray = "text-[#564e47] bg-[#f6f0e7]";
   const green = "text-cs-green-2 bg-cs-mint";
   if (portal === "maker") {
     s.enquiries.filter((e) => e.stage !== "Closed" && e.responses.some((r) => r.mfrId === s.makerId && (r.status === "Awaiting Reply" || r.status === "Shared Proposal"))).forEach((e) => out.push({ id: `mq-${e.id}`, icon: ClipboardList, tone: orange, title: `Quote requested · ${e.id}`, sub: e.name, href: `/console/maker/enquiries?id=${e.id}` }));
@@ -183,21 +184,21 @@ function GlobalSearch({ portal }: { portal: Portal }) {
           }}
           placeholder={SEARCH_HINT[portal]}
           aria-label="Search the workspace"
-          className="min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-[#6f7571]"
+          className="min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-[#7d7167]"
         />
-        <kbd className="hidden rounded-[5px] border sm:inline border-cs-line bg-[#f7f6f2] px-[7px] py-[2px] font-sans text-[11px] text-cs-ink-2">⌘ K</kbd>
+        <kbd className="hidden rounded-[5px] border sm:inline border-cs-line bg-[#f9f6f0] px-[7px] py-[2px] font-sans text-[11px] text-cs-ink-2">⌘ K</kbd>
       </form>
       {open && q.trim() && (
-        <div className="absolute left-0 right-0 top-[46px] z-50 overflow-hidden rounded-[10px] border border-cs-line bg-white py-[6px] shadow-[0_12px_32px_rgba(20,30,25,0.14)]">
+        <div className="absolute left-0 right-0 top-[46px] z-50 overflow-hidden rounded-[10px] border border-cs-line bg-white py-[6px] shadow-[0_12px_32px_rgba(60,40,25,0.14)]">
           {hits.length === 0 && <p className="px-[14px] py-[12px] text-[13px] text-cs-ink-2">Nothing matches “{q}”.</p>}
           {hits.map((h, i) => (
-            <button key={h.kind + h.href} type="button" onMouseEnter={() => setCursor(i)} onClick={() => go(h)} className={cn("flex w-full items-center gap-[11px] px-[14px] py-[8px] text-left", i === cursor && "bg-[#f5f3ee]")}>
+            <button key={h.kind + h.href} type="button" onMouseEnter={() => setCursor(i)} onClick={() => go(h)} className={cn("flex w-full items-center gap-[11px] px-[14px] py-[8px] text-left", i === cursor && "bg-[#f8f3eb]")}>
               {h.img ? <Image src={h.img} alt="" width={34} height={34} className="size-[34px] rounded-[6px] object-cover" /> : <span className="size-[34px] rounded-[6px] bg-cs-mint" />}
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[13px] font-medium">{h.title}</span>
                 <span className="block truncate text-[11.5px] text-cs-ink-2">{h.sub}</span>
               </span>
-              <span className="rounded-[4px] bg-[#f1f0ec] px-[7px] py-[2px] text-[10.5px] text-cs-ink-2">{h.kind}</span>
+              <span className="rounded-[4px] bg-[#f6f0e7] px-[7px] py-[2px] text-[10.5px] text-cs-ink-2">{h.kind}</span>
             </button>
           ))}
         </div>
@@ -217,7 +218,7 @@ function Notifications({ portal }: { portal: Portal }) {
       align="right"
       trigger={
         <button type="button" aria-label={`Notifications, ${unread} unread`} className="relative grid size-[34px] place-items-center rounded-full hover:bg-cs-cream">
-          <Bell className="size-[21px] text-[#2f3431]" strokeWidth={1.6} />
+          <Bell className="size-[21px] text-[#36312d]" strokeWidth={1.6} />
           {unread > 0 && <span className="absolute right-[6px] top-[5px] size-[8px] rounded-full border-[1.5px] border-cs-ground bg-cs-red" />}
         </button>
       }
@@ -233,7 +234,7 @@ function Notifications({ portal }: { portal: Portal }) {
             {items.map((n) => {
               const read = s.readNotifications.includes(n.id);
               return (
-                <button key={n.id} type="button" onClick={() => { update((d) => { if (!d.readNotifications.includes(n.id)) d.readNotifications.push(n.id); }); close(); router.push(n.href); }} className="flex w-full items-start gap-[10px] px-[14px] py-[9px] text-left hover:bg-[#f5f3ee]">
+                <button key={n.id} type="button" onClick={() => { update((d) => { if (!d.readNotifications.includes(n.id)) d.readNotifications.push(n.id); }); close(); router.push(n.href); }} className="flex w-full items-start gap-[10px] px-[14px] py-[9px] text-left hover:bg-[#f8f3eb]">
                   <span className={cn("grid size-[32px] shrink-0 place-items-center rounded-[7px]", n.tone)}><n.icon className="size-[16px]" strokeWidth={1.7} /></span>
                   <span className="min-w-0 flex-1">
                     <span className={cn("block truncate text-[12.5px]", read ? "text-cs-ink-2" : "font-semibold")}>{n.title}</span>
@@ -270,8 +271,8 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-dvh" style={z < 1 ? { zoom: z } : undefined}>
       <aside style={z < 1 ? { height: `calc(100dvh / ${z})` } : undefined} className="sticky top-0 hidden h-dvh w-[205px] shrink-0 flex-col overflow-y-auto border-r border-cs-line bg-cs-ground lg:flex">
         <Link href={PORTAL_HOME[portal]} className="flex h-[68px] shrink-0 flex-col justify-center pl-[23px]">
-          <span className="flex items-baseline gap-2">
-            <span className="serif text-[29px] font-semibold leading-none tracking-[-0.02em] text-cs-green">Scouthru</span>
+          <span className="flex items-center gap-2">
+            <BrandMark className="h-[30px] text-cs-green" />
             <span className="serif text-[14px] text-cs-ink-2">OS</span>
           </span>
           {portal !== "brand" && <span className="mt-[3px] text-[10.5px] font-semibold tracking-[0.16em] text-cs-green-2">{PORTAL_LABEL[portal].toUpperCase()} PORTAL</span>}
@@ -284,7 +285,7 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
                 key={href}
                 href={href}
                 aria-current={on ? "page" : undefined}
-                className={cn("mb-[6px] flex h-[38px] items-center gap-[13px] rounded-[6px] px-[12px] text-[14px]", on ? "bg-cs-green font-medium text-white" : "text-[#2f3431] hover:bg-cs-cream")}
+                className={cn("mb-[6px] flex h-[38px] items-center gap-[13px] rounded-[6px] px-[12px] text-[14px]", on ? "bg-cs-green font-medium text-white" : "text-[#36312d] hover:bg-cs-cream")}
               >
                 <Icon className="size-[18px]" strokeWidth={1.6} />
                 {label}
@@ -292,7 +293,7 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
             );
           })}
           <div className="my-[14px] border-t border-cs-line" />
-          <Link href="/console/settings" className={cn("flex h-[38px] items-center gap-[13px] rounded-[6px] px-[12px] text-[14px]", section === "/console/settings" ? "bg-cs-green text-white" : "text-[#2f3431] hover:bg-cs-cream")}>
+          <Link href="/console/settings" className={cn("flex h-[38px] items-center gap-[13px] rounded-[6px] px-[12px] text-[14px]", section === "/console/settings" ? "bg-cs-green text-white" : "text-[#36312d] hover:bg-cs-cream")}>
             <Settings className="size-[18px]" strokeWidth={1.6} />
             Settings
           </Link>
@@ -302,8 +303,8 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
             <Image src={promo.img} alt="" width={332} height={304} className="h-[152px] w-full object-cover [@media(max-height:860px)]:h-[96px]" priority />
             <div className="px-[16px] pb-[18px] pt-[4px]">
               <p className="serif text-[21px] font-semibold leading-[1.08] text-cs-ink">{promo.title}</p>
-              {promo.text && <p className="mt-[8px] text-[13px] leading-[1.35] text-[#3b403d]">{promo.text}</p>}
-              <Link href={promo.href} aria-label="Get started" className="mt-[12px] grid size-[37px] place-items-center rounded-full bg-cs-green text-white hover:bg-[#8f3a18]">
+              {promo.text && <p className="mt-[8px] text-[13px] leading-[1.35] text-[#443d37]">{promo.text}</p>}
+              <Link href={promo.href} aria-label="Get started" className="mt-[12px] grid size-[37px] place-items-center rounded-full bg-cs-green text-white hover:bg-[#7c2c14]">
                 <ArrowRight className="size-[17px]" />
               </Link>
             </div>
@@ -325,10 +326,9 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
                 "sep" as const,
                 { label: "Reset demo data", icon: RotateCcw, onClick: () => setConfirmReset(true) },
                 { label: "Browse marketplace", icon: Store, onClick: () => router.push("/marketplace") },
-                { label: "Scouthru website", icon: Globe, onClick: () => router.push("/") },
               ]}
               trigger={
-                <button type="button" aria-label="Workspace menu" className="flex h-[41px] items-center gap-[10px] whitespace-nowrap rounded-[9px] border border-cs-line bg-white px-[11px] text-[13.5px] font-medium hover:border-[#cfcac0] md:w-auto md:min-w-[194px] md:max-w-[250px] md:px-[12px]">
+                <button type="button" aria-label="Workspace menu" className="flex h-[41px] items-center gap-[10px] whitespace-nowrap rounded-[9px] border border-cs-line bg-white px-[11px] text-[13.5px] font-medium hover:border-[#d0c7bf] md:w-auto md:min-w-[194px] md:max-w-[250px] md:px-[12px]">
                   <PortalIcon className="size-[18px]" strokeWidth={1.6} />
                   <span className="hidden truncate md:inline">{orgName(s, portal)}</span>
                   <ChevronDown className="ml-auto hidden size-[16px] text-cs-ink-2 md:block" />
@@ -360,14 +360,14 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
 
       {drawer && (
         <div className="fixed inset-0 z-50 lg:hidden" onMouseDown={() => setDrawer(false)}>
-          <div className="absolute inset-0 bg-[#10201b]/40" />
+          <div className="absolute inset-0 bg-[#221e1b]/40" />
           <nav aria-label="Console" onMouseDown={(e) => e.stopPropagation()} className="absolute inset-y-0 left-0 w-[260px] overflow-y-auto bg-cs-ground px-[16px] py-[18px] shadow-[0_0_40px_rgba(0,0,0,0.2)]">
             <div className="mb-[14px] flex items-center justify-between pl-[6px]">
-              <span className="serif text-[26px] font-semibold text-cs-green">Scouthru <span className="text-[13px] text-cs-ink-2">OS</span></span>
+              <span className="flex items-center gap-2"><BrandMark className="h-[28px] text-cs-green" /><span className="serif text-[13px] text-cs-ink-2">OS</span></span>
               <button type="button" aria-label="Close menu" onClick={() => setDrawer(false)} className="grid size-[34px] place-items-center rounded-[7px] hover:bg-cs-cream"><X className="size-[18px]" /></button>
             </div>
             {[...nav, { href: "/console/settings", label: "Settings", icon: Settings }].map(({ href, label, icon: Icon }) => (
-              <Link key={href} href={href} className={cn("mb-[4px] flex h-[42px] items-center gap-[13px] rounded-[7px] px-[12px] text-[14.5px]", section === href ? "bg-cs-green font-medium text-white" : "text-[#2f3431] hover:bg-cs-cream")}>
+              <Link key={href} href={href} className={cn("mb-[4px] flex h-[42px] items-center gap-[13px] rounded-[7px] px-[12px] text-[14.5px]", section === href ? "bg-cs-green font-medium text-white" : "text-[#36312d] hover:bg-cs-cream")}>
                 <Icon className="size-[18px]" strokeWidth={1.6} />{label}
               </Link>
             ))}

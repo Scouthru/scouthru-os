@@ -56,7 +56,7 @@ export default function Outbox() {
                     <Link href={`/hq/members/${r.doc.memberId}#documents`} className="block truncate text-[13.5px] font-semibold hover:text-cs-green">{name(r.doc.memberId)}</Link>
                     <p className="truncate text-[12px] text-cs-ink-2">{r.doc.kind} · valid till {fmtDate(r.doc.validTill)}</p>
                   </div>
-                  <span className={cn("rounded-full px-[8px] py-[2px] text-[11.5px] font-medium", r.days < 15 ? "bg-cs-red-bg text-cs-red" : "bg-cs-orange-bg text-[#b8641f]")}>{r.days < 0 ? "Expired" : `${r.days} days left`}</span>
+                  <span className={cn("rounded-full px-[8px] py-[2px] text-[11.5px] font-medium", r.days < 15 ? "bg-cs-red-bg text-cs-red" : "bg-cs-orange-bg text-[#a9713f]")}>{r.days < 0 ? "Expired" : `${r.days} days left`}</span>
                 </li>
               ))}
             </ul>
@@ -78,13 +78,13 @@ export default function Outbox() {
         </Box>
 
         <Box title="Sent" icon={Mail} sub={`${s.sends.length} messages`}
-          right={<div className="flex gap-[4px]">{(["all", "auto"] as const).map((k) => <button key={k} type="button" onClick={() => setShow(k)} className={cn("rounded-full px-[10px] py-[4px] text-[12px]", show === k ? "bg-cs-deep text-white" : "bg-[#f3f0e9]")}>{k === "all" ? "All" : "Automatic"}</button>)}</div>}>
+          right={<div className="flex gap-[4px]">{(["all", "auto"] as const).map((k) => <button key={k} type="button" onClick={() => setShow(k)} className={cn("rounded-full px-[10px] py-[4px] text-[12px]", show === k ? "bg-cs-deep text-white" : "bg-[#f6f0e6]")}>{k === "all" ? "All" : "Automatic"}</button>)}</div>}>
           <ul className="divide-y divide-cs-line">
             {log.slice(0, 25).map((x) => (
               <li key={x.id} className="flex items-center gap-[10px] py-[8px] text-[13px]">
                 {x.channel === "WhatsApp" ? <MessageCircle className="size-[15px] shrink-0 text-cs-ok" /> : <Mail className="size-[15px] shrink-0 text-cs-blue" />}
                 <span className="min-w-0 flex-1 truncate"><b className="font-medium">{x.pack}</b> to <Link href={`/hq/members/${x.memberId}`} className="hover:text-cs-green">{name(x.memberId)}</Link></span>
-                {x.auto && <span className="rounded-full bg-[#f1efe9] px-[6px] text-[10.5px] text-cs-ink-2">automatic</span>}
+                {x.auto && <span className="rounded-full bg-[#f5efe5] px-[6px] text-[10.5px] text-cs-ink-2">automatic</span>}
                 <span className="shrink-0 text-[11.5px] text-cs-ink-2">{ago(x.at)}</span>
               </li>
             ))}

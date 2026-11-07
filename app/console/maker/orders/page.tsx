@@ -8,10 +8,12 @@ import { Btn, Empty, Field, Modal, Pill, RowMenu, StatStrip, Stepper, inputCls, 
 import { Lightbox, WideHero } from "@/components/console/making";
 import { Meter, Page, Panel, Split, tdc, thc } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
+import { NextAction, Timeline } from "@/components/console/flow";
+import { orderNext, orderTimeline } from "@/lib/console/flow";
 import { updateBatch } from "@/lib/console/actions";
 import { acceptOrder, addEvidence, postFactoryUpdate } from "@/lib/console/actions-network";
 import { addRisk, mine, setRiskResolved } from "@/lib/console/actions-maker";
-import { ago, daysUntil, fmtDate, fmtDay, fmtNum } from "@/lib/console/format";
+import { daysUntil, fmtDate, fmtDay, fmtNum } from "@/lib/console/format";
 import type { Batch, Issue, Order } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
 
@@ -63,7 +65,7 @@ function MakerOrders() {
                   const closed = x.batches.every((b) => b.status === "Completed");
                   return (
                     <li key={x.id}>
-                      <button type="button" onClick={() => setSel(x.id)} className={cn("flex w-full items-center gap-[10px] rounded-[8px] border px-[9px] py-[8px] text-left", x.id === o.id ? "border-cs-green bg-cs-mint/40" : "border-cs-line hover:border-[#cfcac0]")}>
+                      <button type="button" onClick={() => setSel(x.id)} className={cn("flex w-full items-center gap-[10px] rounded-[8px] border px-[9px] py-[8px] text-left", x.id === o.id ? "border-cs-green bg-cs-mint/40" : "border-cs-line hover:border-[#d0c7bf]")}>
                         <Image src={x.img} alt="" width={40} height={40} className="size-[40px] rounded-[6px] object-cover" />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-[12.5px] font-medium">{x.name}</span>
@@ -96,9 +98,15 @@ function OrderDetail({ o }: { o: Order }) {
   const allDone = o.batches.every((b) => b.status === "Completed");
   const step = !o.confirmed ? 0 : !allDone ? 1 : q.some((x) => x.status !== "Passed") || q.length === 0 ? 2 : ships.some((x) => x.status === "Delivered") ? 5 : ships.length ? 3 : 2;
   const d = daysUntil(o.targetDelivery);
+  const flow = orderNext(s, o, "maker");
+  const doNext = () => {
+    if (flow.action === "accept") { update((dd) => acceptOrder(dd, o.id)); toast(`Accepted ${o.id}. The brand has been told.`); }
+    else if (flow.action === "progress") { const b = o.batches.find((x) => x.status === "In Progress") ?? o.batches.find((x) => x.status === "Pending"); if (b) setBatchFor(b); }
+  };
 
   return (
     <Panel bodyClass="px-[15px] pb-[14px] pt-[14px]">
+      <NextAction step={flow} onAction={doNext} className="mb-[12px]" />
       <div className="flex flex-wrap items-start gap-[12px]">
         <Image src={o.img} alt="" width={80} height={80} className="size-[68px] rounded-[8px] object-cover" />
         <div className="min-w-0 flex-1">
@@ -156,15 +164,7 @@ function OrderDetail({ o }: { o: Order }) {
         <input className={cn(inputCls, "h-[36px] text-[12.5px]")} value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. Batch 004 blending done, encapsulation starts tomorrow" aria-label="Update" />
         <Btn type="submit" kind="primary" icon={Send} className="h-[36px] text-[12.5px]" disabled={!text.trim()}>Post</Btn>
       </form>
-      <ul className="mt-[8px] space-y-[6px]">
-        {o.updates.slice(0, 4).map((u, i) => (
-          <li key={i} className="flex items-start gap-[9px] text-[12px]">
-            <span className="mt-[5px] size-[7px] shrink-0 rounded-full bg-cs-green-2" />
-            <span className="min-w-0 flex-1 text-[#3e4440]">{u.text}</span>
-            <span className="shrink-0 text-[11px] text-cs-ink-2">{ago(u.at)}</span>
-          </li>
-        ))}
-      </ul>
+      <Timeline items={orderTimeline(s, o)} next={flow} className="mt-[10px]" />
 
       <div className="mt-[16px] grid gap-[12px] min-[700px]:grid-cols-2">
         <div>

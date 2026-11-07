@@ -11,8 +11,10 @@ import {
 import { Btn, Check, CardTitle, Empty, Field, FilterSelect, Hero, Modal, Pill, RowMenu, SearchBox, StatStrip, Tabs, ViewAllBtn, inputCls, type Tone } from "@/components/console/kit";
 import { Bar } from "@/components/console/ops";
 import { useConsole } from "@/lib/console/store";
+import { NextAction, Timeline } from "@/components/console/flow";
+import { paymentNext, paymentTimeline } from "@/lib/console/flow";
 import { recordPayment, sendMessage } from "@/lib/console/actions";
-import { daysUntil, download, csv, fmtDate, fmtDateTime, inr, ist, lakh, ago } from "@/lib/console/format";
+import { daysUntil, download, csv, fmtDate, fmtDateTime, inr, ist, lakh } from "@/lib/console/format";
 import type { ConsoleState, Milestone, PaymentPlan } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
 
@@ -191,7 +193,7 @@ function Payments() {
             <div className="mt-[6px] min-h-0 flex-1 overflow-auto pb-[10px]">
               <table className="w-full min-w-[700px] border-separate border-spacing-0 text-[11px]">
                 <thead className="sticky top-0 z-10">
-                  <tr className="bg-[#f7f6f2] text-left text-[10.5px] font-medium text-[#4b524e]">
+                  <tr className="bg-[#f9f6f0] text-left text-[10.5px] font-medium text-[#564e47]">
                     <th className="rounded-l-[6px] py-[8px] pl-[22px] font-medium">Order &amp; Product</th>
                     <th className="px-[6px] font-medium">Manufacturer</th>
                     <th className="px-[6px] font-medium">Invoice ID</th>
@@ -211,24 +213,24 @@ function Payments() {
                     <Fragment key={p.orderId}>
                     <tbody aria-hidden><tr><td colSpan={8} className={gi === 0 ? "h-[6px]" : "h-[9px]"} /></tr></tbody>
                     <tbody className={cn("outline -outline-offset-[1px]", on ? "outline-[1.5px] outline-cs-green-2/70" : "outline-1 outline-cs-line")} style={{ borderRadius: 8 }}>
-                      <tr className={cn("cursor-pointer", on ? "bg-[#fbfdfb]" : "hover:bg-[#faf9f6]")} onClick={() => { setSel(p.orderId); router.replace(`/console/payments?id=${p.orderId}`, { scroll: false }); }}>
+                      <tr className={cn("cursor-pointer", on ? "bg-[#fdfcfb]" : "hover:bg-[#fbf9f5]")} onClick={() => { setSel(p.orderId); router.replace(`/console/payments?id=${p.orderId}`, { scroll: false }); }}>
                         <td className={cn("py-[8px] pl-[4px]", compact && "py-[5px]")}>
                           <div className="flex items-center gap-[7px]">
-                            <button type="button" aria-label={isOpen ? "Collapse" : "Expand"} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); setOpen((o) => (o.includes(p.orderId) ? o.filter((x) => x !== p.orderId) : [...o, p.orderId])); }} className="grid size-[18px] place-items-center rounded hover:bg-[#ecebe6]">
+                            <button type="button" aria-label={isOpen ? "Collapse" : "Expand"} aria-expanded={isOpen} onClick={(e) => { e.stopPropagation(); setOpen((o) => (o.includes(p.orderId) ? o.filter((x) => x !== p.orderId) : [...o, p.orderId])); }} className="grid size-[18px] place-items-center rounded hover:bg-[#f3ebdf]">
                               {isOpen ? <ChevronDown className="size-[15px]" /> : <ChevronRight className="size-[15px]" />}
                             </button>
                             {!compact && <Image src={p.img} alt="" width={40} height={40} className="size-[40px] shrink-0 rounded-[6px] object-cover" />}
                             <div className="min-w-0">
-                              <p className="whitespace-nowrap text-[11.5px] font-semibold text-[#1d211e]">{p.orderId}</p>
-                              <p className="line-clamp-2 w-[104px] text-[10.5px] leading-[1.3] text-[#3e4440]">{p.name}</p>
+                              <p className="whitespace-nowrap text-[11.5px] font-semibold text-[#221f1c]">{p.orderId}</p>
+                              <p className="line-clamp-2 w-[104px] text-[10.5px] leading-[1.3] text-[#48413b]">{p.name}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="w-[86px] px-[6px] text-[11px] leading-tight text-[#3e4440]">{mfrName(p.mfrId)}</td>
-                        <td className="whitespace-nowrap px-[6px] text-[#3e4440]">{cur.invoice}</td>
-                        <td className="px-[6px] leading-tight text-[#3e4440]">{cur.name}</td>
-                        <td className="whitespace-nowrap px-[6px] text-[#3e4440]">{fmtDate(cur.due)}</td>
-                        <td className="whitespace-nowrap px-[6px] text-[#1d211e]">{inr(cur.amount)}</td>
+                        <td className="w-[86px] px-[6px] text-[11px] leading-tight text-[#48413b]">{mfrName(p.mfrId)}</td>
+                        <td className="whitespace-nowrap px-[6px] text-[#48413b]">{cur.invoice}</td>
+                        <td className="px-[6px] leading-tight text-[#48413b]">{cur.name}</td>
+                        <td className="whitespace-nowrap px-[6px] text-[#48413b]">{fmtDate(cur.due)}</td>
+                        <td className="whitespace-nowrap px-[6px] text-[#221f1c]">{inr(cur.amount)}</td>
                         <td className="px-[6px]"><Pill tone={TONE[statusOf(cur)]} className="!w-[68px] justify-center !text-[10.5px]">{statusOf(cur)}</Pill></td>
                         <td className="pr-[6px]">
                           <RowMenu items={[
@@ -240,13 +242,13 @@ function Payments() {
                         </td>
                       </tr>
                       {isOpen && rows.map((m) => (
-                        <tr key={m.invoice} className={cn("group/ms", on ? "bg-[#fbfdfb]" : "")}>
+                        <tr key={m.invoice} className={cn("group/ms", on ? "bg-[#fdfcfb]" : "")}>
                           <td className="py-[6px] pl-[40px]"><Check checked={checked.includes(m.invoice)} onChange={() => toggleCheck(m.invoice)} label={`Select ${m.invoice}`} /></td>
                           <td />
-                          <td className="whitespace-nowrap px-[6px] text-[10.5px] text-[#3e4440]">{m.invoice}</td>
-                          <td className="px-[6px] text-[10.5px] text-[#3e4440]">{m.name}</td>
-                          <td className="whitespace-nowrap px-[6px] text-[10.5px] text-[#3e4440]">{fmtDate(m.due)}</td>
-                          <td className="whitespace-nowrap px-[6px] text-[10.5px] text-[#1d211e]">{inr(m.amount)}</td>
+                          <td className="whitespace-nowrap px-[6px] text-[10.5px] text-[#48413b]">{m.invoice}</td>
+                          <td className="px-[6px] text-[10.5px] text-[#48413b]">{m.name}</td>
+                          <td className="whitespace-nowrap px-[6px] text-[10.5px] text-[#48413b]">{fmtDate(m.due)}</td>
+                          <td className="whitespace-nowrap px-[6px] text-[10.5px] text-[#221f1c]">{inr(m.amount)}</td>
                           <td className="px-[6px]"><Pill tone={TONE[statusOf(m)]} className="!w-[68px] justify-center !py-[2px] !text-[10px]">{statusOf(m)}</Pill></td>
                           <td className="pr-[6px] opacity-0 focus-within:opacity-100 group-hover/ms:opacity-100">
                             <RowMenu items={[
@@ -298,7 +300,7 @@ function Payments() {
             {[...plan.documents, ...plan.milestones.map((m) => `${m.invoice}.pdf`)].map((doc) => (
               <li key={doc} className="flex items-center gap-[10px] py-[8px] text-[13px]">
                 <FileText className="size-[16px] text-cs-red" strokeWidth={1.6} /><span className="flex-1">{doc}</span>
-                <button type="button" aria-label={`Download ${doc}`} onClick={() => docFile(plan, doc, toast)} className="grid size-[26px] place-items-center rounded-[6px] hover:bg-[#f1f0ec]"><Download className="size-[15px]" /></button>
+                <button type="button" aria-label={`Download ${doc}`} onClick={() => docFile(plan, doc, toast)} className="grid size-[26px] place-items-center rounded-[6px] hover:bg-[#f6f0e7]"><Download className="size-[15px]" /></button>
               </li>
             ))}
           </ul>
@@ -346,6 +348,7 @@ function PaymentPanel({ p, onRecord, onRemind, onAllMs, onAllDocs }: { p: Paymen
   const paidAmt = p.milestones.filter((m) => m.status === "Paid").reduce((a, m) => a + m.amount, 0);
   const next = p.milestones.find((m) => m.status !== "Paid");
   const stageTone: Tone = p.stage === "In Production" ? "green" : p.stage === "Delivered" ? "blue" : "orange";
+  const flow = paymentNext(s, p, "brand");
 
   return (
     <aside className="cs-card flex min-h-0 min-w-0 flex-col px-[15px] pb-[12px] pt-[14px]">
@@ -357,12 +360,13 @@ function PaymentPanel({ p, onRecord, onRemind, onAllMs, onAllDocs }: { p: Paymen
             <p className="serif flex items-center gap-[6px] text-[19px] font-semibold leading-tight">{p.orderId}{order && <Link href={`/console/production?id=${order.id}`} aria-label="Open the production order" className="text-cs-ink-2 hover:text-cs-green"><ExternalLink className="size-[13px]" /></Link>}</p>
             <Pill tone={stageTone} className="!text-[10.5px]">{p.stage}</Pill>
           </div>
-          <p className="mt-[3px] text-[13px] text-[#3e4440]">{p.name}</p>
+          <p className="mt-[3px] text-[13px] text-[#48413b]">{p.name}</p>
           <p className="mt-[4px] text-[12.5px] font-medium">{mfr?.name}</p>
           <p className="flex items-center gap-[4px] text-[11.5px] text-cs-ink-2"><MapPin className="size-[12px]" />{mfr?.state}, India</p>
         </div>
       </div>
 
+      <NextAction step={flow} onAction={flow.action === "pay" ? onRecord : undefined} className="mt-[12px]" />
       <div className="mt-[14px] border-t border-cs-line pt-[12px]">
         <CardTitle right={<ViewAllBtn onClick={onAllMs} />}><span className="text-[17px]">Payment Milestones</span></CardTitle>
         <ul className="mt-[6px]">
@@ -372,9 +376,9 @@ function PaymentPanel({ p, onRecord, onRemind, onAllMs, onAllDocs }: { p: Paymen
               <li key={m.invoice} className="flex items-center gap-[10px] py-[6px]">
                 {st === "Paid" ? <span className="grid size-[20px] place-items-center rounded-full bg-cs-green text-white"><CheckIcon className="size-[12px]" strokeWidth={3} /></span>
                   : st === "Due Soon" || st === "Overdue" ? <span className={cn("grid size-[20px] place-items-center rounded-full text-white", st === "Overdue" ? "bg-cs-red" : "bg-[#f0a530]")}><Clock3 className="size-[12px]" strokeWidth={2.4} /></span>
-                    : <span className="grid size-[20px] place-items-center rounded-full border border-[#c9ccc6] text-[#9aa19c]"><Clock3 className="size-[12px]" /></span>}
+                    : <span className="grid size-[20px] place-items-center rounded-full border border-[#d2c8c0] text-[#ad9c8e]"><Clock3 className="size-[12px]" /></span>}
                 <div className="min-w-0 flex-1 leading-tight">
-                  <p className="text-[12px] text-[#1d211e]">{m.name}</p>
+                  <p className="text-[12px] text-[#221f1c]">{m.name}</p>
                   <p className="text-[10.5px] text-cs-ink-2">{st === "Paid" ? `Paid on ${fmtDate(m.paidAt ?? m.due)}` : `Due on ${fmtDate(m.due)}`}</p>
                 </div>
                 <span className="w-[76px] text-right text-[12px]">{inr(m.amount)}</span>
@@ -406,11 +410,11 @@ function PaymentPanel({ p, onRecord, onRemind, onAllMs, onAllDocs }: { p: Paymen
           </dl>
         </div>
         <div className="border-l border-cs-line pl-[12px]">
-          <div className="flex items-center justify-between gap-2"><p className="serif whitespace-nowrap text-[14.5px] font-semibold">Linked Documents</p><button type="button" onClick={onAllDocs} className="whitespace-nowrap text-[11px] font-medium text-[#2f3431] hover:text-cs-green">View All →</button></div>
+          <div className="flex items-center justify-between gap-2"><p className="serif whitespace-nowrap text-[14.5px] font-semibold">Linked Documents</p><button type="button" onClick={onAllDocs} className="whitespace-nowrap text-[11px] font-medium text-[#36312d] hover:text-cs-green">View All →</button></div>
           <ul className="mt-[4px] space-y-[3px]">
             {p.documents.slice(0, 3).map((doc) => (
               <li key={doc}>
-                <button type="button" onClick={() => docFile(p, doc, toast)} className="flex w-full items-start gap-[7px] rounded-[5px] py-[2px] text-left hover:bg-[#f5f3ee]">
+                <button type="button" onClick={() => docFile(p, doc, toast)} className="flex w-full items-start gap-[7px] rounded-[5px] py-[2px] text-left hover:bg-[#f8f3eb]">
                   <FileText className="mt-[2px] size-[15px] shrink-0 text-cs-red" strokeWidth={1.6} />
                   <span className="min-w-0 leading-tight"><span className="block text-[11px] font-medium">{doc.replace(/_/g, " ").replace(/ ORD-.*|\.pdf/, "")}</span><span className="block truncate text-[10px] text-cs-ink-2">{doc}</span></span>
                 </button>
@@ -421,17 +425,8 @@ function PaymentPanel({ p, onRecord, onRemind, onAllMs, onAllDocs }: { p: Paymen
       </div>
 
       <div className="mt-[10px] border-t border-cs-line pt-[10px]">
-        <p className="serif text-[14.5px] font-semibold">Recent Transaction Notes</p>
-        {p.notes.slice(0, 2).map((n) => (
-          <div key={n.at + n.text} className="mt-[6px] flex items-start gap-[9px]">
-            <Image src={n.who === s.user.name ? "/console/av-priya-sm.jpg" : "/console/av-rohit.jpg"} alt="" width={30} height={30} className="size-[30px] rounded-full" />
-            <div className="min-w-0 text-[11px] leading-tight">
-              <p><b className="font-semibold">{n.who}</b> <span className="text-cs-ink-2">{fmtDateTime(n.at)} · {ago(n.at)}</span></p>
-              <p className="mt-[2px] text-[#3e4440]">{n.text}</p>
-            </div>
-          </div>
-        ))}
-        {p.notes.length === 0 && <p className="mt-[4px] text-[11.5px] text-cs-ink-2">No notes yet.</p>}
+        <p className="serif text-[14.5px] font-semibold">Timeline</p>
+        <Timeline items={paymentTimeline(s, p)} next={flow} className="mt-[8px]" />
       </div>
 
       </div>
@@ -483,7 +478,7 @@ function RecordModal({ init, onClose, onDone }: { init: { orderId: string; invoi
           </Field>
         )}
         <div className="grid grid-cols-2 gap-[12px]">
-          <Field label="Amount"><input className={cn(inputCls, "bg-[#f7f6f2]")} readOnly value={inr(sum)} /></Field>
+          <Field label="Amount"><input className={cn(inputCls, "bg-[#f9f6f0]")} readOnly value={inr(sum)} /></Field>
           <Field label="Paid on"><input type="date" className={inputCls} value={paidOn} onChange={(e) => setPaidOn(e.target.value)} /></Field>
         </div>
         <Field label="Payment reference" hint="UTR, cheque or transaction number"><input className={inputCls} placeholder="e.g. UTR 4521 8890 1123" value={ref} onChange={(e) => setRef(e.target.value)} /></Field>

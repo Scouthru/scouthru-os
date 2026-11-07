@@ -16,13 +16,13 @@ export function KitPanel({ member, choices, onPick, onNew }: { member?: Member; 
   const { s } = useHq();
   const p = member ? progress(s, member) : null;
   return (
-    <section id="kit" className="scroll-mt-[130px] rounded-[14px] border-2 border-cs-green/30 bg-white p-[16px] shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+    <section id="kit" className="scroll-mt-[130px] rounded-[14px] border-2 border-cs-green/30 bg-white p-[16px] shadow-[0_1px_2px_rgba(60,40,25,0.04)]">
       <div className="flex flex-wrap items-center justify-between gap-[10px]">
         <h2 className="serif text-[19px] font-semibold leading-tight">Onboarding upload boxes</h2>
-        <button type="button" onClick={onNew} className="inline-flex h-[34px] items-center gap-[6px] rounded-[8px] bg-cs-green px-[12px] text-[12.5px] font-medium text-white hover:bg-[#8f3a18]"><UserPlus className="size-[15px]" />New onboarding</button>
+        <button type="button" onClick={onNew} className="inline-flex h-[34px] items-center gap-[6px] rounded-[8px] bg-cs-green px-[12px] text-[12.5px] font-medium text-white hover:bg-[#7c2c14]"><UserPlus className="size-[15px]" />New onboarding</button>
       </div>
       {!member || !p ? (
-        <p className="mt-[14px] rounded-[10px] bg-[#faf8f4] p-[14px] text-center text-[13px] text-cs-ink-2">Nobody in onboarding. Start one with New onboarding.</p>
+        <p className="mt-[14px] rounded-[10px] bg-[#fbf8f3] p-[14px] text-center text-[13px] text-cs-ink-2">Nobody in onboarding. Start one with New onboarding.</p>
       ) : (
         <>
           <label className="mt-[10px] flex items-center gap-[8px] text-[12.5px] text-cs-ink-2">

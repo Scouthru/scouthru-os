@@ -7,9 +7,10 @@ import { PostRequirement } from "./market";
 import { AccountArea } from "./account-ui";
 import { Toasts } from "./kit";
 import { useConsole } from "@/lib/console/store";
+import { BrandMark } from "@/components/brand-mark";
 
 export function SiteLogo({ light }: { light?: boolean }) {
-  return <span className={`serif text-[30px] font-semibold leading-none tracking-[-0.02em] ${light ? "text-white" : "text-cs-green"}`}>Scouthru</span>;
+  return <BrandMark className={`h-[32px] ${light ? "text-cs-cream" : "text-cs-green"}`} />;
 }
 
 const LINKS: [string, string][] = [["Marketplace", "/marketplace"], ["For factories", "/os"], ["Pricing", "/about#pricing"]];
@@ -24,12 +25,12 @@ export function SiteHeader() {
       <header className="sticky top-0 z-30 border-b border-cs-line bg-cs-ground/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4 px-5 py-[14px]">
           <Link href="/" aria-label="Scouthru home"><SiteLogo /></Link>
-          <nav className="hidden gap-[28px] text-[14.5px] font-medium text-[#2f3431] md:flex">
+          <nav className="hidden gap-[28px] text-[14.5px] font-medium text-[#36312d] md:flex">
             {LINKS.map(([l, h]) => <Link key={l} href={h} className="hover:text-cs-green">{l}</Link>)}
           </nav>
           <div className="flex items-center gap-[10px]">
             <AccountArea />
-            <button type="button" onClick={() => setPost(true)} className="hidden h-[42px] rounded-[8px] bg-cs-green px-[18px] text-[14px] font-medium text-white hover:bg-[#8f3a18] sm:block">Post a requirement</button>
+            <button type="button" onClick={() => setPost(true)} className="hidden h-[42px] rounded-[8px] bg-cs-green px-[18px] text-[14px] font-medium text-white hover:bg-[#7c2c14] sm:block">Post a requirement</button>
             <button type="button" aria-label="Menu" onClick={() => setOpen((o) => !o)} className="grid size-[40px] place-items-center rounded-[8px] border border-cs-line bg-white md:hidden">{open ? <X className="size-[18px]" /> : <MenuIcon className="size-[18px]" />}</button>
           </div>
         </div>

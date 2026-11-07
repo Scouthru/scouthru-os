@@ -12,6 +12,8 @@ import type { LucideIcon } from "lucide-react";
 import { Btn, CardTitle, Crumbs, Empty, Field, IconDot, Menu, Modal, Pill, RowMenu, ViewAllBtn, inputCls, textareaCls, type Tone } from "@/components/console/kit";
 import { Avatar, BATCH_TONE, Lightbox, Loading, MessageModal, WideHero, CT } from "@/components/console/making";
 import { useConsole } from "@/lib/console/store";
+import { NextAction, Timeline as FlowTimeline } from "@/components/console/flow";
+import { orderNext, orderTimeline } from "@/lib/console/flow";
 import { confirmOrder, log, updateBatch } from "@/lib/console/actions";
 import { csv, daysUntil, download, fmtDate, fmtDateTime, fmtMon, fmtNum, inr, ist } from "@/lib/console/format";
 import type { ConsoleState, Order } from "@/lib/console/types";
@@ -61,6 +63,7 @@ function ProductionInner() {
   const evidence = order.evidence.map((e) => ({ src: e.img, label: `${e.label} · ${e.batch}` }));
   const href = `/console/production?id=${order.id}`;
   const mod = (fn: (o: Order, d: ConsoleState) => void) => update((d) => { const o = d.orders.find((x) => x.id === order.id); if (o) fn(o, d); });
+  const flow = orderNext(s, order, "brand");
 
   const openBatch = (id: string) => {
     const b = order.batches.find((x) => x.id === id);
@@ -94,18 +97,19 @@ function ProductionInner() {
     <div>
       <Header id={order.id} />
       <div className="px-[15px] pb-[16px]">
+        <NextAction step={flow} onAction={flow.action === "quality" ? () => router.push("/console/quality") : undefined} className="mb-[10px]" />
         {/* order header */}
         <section className="cs-card relative -mt-[1px] flex items-center gap-[15px] px-[10px] py-[7px] pr-[16px]">
           <Image src={LARGE[order.name] ?? order.img} alt={order.name} width={230} height={220} className="h-[110px] w-[115px] shrink-0 rounded-[7px] object-cover" />
           <div className="min-w-0 flex-1 self-start pt-[6px]">
             <h2 className="serif text-[18px] font-semibold leading-tight tracking-[-0.02em]">{order.name}</h2>
-            <div className="mt-[8px] flex flex-wrap gap-[6px]">{order.tags.map((t) => <span key={t} className="rounded-[5px] bg-[#f1f0ec] px-[10px] py-[3px] text-[11.5px] text-[#3e4440]">{t}</span>)}</div>
-            <p className="mt-[8px] max-w-[320px] text-[12.5px] leading-[1.4] text-[#3e4440]">{order.desc}</p>
+            <div className="mt-[8px] flex flex-wrap gap-[6px]">{order.tags.map((t) => <span key={t} className="rounded-[5px] bg-[#f6f0e7] px-[10px] py-[3px] text-[11.5px] text-[#48413b]">{t}</span>)}</div>
+            <p className="mt-[8px] max-w-[320px] text-[12.5px] leading-[1.4] text-[#48413b]">{order.desc}</p>
           </div>
           <div className="h-[100px] w-px shrink-0 bg-cs-line" />
           <dl className="w-[285px] shrink-0 space-y-[7px] text-[12px] leading-[18px]">
             <div className="grid grid-cols-[84px_1fr] items-center">
-              <dt className="text-[#3e4440]">Order ID</dt>
+              <dt className="text-[#48413b]">Order ID</dt>
               <dd className="relative">
                 <label className="sr-only" htmlFor="order-switch">Switch order</label>
                 <select id="order-switch" value={order.id} onChange={(e) => router.replace(`/console/production?id=${e.target.value}`, { scroll: false })} className="w-full appearance-none bg-transparent pr-[20px] text-[12.5px] outline-none hover:text-cs-green">
@@ -114,12 +118,12 @@ function ProductionInner() {
                 <ChevronDown className="pointer-events-none absolute right-0 top-[2px] size-[14px]" />
               </dd>
             </div>
-            <div className="grid grid-cols-[84px_1fr] border-t border-[#f1efea] pt-[7px]"><dt className="text-[#3e4440]">Manufacturer</dt><dd><Link href={`/console/manufacturers?id=${order.mfrId}`} className="hover:text-cs-green">{m?.name}</Link></dd></div>
-            <div className="grid grid-cols-[84px_1fr] border-t border-[#f1efea] pt-[7px]"><dt className="text-[#3e4440]">Location</dt><dd className="flex items-center gap-[5px]"><MapPin className="size-[14px]" strokeWidth={1.7} />{m?.state}, India</dd></div>
+            <div className="grid grid-cols-[84px_1fr] border-t border-[#f5efe6] pt-[7px]"><dt className="text-[#48413b]">Manufacturer</dt><dd><Link href={`/console/manufacturers?id=${order.mfrId}`} className="hover:text-cs-green">{m?.name}</Link></dd></div>
+            <div className="grid grid-cols-[84px_1fr] border-t border-[#f5efe6] pt-[7px]"><dt className="text-[#48413b]">Location</dt><dd className="flex items-center gap-[5px]"><MapPin className="size-[14px]" strokeWidth={1.7} />{m?.state}, India</dd></div>
           </dl>
           <div className="h-[100px] w-px shrink-0 bg-cs-line" />
           <div className="w-[160px] shrink-0">
-            <p className="text-[12.5px] text-[#3e4440]">Target Delivery</p>
+            <p className="text-[12.5px] text-[#48413b]">Target Delivery</p>
             <div className="mt-[8px] flex items-center gap-[10px]">
               <span className="grid size-[34px] place-items-center rounded-[7px] bg-cs-mint text-cs-green"><CalendarDays className="size-[18px]" strokeWidth={1.7} /></span>
               <span className="leading-tight">
@@ -138,7 +142,7 @@ function ProductionInner() {
               { label: "View payments", icon: Wallet, onClick: () => router.push(`/console/payments?id=${order.id}`) },
               { label: "View quality checks", icon: ShieldCheck, onClick: () => router.push("/console/quality") },
             ]}
-            trigger={<span role="button" aria-label="More order actions" className="grid h-[42px] w-[40px] cursor-pointer place-items-center rounded-[7px] border border-[#cfd2cd] bg-white hover:border-[#9aa19c]"><MoreHorizontal className="size-[18px]" /></span>}
+            trigger={<span role="button" aria-label="More order actions" className="grid h-[42px] w-[40px] cursor-pointer place-items-center rounded-[7px] border border-[#ddd3c2] bg-white hover:border-[#ad9c8e]"><MoreHorizontal className="size-[18px]" /></span>}
           />
         </section>
 
@@ -170,7 +174,7 @@ function ProductionInner() {
                   <IconDot icon={t.icon} tone={t.tone as Tone} className="size-[42px] [&>svg]:size-[20px]" />
                   <div className="min-w-0">
                     <p className={cn("truncate font-semibold leading-tight", t.value.length > 8 ? "text-[13px] tracking-[-0.02em]" : "text-[17px]")}>{t.value}</p>
-                    <p className="mt-[2px] whitespace-nowrap text-[12px] tracking-[-0.01em] text-[#3e4440]">{t.label}</p>
+                    <p className="mt-[2px] whitespace-nowrap text-[12px] tracking-[-0.01em] text-[#48413b]">{t.label}</p>
                     <p className={cn("mt-[2px] whitespace-nowrap text-[11.5px] text-cs-ink-2", t.subTone)}>{t.sub}</p>
                   </div>
                 </div>
@@ -183,7 +187,7 @@ function ProductionInner() {
                 <CardTitle right={<ViewAllBtn onClick={() => openBatch(order.batches.find((b) => b.status !== "Completed")?.id ?? order.batches[0].id)} label="Update" />}><CT>Production Batches</CT></CardTitle>
                 <table className="mt-[8px] w-full whitespace-nowrap text-[11px] [&_td]:pr-[6px] [&_th]:pr-[6px]">
                   <thead>
-                    <tr className="bg-[#f7f6f2] text-left text-[10.5px] text-[#3e4440]">
+                    <tr className="bg-[#f9f6f0] text-left text-[10.5px] text-[#48413b]">
                       <th className="rounded-l-[6px] py-[7px] pl-[8px] font-medium">Batch #</th><th className="font-medium">Planned Units</th><th className="font-medium">Completed Units</th><th className="font-medium">Status</th><th className="font-medium">Start Date</th><th className="font-medium">Est. Completion</th><th className="rounded-r-[6px]" />
                     </tr>
                   </thead>
@@ -191,7 +195,7 @@ function ProductionInner() {
                     {order.batches.map((b) => {
                       const q = s.quality.find((x) => x.id === b.id);
                       return (
-                        <tr key={b.id} className="border-b border-[#f1efea] last:border-0">
+                        <tr key={b.id} className="border-b border-[#f5efe6] last:border-0">
                           <td className="py-[5px] pl-[8px] font-semibold">{b.id}</td>
                           <td>{fmtNum(b.planned)}</td>
                           <td>{fmtNum(b.completed)}</td>
@@ -216,7 +220,7 @@ function ProductionInner() {
               <section className="cs-card px-[14px] pb-[6px] pt-[10px]">
                 <CardTitle right={<ViewAllBtn onClick={() => { setNote(""); setModal("updates"); }} />}><CT>Factory Updates</CT></CardTitle>
                 <ul className="relative mt-[9px]">
-                  <span className="absolute bottom-[20px] left-[5px] top-[6px] border-l border-dashed border-[#cfd2cd]" />
+                  <span className="absolute bottom-[20px] left-[5px] top-[6px] border-l border-dashed border-[#ddd3c2]" />
                   {order.updates.length === 0 && <Empty>No updates yet.</Empty>}
                   {order.updates.slice(0, 4).map((u, i) => (
                     <li key={i} className={cn("relative pb-[7px] pl-[22px]", u.img ? "min-h-[64px] pr-[90px]" : "pr-[18px]")}>
@@ -248,7 +252,7 @@ function ProductionInner() {
                     {order.evidence.map((e, i) => (
                       <button key={i} type="button" onClick={() => setLightbox(i)} className="min-w-0 text-left">
                         <Image src={e.img} alt={e.label} width={200} height={160} className="h-[80px] w-full rounded-[5px] object-cover hover:opacity-90" />
-                        <span className="mt-[3px] block truncate text-[10px] tracking-[-0.01em] text-[#3e4440]">{e.label}</span>
+                        <span className="mt-[3px] block truncate text-[10px] tracking-[-0.01em] text-[#48413b]">{e.label}</span>
                         <span className="block text-[10px] text-cs-ink-2">{e.batch}</span>
                       </button>
                     ))}
@@ -262,7 +266,7 @@ function ProductionInner() {
                 <ul className="mt-[6px] space-y-[5px]">
                   {openIssues.length === 0 && <li className="flex items-center gap-[8px] text-[12.5px] text-cs-green-2"><CheckCircle2 className="size-[16px]" />No open issues on this order.</li>}
                   {openIssues.slice(0, 2).map((i) => (
-                    <li key={i.id} className="flex items-start gap-[8px] border-b border-[#f1efea] pb-[5px] last:border-0">
+                    <li key={i.id} className="flex items-start gap-[8px] border-b border-[#f5efe6] pb-[5px] last:border-0">
                       <span className={cn("grid size-[32px] shrink-0 place-items-center rounded-[7px]", i.level === "Low" ? "bg-cs-blue-bg text-cs-blue" : "bg-cs-red-bg text-cs-red")}>{i.level === "Low" ? <Info className="size-[18px]" strokeWidth={1.8} /> : <AlertTriangle className="size-[18px]" strokeWidth={1.8} />}</span>
                       <div className="min-w-0 flex-1">
                         <p className="flex items-center gap-[6px] whitespace-nowrap text-[10.5px] font-semibold tracking-[-0.01em]">{i.title}<Pill tone={i.level === "High" ? "red" : i.level === "Medium" ? "orange" : "green"} className="px-[6px] py-[1px] text-[10px]">{i.level}</Pill></p>
@@ -280,11 +284,15 @@ function ProductionInner() {
           </div>
 
           <div className="min-w-0 space-y-[10px]">
+            <section className="cs-card px-[14px] pb-[12px] pt-[14px]">
+              <CardTitle sub={`Shared with ${m?.name ?? "the manufacturer"}`}><CT>Timeline</CT></CardTitle>
+              <FlowTimeline items={orderTimeline(s, order)} next={flow} className="mt-[10px]" />
+            </section>
             {/* order summary */}
             <section className="cs-card px-[14px] pb-[10px] pt-[14px]">
               <CardTitle right={edit
                 ? <div className="flex gap-[6px]"><button type="button" onClick={() => setEdit(null)} className="rounded-[6px] border border-cs-line px-[9px] py-[4px] text-[12px]">Cancel</button><button type="button" onClick={() => { const e = edit; mod((o, d) => { o.targetDelivery = new Date(e.target).toISOString(); o.destination = e.dest; o.incoterms = e.inco; log(d, { text: `Updated order details for ${o.id}`, tag: "Production", href }); }); setEdit(null); toast("Order details saved"); }} className="rounded-[6px] bg-cs-green px-[9px] py-[4px] text-[12px] text-white">Save</button></div>
-                : <button type="button" onClick={() => setEdit({ target: order.targetDelivery.slice(0, 10), dest: order.destination, inco: order.incoterms })} className="flex items-center gap-[6px] rounded-[6px] border border-cs-line px-[10px] py-[4px] text-[12px] hover:border-[#cfcac0]"><Pencil className="size-[13px]" />Edit</button>}
+                : <button type="button" onClick={() => setEdit({ target: order.targetDelivery.slice(0, 10), dest: order.destination, inco: order.incoterms })} className="flex items-center gap-[6px] rounded-[6px] border border-cs-line px-[10px] py-[4px] text-[12px] hover:border-[#d0c7bf]"><Pencil className="size-[13px]" />Edit</button>}
               ><CT>Order Summary</CT></CardTitle>
               <dl className="mt-[10px] text-[12.5px]">
                 {([
@@ -299,8 +307,8 @@ function ProductionInner() {
                   ["Incoterms", edit ? <input key="i" aria-label="Incoterms" className={cn(inputCls, "h-[28px] text-[12px]")} value={edit.inco} onChange={(e) => setEdit({ ...edit, inco: e.target.value })} /> : order.incoterms],
                   ["Destination", edit ? <input key="d" aria-label="Destination" className={cn(inputCls, "h-[28px] text-[12px]")} value={edit.dest} onChange={(e) => setEdit({ ...edit, dest: e.target.value })} /> : order.destination],
                 ] as [string, React.ReactNode][]).map(([k, v]) => (
-                  <div key={k} className="grid min-h-[31px] grid-cols-[98px_1fr] items-center border-b border-[#f1efea] py-[3px] last:border-0">
-                    <dt className="text-[#3e4440]">{k}</dt><dd className="min-w-0">{v}</dd>
+                  <div key={k} className="grid min-h-[31px] grid-cols-[98px_1fr] items-center border-b border-[#f5efe6] py-[3px] last:border-0">
+                    <dt className="text-[#48413b]">{k}</dt><dd className="min-w-0">{v}</dd>
                   </div>
                 ))}
               </dl>
@@ -311,7 +319,7 @@ function ProductionInner() {
               <CardTitle right={<ViewAllBtn onClick={() => setModal("contacts")} />}><CT>Primary Contacts</CT></CardTitle>
               <ul className="mt-[10px]">
                 {(m?.contacts ?? []).slice(0, 2).map((c) => (
-                  <li key={c.name} className="flex items-center gap-[12px] border-b border-[#f1efea] py-[10px] last:border-0">
+                  <li key={c.name} className="flex items-center gap-[12px] border-b border-[#f5efe6] py-[10px] last:border-0">
                     <Avatar name={c.name} size={50} />
                     <div className="min-w-0 flex-1 leading-tight">
                       <p className="text-[13.5px] font-semibold">{c.name}</p>
@@ -349,7 +357,7 @@ function ProductionInner() {
           return (
             <div className="space-y-[10px]">
               <Field label={`Completed units (of ${fmtNum(b.planned)})`}><input type="number" min={0} max={b.planned} className={inputCls} value={units} onChange={(e) => setUnits(Math.max(0, Math.min(b.planned, +e.target.value)))} /></Field>
-              <input type="range" aria-label="Completed units" min={0} max={b.planned} step={500} value={units} onChange={(e) => setUnits(+e.target.value)} className="w-full accent-[#a8461f]" />
+              <input type="range" aria-label="Completed units" min={0} max={b.planned} step={500} value={units} onChange={(e) => setUnits(+e.target.value)} className="w-full accent-[#9c3a1e]" />
               <p className="text-[12px] text-cs-ink-2">{Math.round((units / b.planned) * 100)}% of batch</p>
             </div>
           );
@@ -360,7 +368,7 @@ function ProductionInner() {
         footer={<><Btn onClick={() => setModal(null)}>Close</Btn><Btn kind="primary" disabled={!note.trim()} onClick={() => { const t = note.trim(); mod((o, d) => { o.updates.unshift({ at: new Date().toISOString(), text: t }); log(d, { text: `Posted update on ${o.id}: ${t}`, tag: "Production", href }); }); setNote(""); toast("Update posted"); }}>Post update</Btn></>}>
         <textarea aria-label="New update" rows={2} className={textareaCls} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add a note to the order timeline…" />
         <ul className="mt-[12px] max-h-[45dvh] space-y-[10px] overflow-y-auto">
-          {order.updates.map((u, i) => <li key={i} className="border-b border-[#f1efea] pb-[8px]"><p className="text-[11px] text-cs-ink-2">{fmtDateTime(u.at)}</p><p className="text-[13px]">{u.text}</p></li>)}
+          {order.updates.map((u, i) => <li key={i} className="border-b border-[#f5efe6] pb-[8px]"><p className="text-[11px] text-cs-ink-2">{fmtDateTime(u.at)}</p><p className="text-[13px]">{u.text}</p></li>)}
         </ul>
       </Modal>
 
@@ -433,8 +441,8 @@ function ProgressSteps({ steps, current }: { steps: { label: string; icon: Lucid
     <div className="relative grid" style={{ gridTemplateColumns: `repeat(${n}, minmax(0,1fr))` }}>
       <div className="absolute flex" style={{ left: `${50 / n}%`, right: `${50 / n}%`, top: SZ / 2 - 1 }}>
         {steps.slice(0, -1).map((st, i) => (
-          <span key={st.label} className={cn("relative h-[2px] flex-1", i < current ? "bg-cs-green" : "bg-[#dedcd6]")}>
-            {i === current && current < n - 1 && <span className="absolute left-[38%] top-1/2 size-[13px] -translate-y-1/2 rounded-full border-[1.5px] border-[#c9ccc7] bg-white" />}
+          <span key={st.label} className={cn("relative h-[2px] flex-1", i < current ? "bg-cs-green" : "bg-[#e4dcd0]")}>
+            {i === current && current < n - 1 && <span className="absolute left-[38%] top-1/2 size-[13px] -translate-y-1/2 rounded-full border-[1.5px] border-[#d2c9c1] bg-white" />}
           </span>
         ))}
       </div>
@@ -443,7 +451,7 @@ function ProgressSteps({ steps, current }: { steps: { label: string; icon: Lucid
         const on = i === current;
         return (
           <div key={st.label} className="relative flex flex-col items-center text-center">
-            <span className={cn("relative grid place-items-center rounded-full", on ? "bg-cs-green text-white ring-[5px] ring-cs-mint" : done ? "bg-cs-mint text-cs-green" : "border border-[#e2e0da] bg-[#f6f5f1] text-[#4b524e]")} style={{ width: SZ, height: SZ }}>
+            <span className={cn("relative grid place-items-center rounded-full", on ? "bg-cs-green text-white ring-[5px] ring-cs-mint" : done ? "bg-cs-mint text-cs-green" : "border border-[#e7e0d5] bg-[#f9f5ee] text-[#564e47]")} style={{ width: SZ, height: SZ }}>
               <st.icon className="size-[22px]" strokeWidth={1.6} />
               {(done || on) && (
                 <span className="absolute -bottom-[3px] -right-[3px] grid size-[17px] place-items-center rounded-full border-2 border-white bg-cs-green text-white">
@@ -451,8 +459,8 @@ function ProgressSteps({ steps, current }: { steps: { label: string; icon: Lucid
                 </span>
               )}
             </span>
-            <p className="mt-[10px] text-[13.5px] font-semibold leading-tight text-[#1d211e]">{st.label}</p>
-            <p className="mt-[4px] text-[11.5px] leading-tight text-[#3e4440]">{st.sub}</p>
+            <p className="mt-[10px] text-[13.5px] font-semibold leading-tight text-[#221f1c]">{st.label}</p>
+            <p className="mt-[4px] text-[11.5px] leading-tight text-[#48413b]">{st.sub}</p>
             <p className={cn("mt-[3px] text-[11.5px] leading-tight", done ? "text-cs-green-2" : on ? "text-cs-blue" : "text-cs-ink-2")}>{st.note}</p>
           </div>
         );

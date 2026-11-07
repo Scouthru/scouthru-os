@@ -67,12 +67,12 @@ export default function RoutesPage() {
                         <p className="flex items-center gap-[6px] text-[13.5px] font-semibold">{r.name}{r.day.includes(today) && <Pill tone="green" className="py-[1px] text-[10.5px]">Today</Pill>}</p>
                         <p className="text-[11px] text-cs-ink-2">{r.day} · {r.areas.join(", ")}</p>
                       </div>
-                      <button type="button" aria-label={`Edit ${r.name}`} onClick={() => setEdit(r)} className="grid size-[28px] place-items-center rounded-[6px] text-cs-ink-2 hover:bg-[#f1f0ec]"><Pencil className="size-[14px]" /></button>
+                      <button type="button" aria-label={`Edit ${r.name}`} onClick={() => setEdit(r)} className="grid size-[28px] place-items-center rounded-[6px] text-cs-ink-2 hover:bg-[#f6f0e7]"><Pencil className="size-[14px]" /></button>
                     </div>
-                    <p className="mt-[8px] flex flex-wrap gap-x-[12px] gap-y-[2px] text-[11.5px] text-[#3e4440]"><span className="inline-flex items-center gap-[4px]"><Truck className="size-[13px]" />{r.van}</span><span className="inline-flex items-center gap-[4px]"><User className="size-[13px]" />{r.driver}</span></p>
+                    <p className="mt-[8px] flex flex-wrap gap-x-[12px] gap-y-[2px] text-[11.5px] text-[#48413b]"><span className="inline-flex items-center gap-[4px]"><Truck className="size-[13px]" />{r.van}</span><span className="inline-flex items-center gap-[4px]"><User className="size-[13px]" />{r.driver}</span></p>
                     <ul className="mt-[8px] space-y-[5px]">
                       {orders.map((o) => (
-                        <li key={o.id} className="flex items-center gap-[8px] rounded-[7px] bg-[#f7f6f2] px-[9px] py-[6px] text-[11.5px]">
+                        <li key={o.id} className="flex items-center gap-[8px] rounded-[7px] bg-[#f9f6f0] px-[9px] py-[6px] text-[11.5px]">
                           <Link href={`/console/distributor/orders?id=${o.id}`} className="min-w-0 flex-1 hover:text-cs-green"><b>{o.id}</b> · <span className="truncate">{o.retailer}</span></Link>
                           <Pill tone={RO_TONE[o.status]} className="py-[1px] text-[10.5px]">{o.status === "Out for Delivery" ? "Out" : o.status}</Pill>
                           {o.status === "Out for Delivery" && <button type="button" onClick={() => deliver(o.id)} className="text-[11px] font-medium text-cs-green hover:underline">Delivered</button>}

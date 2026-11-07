@@ -7,6 +7,8 @@ import { CheckCircle2, ClipboardList, Gauge, IndianRupee, Inbox, Mail, MessageCi
 import { Btn, Empty, Field, FilterSelect, Hero, Modal, Pill, RowMenu, SearchBox, StatStrip, Tabs, inputCls, textareaCls, type Tone } from "@/components/console/kit";
 import { KV, Page, Panel, Split, thc, tdc } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
+import { NextAction, Timeline } from "@/components/console/flow";
+import { enquiryNext, enquiryTimeline } from "@/lib/console/flow";
 import { addLead, declineEnquiry, submitQuote, updateLead } from "@/lib/console/actions-network";
 import { capacityFit, lineFor, mine } from "@/lib/console/actions-maker";
 import { ago, fmtDate, fmtNum, inr } from "@/lib/console/format";
@@ -114,11 +116,11 @@ function MakerEnquiries() {
                     const Icon = SOURCE_ICON[r.source as keyof typeof SOURCE_ICON] ?? Inbox;
                     const on = current?.key === r.key;
                     return (
-                      <tr key={r.key} onClick={() => setSel(r.key)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#faf9f5]")}>
+                      <tr key={r.key} onClick={() => setSel(r.key)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
                         <td className={cn(tdc, on && "border-l-2 border-l-cs-green")}>
                           <div className="flex items-center gap-[10px]">
                             {r.img ? <Image src={r.img} alt="" width={36} height={36} className="size-[36px] rounded-[6px] object-cover" /> : <span className="grid size-[36px] place-items-center rounded-[6px] bg-cs-cream text-cs-green"><Icon className="size-[16px]" strokeWidth={1.7} /></span>}
-                            <div className="min-w-0"><p className="truncate font-medium text-[#1d211e]">{r.name}</p><p className="truncate text-[11px] text-cs-ink-2">{r.buyer} · {r.id}</p></div>
+                            <div className="min-w-0"><p className="truncate font-medium text-[#221f1c]">{r.name}</p><p className="truncate text-[11px] text-cs-ink-2">{r.buyer} · {r.id}</p></div>
                           </div>
                         </td>
                         <td className={tdc}><span className="inline-flex items-center gap-[5px] text-[11.5px]"><Icon className="size-[13px] text-cs-ink-2" />{r.source}</span></td>
@@ -173,16 +175,21 @@ function FitBadge({ name, qty }: { name: string; qty: number }) {
 
 function Detail({ row, onQuote, onDecline, onClose, goBrand }: { row: Row | null; onQuote: (r: Row) => void; onDecline: (r: Row) => void; onClose: () => void; goBrand: (id: string) => void }) {
   const { s, update, toast } = useConsole();
+  const router = useRouter();
   if (!row) return <Panel><Empty>Pick an enquiry or lead to see the details.</Empty></Panel>;
+  // A factory only sees its own quote and the brand's side, never other factories' replies.
+  const otherFactories = new Set(s.manufacturers.filter((m) => m.id !== s.makerId).map((m) => m.name));
+  const goSamples = () => router.push("/console/maker/samples");
   const e = row.kind === "brand" ? s.enquiries.find((x) => x.id === row.id) : undefined;
   const lead = row.kind === "lead" ? s.leads.find((x) => x.id === row.id) : undefined;
   const myQuote = e?.quotes.find((x) => x.mfrId === s.makerId);
   const myResp = e?.responses.find((x) => x.mfrId === s.makerId);
   const canQuote = row.status === "To quote" || row.status === "New" || row.status === "Quoted";
+  const next = e ? enquiryNext(s, e, "maker", s.makerId) : undefined;
 
   return (
     <Panel className="relative" bodyClass="px-[15px] pb-[14px] pt-[14px]">
-      <button type="button" aria-label="Close" onClick={onClose} className="absolute right-[10px] top-[10px] grid size-[28px] place-items-center rounded-[6px] hover:bg-[#f1f0ec]"><X className="size-[16px]" /></button>
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute right-[10px] top-[10px] grid size-[28px] place-items-center rounded-[6px] hover:bg-[#f6f0e7]"><X className="size-[16px]" /></button>
       <div className="flex items-start gap-[12px] pr-[30px]">
         {row.img ? <Image src={row.img} alt="" width={72} height={72} className="size-[64px] rounded-[8px] object-cover" /> : <span className="grid size-[64px] place-items-center rounded-[8px] bg-cs-cream text-cs-green"><Inbox className="size-[24px]" strokeWidth={1.6} /></span>}
         <div className="min-w-0">
@@ -192,6 +199,7 @@ function Detail({ row, onQuote, onDecline, onClose, goBrand }: { row: Row | null
         </div>
       </div>
 
+      {next && <NextAction step={next} onAction={next.action === "quote" ? () => onQuote(row) : next.action === "samples" ? () => goSamples() : undefined} className="mt-[12px]" />}
       <dl className="mt-[12px]">
         <KV k="Quantity" v={`${fmtNum(row.qty)} units`} />
         {e && <><KV k="Target price" v={e.price} /><KV k="Target launch" v={e.launch} /><KV k="Category" v={e.category} /></>}
@@ -203,18 +211,16 @@ function Detail({ row, onQuote, onDecline, onClose, goBrand }: { row: Row | null
       <div className="mt-[12px]"><FitBadge name={`${row.name} ${e?.tags.join(" ") ?? ""}`} qty={row.qty} /></div>
 
       <h4 className="serif mt-[14px] text-[16px] font-semibold">{e ? "Brand's brief" : "Notes"}</h4>
-      <p className="mt-[4px] text-[12.5px] leading-[1.5] text-[#3e4440]">{e?.brief ?? lead?.note}</p>
+      <p className="mt-[4px] text-[12.5px] leading-[1.5] text-[#48413b]">{e?.brief ?? lead?.note}</p>
       {e && (
-        <div className="mt-[8px] flex flex-wrap gap-[6px]">{e.requirements.map((r) => <span key={r} className="rounded-[5px] bg-[#f1f0ec] px-[9px] py-[3px] text-[11.5px]">{r}</span>)}</div>
+        <div className="mt-[8px] flex flex-wrap gap-[6px]">{e.requirements.map((r) => <span key={r} className="rounded-[5px] bg-[#f6f0e7] px-[9px] py-[3px] text-[11.5px]">{r}</span>)}</div>
       )}
-      {myResp?.status === "Declined" && <p className="mt-[10px] rounded-[7px] bg-[#f5f3ee] px-[10px] py-[8px] text-[12px] text-cs-ink-2">You declined: {myResp.note}</p>}
+      {myResp?.status === "Declined" && <p className="mt-[10px] rounded-[7px] bg-[#f8f3eb] px-[10px] py-[8px] text-[12px] text-cs-ink-2">You declined: {myResp.note}</p>}
 
       {e && (
         <>
-          <h4 className="serif mt-[14px] text-[16px] font-semibold">History</h4>
-          <ul className="mt-[4px] space-y-[6px] text-[12px]">
-            {e.activity.slice(-4).reverse().map((a, i) => <li key={i} className="flex justify-between gap-3"><span className="text-[#3e4440]">{a.text}</span><span className="shrink-0 text-cs-ink-2">{ago(a.at)}</span></li>)}
-          </ul>
+          <h4 className="serif mt-[14px] text-[16px] font-semibold">Timeline</h4>
+          <Timeline items={enquiryTimeline(s, e).filter((m) => !otherFactories.has(m.who))} next={next} className="mt-[8px]" />
         </>
       )}
 

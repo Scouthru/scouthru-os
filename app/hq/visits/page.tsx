@@ -99,7 +99,7 @@ export default function Visits() {
                     <span className="flex shrink-0">{[1, 2, 3, 4, 5].map((n) => <Star key={n} className={cn("size-[14px]", (m.visit!.score ?? 0) >= n ? "fill-cs-amber text-cs-amber" : "text-[#d8d2c4]")} />)}</span>
                   </span>
                   <span className="mt-[3px] block text-[12px] text-cs-ink-2">{fmtDate(m.visit!.date)} · {Object.values(m.visit!.checks).filter(Boolean).length} checks passed</span>
-                  {m.visit!.notes && <span className="mt-[5px] line-clamp-2 block text-[12.5px] text-[#3e4440]">{m.visit!.notes}</span>}
+                  {m.visit!.notes && <span className="mt-[5px] line-clamp-2 block text-[12.5px] text-[#48413b]">{m.visit!.notes}</span>}
                 </Link>
               </li>
             ))}

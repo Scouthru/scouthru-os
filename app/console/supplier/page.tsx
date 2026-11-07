@@ -23,7 +23,7 @@ const PIPE: { key: POStatus; label: string; icon: LucideIcon; href: string }[] =
   { key: "Paid", label: "Paid", icon: IndianRupee, href: "/console/supplier/payments" },
 ];
 
-const LEVEL: Record<string, string> = { High: "bg-cs-red-bg text-cs-red", Medium: "bg-cs-orange-bg text-[#b8641f]", Low: "bg-[#f1f0ec] text-[#4b524e]" };
+const LEVEL: Record<string, string> = { High: "bg-cs-red-bg text-cs-red", Medium: "bg-cs-orange-bg text-[#a9713f]", Low: "bg-[#f6f0e7] text-[#564e47]" };
 
 export default function SupplierDashboard() {
   const { s } = useConsole();
@@ -62,10 +62,10 @@ export default function SupplierDashboard() {
   const ACTIONS: { label: string; icon: LucideIcon; color: string; href?: string; run?: () => void }[] = [
     { label: "Quote a Request", icon: FileText, color: "", href: "/console/supplier/requests" },
     { label: "Add Request", icon: Plus, color: "text-cs-orange", href: "/console/supplier/requests?add=1" },
-    { label: "Dispatch an Order", icon: Truck, color: "text-[#2f3431]", href: "/console/supplier/dispatch" },
+    { label: "Dispatch an Order", icon: Truck, color: "text-[#36312d]", href: "/console/supplier/dispatch" },
     { label: "Update Stock", icon: Warehouse, color: "text-cs-green-2", href: "/console/supplier/stock" },
     { label: "Chase Payments", icon: BellRing, color: "text-cs-red", href: "/console/supplier/payments" },
-    { label: "Export Price List", icon: Download, color: "text-[#2f3431]", run: () => download("packright-price-list.csv", csv([["SKU", "Item", "Price (₹)", "MOQ", "Lead days", "Available"], ...s.supplierStock.map((x) => [x.sku, x.name, x.price, x.moq, x.leadDays, x.onHand - x.reserved])])) },
+    { label: "Export Price List", icon: Download, color: "text-[#36312d]", run: () => download("packright-price-list.csv", csv([["SKU", "Item", "Price (₹)", "MOQ", "Lead days", "Available"], ...s.supplierStock.map((x) => [x.sku, x.name, x.price, x.moq, x.leadDays, x.onHand - x.reserved])])) },
   ];
 
   return (
@@ -84,15 +84,15 @@ export default function SupplierDashboard() {
           <section className="cs-card px-[15px] pb-[16px] pt-[14px]">
             <CardTitle sub="Every request from quote to payment.">Order Pipeline</CardTitle>
             <div className="relative mt-[20px] grid grid-cols-6">
-              <div className="absolute left-[8.3%] right-[8.3%] top-[24px] flex">{PIPE.slice(0, -1).map((p, i) => <span key={p.key} className={cn("h-[2px] flex-1", i < 2 ? "bg-cs-green" : "bg-[#dedcd6]")} />)}</div>
+              <div className="absolute left-[8.3%] right-[8.3%] top-[24px] flex">{PIPE.slice(0, -1).map((p, i) => <span key={p.key} className={cn("h-[2px] flex-1", i < 2 ? "bg-cs-green" : "bg-[#e4dcd0]")} />)}</div>
               {PIPE.map((p) => {
                 const n = by(p.key).length;
                 return (
                   <Link key={p.key} href={p.href} className="group relative flex flex-col items-center">
-                    <span className={cn("grid size-[48px] place-items-center rounded-full transition group-hover:ring-2 group-hover:ring-cs-green/30", n ? "bg-cs-mint text-cs-green" : "bg-[#f1f0ec] text-[#4b524e]")}><p.icon className="size-[22px]" strokeWidth={1.6} /></span>
-                    <p className="mt-[8px] text-[13px] text-[#2a2f2c]">{p.label}</p>
+                    <span className={cn("grid size-[48px] place-items-center rounded-full transition group-hover:ring-2 group-hover:ring-cs-green/30", n ? "bg-cs-mint text-cs-green" : "bg-[#f6f0e7] text-[#564e47]")}><p.icon className="size-[22px]" strokeWidth={1.6} /></span>
+                    <p className="mt-[8px] text-[13px] text-[#312c28]">{p.label}</p>
                     <p className="serif mt-[4px] text-[20px] font-semibold leading-none">{n}</p>
-                    <span className="mt-[7px] whitespace-nowrap rounded-[5px] bg-[#f5f3ee] px-[8px] py-[2px] text-[11px] text-cs-ink-2">{inr(by(p.key).reduce((a, x) => a + poValue(s, x), 0))}</span>
+                    <span className="mt-[7px] whitespace-nowrap rounded-[5px] bg-[#f8f3eb] px-[8px] py-[2px] text-[11px] text-cs-ink-2">{inr(by(p.key).reduce((a, x) => a + poValue(s, x), 0))}</span>
                   </Link>
                 );
               })}
@@ -103,7 +103,7 @@ export default function SupplierDashboard() {
             <CardTitle sub="Get going with the usual jobs.">Quick Actions</CardTitle>
             <div className="mt-[14px] grid grid-cols-2 gap-[9px]">
               {ACTIONS.map((a, i) => {
-                const cls = cn("flex h-[52px] items-center gap-[10px] rounded-[7px] px-[12px] text-left text-[12.5px] font-medium leading-tight", i === 0 ? "bg-cs-green text-white hover:bg-[#163b29]" : "border border-cs-line bg-white text-[#1f2421] hover:border-[#cfcac0]");
+                const cls = cn("flex h-[52px] items-center gap-[10px] rounded-[7px] px-[12px] text-left text-[12.5px] font-medium leading-tight", i === 0 ? "bg-cs-green text-white hover:bg-[#163b29]" : "border border-cs-line bg-white text-[#25211e] hover:border-[#d0c7bf]");
                 const inner = <><a.icon className={cn("size-[20px] shrink-0", a.color)} strokeWidth={1.6} />{a.label}<ChevronRight className="ml-auto size-[15px]" /></>;
                 return a.href ? <Link key={a.label} href={a.href} className={cls}>{inner}</Link> : <button key={a.label} type="button" onClick={a.run} className={cls}>{inner}</button>;
               })}
@@ -116,10 +116,10 @@ export default function SupplierDashboard() {
             <div className="px-[4px]"><CardTitle right={<Link href="/console/supplier/requests" className="flex items-center gap-[6px] whitespace-nowrap pt-[2px] text-[12px] font-medium hover:text-cs-green">View All <ArrowRight className="size-[14px]" /></Link>}><span className="flex items-center gap-[10px]">Needs Attention <span className="grid size-[21px] place-items-center rounded-full bg-cs-red font-sans text-[11px] font-semibold text-white">{priority.length}</span></span></CardTitle></div>
             <ul className="mt-[8px] max-h-[430px] space-y-[7px] overflow-y-auto">
               {priority.slice(0, 6).map((p) => (
-                <li key={p.key} className="relative flex min-w-0 items-start gap-[10px] rounded-[8px] border border-cs-line px-[8px] py-[7px] hover:border-[#cfcac0]">
+                <li key={p.key} className="relative flex min-w-0 items-start gap-[10px] rounded-[8px] border border-cs-line px-[8px] py-[7px] hover:border-[#d0c7bf]">
                   <span className={cn("grid size-[36px] shrink-0 place-items-center rounded-[7px]", TONE[p.tone].bg, TONE[p.tone].fg)}><p.icon className="size-[18px]" strokeWidth={1.7} /></span>
                   <Link href={p.href} className="min-w-0 flex-1">
-                    <p className="text-[12px] font-medium text-[#1d211e]">{p.title}</p>
+                    <p className="text-[12px] font-medium text-[#221f1c]">{p.title}</p>
                     <p className="truncate pr-[24px] text-[10.5px] text-cs-ink-2">{p.sub}</p>
                     <p className="mt-[1px] text-[11px] text-cs-red">{p.due}</p>
                   </Link>
@@ -156,7 +156,7 @@ export default function SupplierDashboard() {
                     <li key={x.sku}>
                       <Link href={`/console/supplier/stock?sku=${x.sku}`} className="block">
                         <span className="flex justify-between text-[11.5px]"><span className="truncate pr-2">{x.name}</span><span className={av < x.moq ? "font-semibold text-cs-red" : "text-cs-ink-2"}>{fmtNum(av)}</span></span>
-                        <span className="mt-[4px] block h-[6px] overflow-hidden rounded-full bg-[#ece9e2]"><span className={cn("block h-full rounded-full", av < x.moq ? "bg-cs-red" : "bg-cs-green")} style={{ width: `${Math.max(3, pct)}%` }} /></span>
+                        <span className="mt-[4px] block h-[6px] overflow-hidden rounded-full bg-[#f2eadc]"><span className={cn("block h-full rounded-full", av < x.moq ? "bg-cs-red" : "bg-cs-green")} style={{ width: `${Math.max(3, pct)}%` }} /></span>
                       </Link>
                     </li>
                   );

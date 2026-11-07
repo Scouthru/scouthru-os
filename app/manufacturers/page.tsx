@@ -86,7 +86,7 @@ function Search() {
                 <div key={v} className="flex cursor-pointer items-center gap-[10px] py-[5px] text-[13.5px]" onClick={() => toggle(k, v)}>
                   <Check checked={!!f[k]?.includes(v)} onChange={() => toggle(k, v)} label={v} />
                   <span className="flex-1">{v}</span>
-                  <span className="rounded-full bg-[#f1f0ec] px-[7px] py-[1px] text-[11px] text-cs-ink-2">{countFor(k, v)}</span>
+                  <span className="rounded-full bg-[#f6f0e7] px-[7px] py-[1px] text-[11px] text-cs-ink-2">{countFor(k, v)}</span>
                 </div>
               ))}
             </fieldset>
@@ -100,14 +100,14 @@ function Search() {
           <p className="mt-[4px] text-[14px] text-cs-ink-2">Pick a factory to send an enquiry, or open a ready product. Names stay hidden until you connect.</p>
           <div className="mt-[16px] grid grid-cols-2 gap-[4px] rounded-[10px] border border-cs-line bg-white p-[4px]" role="tablist">
             {([["makers", `Manufacturers (${results.length})`], ["products", `Ready products (${products.length})`]] as const).map(([k, l]) => (
-              <button type="button" key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={cn("h-[40px] rounded-[7px] text-[13.5px] font-medium transition-colors", tab === k ? "bg-cs-green text-white" : "text-[#3e4440] hover:bg-[#f5f3ee]")}>{l}</button>
+              <button type="button" key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={cn("h-[40px] rounded-[7px] text-[13.5px] font-medium transition-colors", tab === k ? "bg-cs-green text-white" : "text-[#48413b] hover:bg-[#f8f3eb]")}>{l}</button>
             ))}
           </div>
 
           {tab === "products" ? (
             <div className="mt-[16px] grid grid-cols-1 gap-[12px] sm:grid-cols-2">
               {products.map((p) => (
-                <Link key={p.id} href={`/products/${p.id}`} className="cs-card flex gap-[14px] p-[14px] hover:border-[#cfcac0]">
+                <Link key={p.id} href={`/products/${p.id}`} className="cs-card flex gap-[14px] p-[14px] hover:border-[#d0c7bf]">
                   <div className="size-[80px] shrink-0 overflow-hidden rounded-[8px] bg-cs-cream"><img src={`/products/${p.id}.jpg`} alt={p.name} loading="lazy" className="size-full object-cover" /></div>
                   <div className="min-w-0">
                     <p className="text-[11px] font-semibold tracking-[0.12em] text-cs-ink-2">{p.categoryLabel.toUpperCase()}</p>
@@ -140,7 +140,7 @@ function Search() {
                     </div>
                     <div className="mt-[14px] grid grid-cols-2 gap-[8px] lg:grid-cols-4">
                       {[["MOQ", fmtNum(u.moq)], ["Free capacity", `${fmtNum(u.freeCap)}/month`], ["Lead time", `${u.lead} days`], ["Licences", u.licences.join(", ")]].map(([k, v]) => (
-                        <div key={k} className="rounded-[8px] bg-[#f7f5f0] px-[12px] py-[9px]">
+                        <div key={k} className="rounded-[8px] bg-[#f9f5ee] px-[12px] py-[9px]">
                           <p className="text-[11.5px] text-cs-ink-2">{k}</p>
                           <p className="mt-[2px] text-[13.5px] font-medium">{v}</p>
                         </div>

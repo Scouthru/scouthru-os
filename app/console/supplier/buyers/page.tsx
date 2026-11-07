@@ -71,9 +71,9 @@ function Buyers() {
                     {list.map((x) => {
                       const on = r?.m.id === x.m.id;
                       return (
-                        <tr key={x.m.id} onClick={() => setSel(x.m.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#faf9f6]")}>
+                        <tr key={x.m.id} onClick={() => setSel(x.m.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
                           <td className={cn(td, on && "border-l-2 border-l-cs-green")}>
-                            <span className="flex items-center gap-[9px]"><Image src={x.m.img} alt="" width={34} height={34} className="size-[34px] shrink-0 rounded-[6px] object-cover" /><span><span className="block font-semibold text-[#1d211e]">{x.m.name}</span><span className="text-[10.5px] text-cs-ink-2">{x.m.city}, {x.m.state}</span></span></span>
+                            <span className="flex items-center gap-[9px]"><Image src={x.m.img} alt="" width={34} height={34} className="size-[34px] shrink-0 rounded-[6px] object-cover" /><span><span className="block font-semibold text-[#221f1c]">{x.m.name}</span><span className="text-[10.5px] text-cs-ink-2">{x.m.city}, {x.m.state}</span></span></span>
                           </td>
                           <td className={td}>{x.orders}</td>
                           <td className={cn(td, "whitespace-nowrap font-medium")}>{inr(x.value)}</td>
@@ -122,7 +122,7 @@ function Buyers() {
                 <ul className="mt-[6px] space-y-[6px]">
                   {r.pos.map((p) => (
                     <li key={p.id}>
-                      <Link href={`/console/supplier/${p.status === "RFQ" || p.status === "Quoted" || p.status === "Declined" ? "requests" : "pos"}?id=${p.id}`} className="flex items-center justify-between gap-2 rounded-[7px] border border-cs-line px-[10px] py-[7px] text-[11.5px] hover:border-[#cfcac0]">
+                      <Link href={`/console/supplier/${p.status === "RFQ" || p.status === "Quoted" || p.status === "Declined" ? "requests" : "pos"}?id=${p.id}`} className="flex items-center justify-between gap-2 rounded-[7px] border border-cs-line px-[10px] py-[7px] text-[11.5px] hover:border-[#d0c7bf]">
                         <span className="min-w-0"><span className="block truncate font-medium">{p.title}</span><span className="text-cs-ink-2">{p.id} · {fmtDate(p.createdAt)} · {inr(poValue(s, p))}</span></span>
                         <StatusPill status={p.status} />
                       </Link>

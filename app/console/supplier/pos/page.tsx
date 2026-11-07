@@ -6,7 +6,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { CheckCircle2, ClipboardList, Download, FileText, IndianRupee, MessageSquare, PackageCheck, Truck } from "lucide-react";
 import { Btn, Empty, FilterSelect, Hero, RowMenu, SearchBox, StatStrip, Tabs } from "@/components/console/kit";
 import { MessageModal } from "@/components/console/making";
-import { Board, EventLog, LinesTable, PoStepper, SourceBadge, StatusPill, buyerName, minePOs, poText, poValue, td, th } from "@/components/console/supplier-kit";
+import { Board, EventLog, SupplierNext, LinesTable, PoStepper, SourceBadge, StatusPill, buyerName, minePOs, poText, poValue, td, th } from "@/components/console/supplier-kit";
 import { useConsole } from "@/lib/console/store";
 import { ago, download, fmtDate, fmtNum, inr } from "@/lib/console/format";
 import type { PurchaseOrder } from "@/lib/console/types";
@@ -80,8 +80,8 @@ function POs() {
                     {list.map((p) => {
                       const on = po?.id === p.id;
                       return (
-                        <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#faf9f6]")}>
-                          <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#1d211e]">{p.title}</span><span className="text-[10.5px] text-cs-ink-2">{p.id} · {p.lines.length} line{p.lines.length > 1 ? "s" : ""}</span></td>
+                        <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
+                          <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#221f1c]">{p.title}</span><span className="text-[10.5px] text-cs-ink-2">{p.id} · {p.lines.length} line{p.lines.length > 1 ? "s" : ""}</span></td>
                           <td className={td}>{buyerName(s, p.mfrId)}</td>
                           <td className={cn(td, "whitespace-nowrap")}>{p.orderId ?? "—"}</td>
                           <td className={cn(td, "whitespace-nowrap font-medium")}>{inr(poValue(s, p))}</td>
@@ -114,6 +114,7 @@ function POs() {
                   </div>
                   <StatusPill status={po.status} />
                 </div>
+                <SupplierNext po={po} className="mt-[12px]" />
                 <div className="mt-[14px]"><PoStepper po={po} /></div>
                 <dl className="mt-[14px] grid grid-cols-2 gap-[8px] text-[11.5px]">
                   <div className="rounded-[7px] border border-cs-line px-[10px] py-[7px]"><dt className="text-cs-ink-2">Order value</dt><dd className="font-semibold">{inr(poValue(s, po))}</dd></div>
@@ -125,7 +126,7 @@ function POs() {
                 <p className="mt-[14px] text-[12.5px] font-semibold">Items</p>
                 <div className="mt-[4px]"><LinesTable po={po} /></div>
                 <p className="mt-[6px] text-[11px] text-cs-ink-2">{fmtNum(po.lines.reduce((a, l) => a + l.qty, 0))} units in total</p>
-                <p className="mt-[14px] text-[12.5px] font-semibold">History</p>
+                <p className="mt-[14px] text-[12.5px] font-semibold">Timeline</p>
                 <div className="mt-[6px]"><EventLog po={po} /></div>
               </div>
               <div className="mt-[10px] grid grid-cols-2 gap-[8px] border-t border-cs-line pt-[10px]">

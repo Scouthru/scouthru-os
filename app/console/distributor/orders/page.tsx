@@ -92,7 +92,7 @@ function Orders() {
             <div className="mt-[14px] min-h-0 flex-1 overflow-auto">
               <table className="w-full min-w-[720px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10">
-                  <tr className="bg-[#f7f6f2]">
+                  <tr className="bg-[#f9f6f0]">
                     <th className={cn(th, "rounded-l-[6px] pl-[10px]")}>Order &amp; Retailer</th>
                     <th className={th}>Items</th>
                     <th className={th}>Value</th>
@@ -107,9 +107,9 @@ function Orders() {
                   {list.map((o) => {
                     const on = o.id === sel;
                     return (
-                      <tr key={o.id} onClick={() => pick(o.id)} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fbfdfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#faf9f6]")}>
-                        <td className="py-[10px] pl-[10px] pr-[8px]"><p className="text-[11.5px] font-semibold">{o.id}</p><p className="max-w-[190px] truncate text-[11px] text-[#3e4440]">{o.retailer}</p></td>
-                        <td className="px-[8px] text-[11px] text-[#3e4440]">{o.lines.reduce((a, l) => a + l.qty, 0)} packs<span className="block text-cs-ink-2">{o.lines.length} SKU{o.lines.length === 1 ? "" : "s"}</span></td>
+                      <tr key={o.id} onClick={() => pick(o.id)} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
+                        <td className="py-[10px] pl-[10px] pr-[8px]"><p className="text-[11.5px] font-semibold">{o.id}</p><p className="max-w-[190px] truncate text-[11px] text-[#48413b]">{o.retailer}</p></td>
+                        <td className="px-[8px] text-[11px] text-[#48413b]">{o.lines.reduce((a, l) => a + l.qty, 0)} packs<span className="block text-cs-ink-2">{o.lines.length} SKU{o.lines.length === 1 ? "" : "s"}</span></td>
                         <td className="whitespace-nowrap px-[8px] text-[11.5px] font-medium">{inr(o.value)}</td>
                         <td className="px-[8px] text-[11px]">{routeName(o.routeId)}</td>
                         <td className="px-[8px]"><Pill tone={RO_TONE[o.status]}>{o.status}</Pill></td>
@@ -142,10 +142,10 @@ function Orders() {
                 <span className="grid size-[46px] shrink-0 place-items-center rounded-[8px] bg-cs-mint text-cs-green"><ShoppingCart className="size-[22px]" strokeWidth={1.6} /></span>
                 <div className="min-w-0 flex-1">
                   <p className="serif text-[19px] font-semibold leading-tight">{cur.id}</p>
-                  <p className="truncate text-[12.5px] text-[#3e4440]">{cur.retailer} · {cur.area}</p>
+                  <p className="truncate text-[12.5px] text-[#48413b]">{cur.retailer} · {cur.area}</p>
                   <div className="mt-[5px] flex gap-[5px]"><Pill tone={RO_TONE[cur.status]}>{cur.status}</Pill><Pill tone={cur.payment === "Collected" ? "green" : "gray"}>{cur.payment}</Pill></div>
                 </div>
-                <button type="button" aria-label="Close" onClick={() => { setSel(null); router.replace("/console/distributor/orders", { scroll: false }); }} className="grid size-[28px] place-items-center rounded-[6px] hover:bg-[#f1f0ec]"><X className="size-[16px]" /></button>
+                <button type="button" aria-label="Close" onClick={() => { setSel(null); router.replace("/console/distributor/orders", { scroll: false }); }} className="grid size-[28px] place-items-center rounded-[6px] hover:bg-[#f6f0e7]"><X className="size-[16px]" /></button>
               </div>
 
               <div className="mt-[14px] min-h-0 flex-1 overflow-y-auto">
@@ -168,7 +168,7 @@ function Orders() {
                 </table>
 
                 <div className="mt-[14px]">
-                  <span className="mb-[4px] block text-[11.5px] font-medium text-[#3e4440]">Route</span>
+                  <span className="mb-[4px] block text-[11.5px] font-medium text-[#48413b]">Route</span>
                   <select className={inputCls} value={cur.routeId ?? ""} disabled={cur.status === "Delivered" || cur.status === "Cancelled"} onChange={(e) => { const rid = e.target.value; update((d) => assignRoute(d, cur.id, rid)); toast(`${cur.id} assigned to ${routeName(rid)}`); }}>
                     <option value="" disabled>Choose a route</option>
                     {s.routes.map((r) => <option key={r.id} value={r.id}>{r.name} · {r.day} · {r.areas.join(", ")}</option>)}

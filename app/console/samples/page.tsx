@@ -11,6 +11,8 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { Btn, CardTitle, Crumbs, Empty, Field, FilterSelect, Modal, Pill, RowMenu, SearchBox, Tabs, ViewAllBtn, inputCls, textareaCls } from "@/components/console/kit";
 import { Avatar, Lightbox, Loading, SAMPLE_TONE, WideHero, CT } from "@/components/console/making";
+import { NextAction, Timeline } from "@/components/console/flow";
+import { sampleNext, sampleTimeline } from "@/lib/console/flow";
 import { useConsole } from "@/lib/console/store";
 import { createOrderFromSample, log, sampleOrderDefaults, setSampleStatus } from "@/lib/console/actions";
 import { download, fmtDate, fmtDateTime, fmtNum } from "@/lib/console/format";
@@ -43,7 +45,8 @@ function SampleStepper({ s }: { s: Sample }) {
   const approved = s.status === "Approved";
   const rejected = s.status === "Rejected";
   return (
-    <div className="mx-[15px] mb-[12px] flex items-center rounded-[8px] border border-cs-line px-[16px] py-[11px]">
+    <div className="mx-[15px] mb-[12px] overflow-x-auto rounded-[8px] border border-cs-line">
+    <div className="flex min-w-[560px] items-center px-[16px] py-[11px]">
       {STEPS.map((st, k) => {
         const done = approved || k < cur;
         const on = !approved && k === cur;
@@ -58,30 +61,31 @@ function SampleStepper({ s }: { s: Sample }) {
                 done && "bg-cs-green text-white",
                 on && !rejected && "border-2 border-cs-green bg-white",
                 on && rejected && "border-2 border-cs-red bg-white text-cs-red",
-                !done && !on && "border-2 border-[#dcdad4] bg-white",
+                !done && !on && "border-2 border-[#e3dbcd] bg-white",
               )}>
                 {done && <CheckIcon className="size-[18px]" strokeWidth={2.4} />}
                 {on && !rejected && <span className="size-[18px] rounded-full bg-cs-green" />}
                 {on && rejected && <X className="size-[18px]" strokeWidth={2.4} />}
               </span>
               <span className="leading-tight">
-                <span className={cn("block text-[13.5px] font-medium", on && rejected ? "text-cs-red" : "text-[#1d211e]")}>{label}</span>
+                <span className={cn("block text-[13.5px] font-medium", on && rejected ? "text-cs-red" : "text-[#221f1c]")}>{label}</span>
                 <span className="mt-[2px] block text-[12.5px] text-cs-ink-2">{date}</span>
               </span>
             </div>
-            {k < STEPS.length - 1 && <span className={cn("mx-[14px] h-[2px] min-w-[20px] flex-1", k < cur || approved ? "bg-cs-green" : "bg-[#dedcd6]")} />}
+            {k < STEPS.length - 1 && <span className={cn("mx-[14px] h-[2px] min-w-[20px] flex-1", k < cur || approved ? "bg-cs-green" : "bg-[#e4dcd0]")} />}
           </div>
         );
       })}
+    </div>
     </div>
   );
 }
 
 function EvalStatus({ e }: { e: Eval }) {
-  if (e.status === "Pass") return <span className="flex items-center gap-[7px] text-[12.5px] text-[#1d211e]"><span className="grid size-[16px] place-items-center rounded-full bg-cs-ok text-white"><CheckIcon className="size-[10px]" strokeWidth={3} /></span>Pass</span>;
+  if (e.status === "Pass") return <span className="flex items-center gap-[7px] text-[12.5px] text-[#221f1c]"><span className="grid size-[16px] place-items-center rounded-full bg-cs-ok text-white"><CheckIcon className="size-[10px]" strokeWidth={3} /></span>Pass</span>;
   if (e.status === "Fail") return <span className="flex items-center gap-[7px] text-[12.5px] text-cs-red"><span className="grid size-[16px] place-items-center rounded-full bg-cs-red text-white"><X className="size-[10px]" strokeWidth={3} /></span>Fail</span>;
-  if (e.status === "Testing") return <span className="flex items-center gap-[7px] text-[12.5px] text-[#1d211e]"><Clock3 className="size-[16px] text-cs-ink-2" strokeWidth={1.8} />Testing</span>;
-  return <span className="flex items-center gap-[7px] text-[12.5px] text-[#1d211e]"><span className="size-[14px] rounded-full bg-[#c9ccc7]" />Not Started</span>;
+  if (e.status === "Testing") return <span className="flex items-center gap-[7px] text-[12.5px] text-[#221f1c]"><Clock3 className="size-[16px] text-cs-ink-2" strokeWidth={1.8} />Testing</span>;
+  return <span className="flex items-center gap-[7px] text-[12.5px] text-[#221f1c]"><span className="size-[14px] rounded-full bg-[#d2c9c1]" />Not Started</span>;
 }
 
 function SamplesInner() {
@@ -160,12 +164,21 @@ function SamplesInner() {
   });
 
   const comments = sample.comments;
+  const next = sampleNext(s, sample, "brand");
+  // The banner's button does this side's next step; "Review sample" takes you to the decision buttons.
+  const doNext = () => {
+    if (next.action === "review") { const el = document.getElementById("sample-decision"); el?.scrollIntoView({ behavior: "smooth", block: "center" }); el?.querySelector("button")?.focus({ preventScroll: true }); }
+    else if (next.action === "order") openOrder();
+    else if (next.action === "view-order" && sample.orderId) router.push(`/console/production?id=${sample.orderId}`);
+    else if (next.action === "send") { update((d) => setSampleStatus(d, sample.id, "Submitted")); toast(`${sample.id} sent to ${m?.name ?? "the factory"}`); }
+  };
   const allList = s.samples.filter((x) => (!allFilter || x.status === allFilter) && (!allQ || `${x.name} ${x.id}`.toLowerCase().includes(allQ.toLowerCase())));
 
   return (
     <div>
       <Header />
       <div className="px-[15px] pb-[20px]">
+        <NextAction step={next} onAction={doNext} className="mb-[10px]" />
         {/* sample header card */}
         <section className="cs-card relative -mt-[1px]">
           <div className="relative flex flex-wrap gap-[18px] px-[15px] pb-[12px] pt-[15px] lg:flex-nowrap">
@@ -187,11 +200,11 @@ function SamplesInner() {
                 />
               </div>
               <h2 className="serif mt-[4px] text-[24px] font-semibold leading-tight tracking-[-0.02em]">{sample.name}</h2>
-              <p className="mt-[4px] flex items-center gap-[10px] text-[13.5px] text-[#3e4440]">Rev. {String(sample.rev).padStart(2, "0")}<span className="h-[14px] w-px bg-[#c9ccc7]" />{m?.name}</p>
+              <p className="mt-[4px] flex items-center gap-[10px] text-[13.5px] text-[#48413b]">Rev. {String(sample.rev).padStart(2, "0")}<span className="h-[14px] w-px bg-[#d2c9c1]" />{m?.name}</p>
               <div className="mt-[10px] flex flex-wrap gap-[6px]">
-                {sample.tags.map((t) => <span key={t} className="rounded-[5px] bg-[#f1f0ec] px-[10px] py-[3px] text-[11.5px] text-[#3e4440]">{t}</span>)}
+                {sample.tags.map((t) => <span key={t} className="rounded-[5px] bg-[#f6f0e7] px-[10px] py-[3px] text-[11.5px] text-[#48413b]">{t}</span>)}
               </div>
-              <p className="mt-[10px] max-w-[365px] text-[12.5px] leading-[1.45] tracking-[-0.005em] text-[#3e4440]">{sample.desc}</p>
+              <p className="mt-[10px] max-w-[365px] text-[12.5px] leading-[1.45] tracking-[-0.005em] text-[#48413b]">{sample.desc}</p>
             </div>
             <div className="hidden w-px shrink-0 bg-cs-line lg:block" />
             <dl className="w-full shrink-0 lg:w-[330px] space-y-[7px] pt-[1px] text-[12.5px] leading-[16px]">
@@ -201,10 +214,10 @@ function SamplesInner() {
                 ["Quantity", `${fmtNum(sample.qty)} ${sample.unit}`],
                 ["Expected Lead Time", sample.leadTime],
               ] as const).map(([k, v]) => (
-                <div key={k} className="grid grid-cols-[128px_1fr] border-b border-[#f1efea] pb-[4px]"><dt className="text-[#3e4440]">{k}</dt><dd>{v}</dd></div>
+                <div key={k} className="grid grid-cols-[128px_1fr] border-b border-[#f5efe6] pb-[4px]"><dt className="text-[#48413b]">{k}</dt><dd>{v}</dd></div>
               ))}
               <div className="grid grid-cols-[128px_1fr]">
-                <dt className="text-[#3e4440]">Manufacturer</dt>
+                <dt className="text-[#48413b]">Manufacturer</dt>
                 <dd>
                   <Link href={`/console/manufacturers?id=${sample.mfrId}`} className="group flex items-center justify-between pr-[10px]">
                     <span><span className="block font-semibold group-hover:text-cs-green">{m?.name}</span><span className="block text-cs-ink-2">{m?.state}, India</span></span>
@@ -214,7 +227,7 @@ function SamplesInner() {
               </div>
             </dl>
             <div className="hidden w-px shrink-0 bg-cs-line lg:block" />
-            <div className="flex w-full shrink-0 flex-col gap-[10px] lg:w-[252px]">
+            <div id="sample-decision" className="flex w-full shrink-0 flex-col gap-[10px] lg:w-[252px]">
               {sample.status === "Approved" ? (
                 order
                   ? <Btn kind="primary" icon={ChevronRight} className="h-[42px] w-full text-[14px]" onClick={() => router.push(`/console/production?id=${order.id}`)}>View Order {order.id}</Btn>
@@ -252,14 +265,14 @@ function SamplesInner() {
                   <CardTitle right={
                     editSpecs
                       ? <div className="flex gap-[6px]"><button type="button" onClick={() => setEditSpecs(null)} className="rounded-[6px] border border-cs-line px-[10px] py-[4px] text-[12px]">Cancel</button><button type="button" onClick={() => { const v = editSpecs; mod((x) => { x.specs = v; }); setEditSpecs(null); toast("Specifications saved"); }} className="rounded-[6px] bg-cs-green px-[10px] py-[4px] text-[12px] text-white">Save</button></div>
-                      : <button type="button" onClick={() => setEditSpecs(sample.specs.map(([a, b]) => [a, b]))} className="rounded-[6px] border border-cs-line px-[12px] py-[4px] text-[12px] hover:border-[#cfcac0]">Edit</button>
+                      : <button type="button" onClick={() => setEditSpecs(sample.specs.map(([a, b]) => [a, b]))} className="rounded-[6px] border border-cs-line px-[12px] py-[4px] text-[12px] hover:border-[#d0c7bf]">Edit</button>
                   }><CT>Sample Specifications</CT></CardTitle>
                   <dl className="mt-[6px]">
                     {(editSpecs ?? sample.specs).map(([k, v], i) => (
-                      <div key={k} className="grid grid-cols-[156px_1fr] items-center border-b border-[#f1efea] py-[3px] text-[12.5px] leading-[1.35] last:border-0">
-                        <dt className="text-[#3e4440]">{k}</dt>
+                      <div key={k} className="grid grid-cols-[156px_1fr] items-center border-b border-[#f5efe6] py-[3px] text-[12.5px] leading-[1.35] last:border-0">
+                        <dt className="text-[#48413b]">{k}</dt>
                         <dd>{editSpecs
-                          ? <input aria-label={k} className="h-[26px] w-full rounded-[5px] border border-[#d6d8d3] px-[7px] text-[12.5px] outline-none focus:border-cs-green" value={v} onChange={(e) => setEditSpecs((p) => p && p.map((r, j) => (j === i ? [r[0], e.target.value] : r)))} />
+                          ? <input aria-label={k} className="h-[26px] w-full rounded-[5px] border border-[#e1d8ca] px-[7px] text-[12.5px] outline-none focus:border-cs-green" value={v} onChange={(e) => setEditSpecs((p) => p && p.map((r, j) => (j === i ? [r[0], e.target.value] : r)))} />
                           : v}</dd>
                       </div>
                     ))}
@@ -296,8 +309,8 @@ function SamplesInner() {
                     {sample.evaluation.map((e) => {
                       const Icon = EVAL_ICON[e.label] ?? FlaskConical;
                       return (
-                        <li key={e.label} className="grid grid-cols-[24px_134px_98px_1fr] items-center border-b border-[#f1efea] py-[3px] leading-[18px] last:border-0">
-                          <Icon className="size-[15px] text-[#3e4440]" strokeWidth={1.6} />
+                        <li key={e.label} className="grid grid-cols-[24px_134px_98px_1fr] items-center border-b border-[#f5efe6] py-[3px] leading-[18px] last:border-0">
+                          <Icon className="size-[15px] text-[#48413b]" strokeWidth={1.6} />
                           <span className="text-[11.5px]">{e.label}</span>
                           <EvalStatus e={e} />
                           <span className="truncate text-[11px] text-cs-ink-2">{e.note}</span>
@@ -309,7 +322,7 @@ function SamplesInner() {
 
                 {/* comments */}
                 <div className="cs-card px-[14px] pb-[12px] pt-[13px]">
-                  <CardTitle right={<button type="button" onClick={() => setComment(comment === null ? "" : null)} className="rounded-[6px] border border-cs-line px-[11px] py-[4px] text-[12px] font-medium hover:border-[#cfcac0]">Add Comment</button>}><CT>Comments &amp; Feedback</CT></CardTitle>
+                  <CardTitle right={<button type="button" onClick={() => setComment(comment === null ? "" : null)} className="rounded-[6px] border border-cs-line px-[11px] py-[4px] text-[12px] font-medium hover:border-[#d0c7bf]">Add Comment</button>}><CT>Comments &amp; Feedback</CT></CardTitle>
                   {comment !== null && (
                     <div className="mt-[10px] flex gap-[8px]">
                       <input autoFocus aria-label="New comment" className={cn(inputCls, "h-[34px]")} value={comment} onChange={(e) => setComment(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addComment()} placeholder="Write a comment…" />
@@ -322,8 +335,8 @@ function SamplesInner() {
                       <li key={i} className="flex gap-[10px]">
                         <Avatar name={c.who} size={32} />
                         <div className="min-w-0">
-                          <p className="flex flex-wrap items-center gap-[8px] text-[12px]"><b className="font-semibold">{c.who}</b>{c.who !== s.user.name && m && c.who !== "Priya Sharma" && <span className="rounded-[4px] bg-cs-orange-bg px-[6px] py-[1px] text-[10.5px] text-[#b8641f]">{m.short} Manufacturing</span>}<span className="text-[11px] text-cs-ink-2">{fmtDateTime(c.at)}</span></p>
-                          <p className="mt-[2px] text-[11.5px] leading-[1.45] text-[#3e4440]">{c.text}</p>
+                          <p className="flex flex-wrap items-center gap-[8px] text-[12px]"><b className="font-semibold">{c.who}</b>{c.who !== s.user.name && m && c.who !== "Priya Sharma" && <span className="rounded-[4px] bg-cs-orange-bg px-[6px] py-[1px] text-[10.5px] text-[#a9713f]">{m.short} Manufacturing</span>}<span className="text-[11px] text-cs-ink-2">{fmtDateTime(c.at)}</span></p>
+                          <p className="mt-[2px] text-[11.5px] leading-[1.45] text-[#48413b]">{c.text}</p>
                         </div>
                       </li>
                     ))}
@@ -339,14 +352,14 @@ function SamplesInner() {
                   <thead><tr className="text-left text-[11.5px] text-cs-ink-2"><th className="py-[6px] font-medium">Check</th><th className="font-medium">Result</th><th className="font-medium">Note</th><th className="w-[160px] font-medium">Set result</th></tr></thead>
                   <tbody>
                     {sample.evaluation.map((e) => (
-                      <tr key={e.label} className="border-t border-[#f1efea]">
+                      <tr key={e.label} className="border-t border-[#f5efe6]">
                         <td className="py-[8px]">{e.label}</td>
                         <td><EvalStatus e={e} /></td>
                         <td className="text-cs-ink-2">{e.note}</td>
                         <td>
                           <div className="flex gap-[4px]">
                             {(["Pass", "Fail", "Testing"] as const).map((st) => (
-                              <button key={st} type="button" onClick={() => setEval(e.label, st)} className={cn("rounded-[5px] border px-[8px] py-[3px] text-[11.5px]", e.status === st ? "border-cs-green bg-cs-mint text-cs-green" : "border-cs-line hover:border-[#cfcac0]")}>{st}</button>
+                              <button key={st} type="button" onClick={() => setEval(e.label, st)} className={cn("rounded-[5px] border px-[8px] py-[3px] text-[11.5px]", e.status === st ? "border-cs-green bg-cs-mint text-cs-green" : "border-cs-line hover:border-[#d0c7bf]")}>{st}</button>
                             ))}
                           </div>
                         </td>
@@ -381,7 +394,7 @@ function SamplesInner() {
                       <Avatar name={c.who} size={34} />
                       <div>
                         <p className="text-[12.5px]"><b className="font-semibold">{c.who}</b> <span className="ml-[6px] text-[11px] text-cs-ink-2">{fmtDateTime(c.at)}</span></p>
-                        <p className="mt-[2px] text-[12.5px] leading-[1.5] text-[#3e4440]">{c.text}</p>
+                        <p className="mt-[2px] text-[12.5px] leading-[1.5] text-[#48413b]">{c.text}</p>
                       </div>
                     </li>
                   ))}
@@ -409,8 +422,13 @@ function SamplesInner() {
             )}
           </section>
 
-          {/* right: other samples */}
-          <section className="cs-card self-start px-[12px] pb-[12px] pt-[16px]">
+          {/* right: shared timeline, then other samples */}
+          <div className="flex min-w-0 flex-col gap-[15px] self-start">
+          <section className="cs-card px-[14px] pb-[14px] pt-[14px]">
+            <CardTitle sub={`Shared with ${m?.name ?? "the manufacturer"}`}><CT>Timeline</CT></CardTitle>
+            <Timeline items={sampleTimeline(s, sample)} next={next} className="mt-[12px]" />
+          </section>
+          <section className="cs-card px-[12px] pb-[12px] pt-[16px]">
             <CardTitle right={<ViewAllBtn onClick={() => { setAllFilter(""); setAllQ(""); setModal("all"); }} />}><CT>Other Samples</CT></CardTitle>
             <ul className="mt-[12px] space-y-[9px]">
               {others.map((x) => {
@@ -418,7 +436,7 @@ function SamplesInner() {
                 const on = x.id === sample.id;
                 return (
                   <li key={x.id}>
-                    <button type="button" onClick={() => select(x.id)} className={cn("relative flex w-full items-center gap-[10px] rounded-[8px] border p-[7px] pr-[24px] text-left", on ? "border-cs-green-2 bg-[#fbfdfb]" : "border-cs-line hover:border-[#cfcac0]")}>
+                    <button type="button" onClick={() => select(x.id)} className={cn("relative flex w-full items-center gap-[10px] rounded-[8px] border p-[7px] pr-[24px] text-left", on ? "border-cs-green-2 bg-[#fdfcfb]" : "border-cs-line hover:border-[#d0c7bf]")}>
                       <Image src={x.img} alt="" width={120} height={120} className="size-[60px] shrink-0 rounded-[6px] object-cover" />
                       <span className="min-w-0 flex-1 leading-[16px]">
                         <span className="block truncate text-[12px] font-medium tracking-[-0.01em]">{x.name}</span>
@@ -433,6 +451,7 @@ function SamplesInner() {
               })}
             </ul>
           </section>
+          </div>
         </div>
       </div>
 
@@ -482,7 +501,7 @@ function SamplesInner() {
           {allList.length === 0 && <Empty>No samples match.</Empty>}
           {allList.map((x) => (
             <li key={x.id}>
-              <button type="button" onClick={() => { select(x.id); setModal(null); }} className="flex w-full items-center gap-[12px] px-[4px] py-[9px] text-left hover:bg-[#f7f6f2]">
+              <button type="button" onClick={() => { select(x.id); setModal(null); }} className="flex w-full items-center gap-[12px] px-[4px] py-[9px] text-left hover:bg-[#f9f6f0]">
                 <Image src={x.img} alt="" width={80} height={80} className="size-[40px] rounded-[6px] object-cover" />
                 <span className="min-w-0 flex-1"><span className="block text-[13px] font-medium">{x.name}</span><span className="block text-[11.5px] text-cs-ink-2">{x.id} · {s.manufacturers.find((y) => y.id === x.mfrId)?.name} · {fmtDate(x.requestedAt)}</span></span>
                 <Pill tone={SAMPLE_TONE[x.status]}>{x.status}</Pill>

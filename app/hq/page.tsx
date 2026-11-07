@@ -17,7 +17,7 @@ import { goLive, useHq } from "@/lib/hq/store";
 import { ago, fmtDay } from "@/lib/console/format";
 import { cn } from "@/lib/cn";
 
-const CHANNEL_TONE: Record<string, string> = { Marketplace: "bg-cs-mint text-cs-green-2", WhatsApp: "bg-cs-ok-bg text-cs-ok", IndiaMART: "bg-cs-blue-bg text-cs-blue", Phone: "bg-cs-violet-bg text-cs-violet", "Walk-in": "bg-[#f1efe9] text-[#3e4440]" };
+const CHANNEL_TONE: Record<string, string> = { Marketplace: "bg-cs-mint text-cs-green-2", WhatsApp: "bg-cs-ok-bg text-cs-ok", IndiaMART: "bg-cs-blue-bg text-cs-blue", Phone: "bg-cs-violet-bg text-cs-violet", "Walk-in": "bg-[#f5efe5] text-[#48413b]" };
 
 /** Each teammate lands on their own dashboard, with only their work on it. */
 export default function Dashboard() {
@@ -78,7 +78,7 @@ function OwnerHome() {
             <ul className="grid gap-[2px]">
               {enquiries.map((e) => (
                 <li key={e.id}>
-                  <Link href="/hq/enquiries" className="block rounded-[8px] px-[6px] py-[7px] hover:bg-[#f7f5f0]">
+                  <Link href="/hq/enquiries" className="block rounded-[8px] px-[6px] py-[7px] hover:bg-[#f9f5ee]">
                     <span className="flex items-center gap-[6px]">
                       <span className="min-w-0 flex-1 truncate text-[13px] font-semibold">{e.product}</span>
                       {e.status === "New" && <span className="size-[7px] shrink-0 rounded-full bg-cs-green" aria-label="New" />}
@@ -114,7 +114,7 @@ function OwnerHome() {
           <Box title="Updates pending" icon={BellRing} sub="According to urgency">
             {groups.length === 0 ? <p className="py-[12px] text-center text-[13px] text-cs-ink-2">All caught up.</p> : groups.map(({ g, items }) => (
               <div key={g} className="mb-[10px] last:mb-0">
-                <p className={cn("mb-[6px] flex items-center gap-[6px] text-[11px] font-semibold tracking-[0.12em]", g === "Urgent" ? "text-cs-red" : g === "Today" ? "text-[#b8641f]" : "text-cs-ink-2")}>
+                <p className={cn("mb-[6px] flex items-center gap-[6px] text-[11px] font-semibold tracking-[0.12em]", g === "Urgent" ? "text-cs-red" : g === "Today" ? "text-[#a9713f]" : "text-cs-ink-2")}>
                   {g === "Urgent" && <AlertTriangle className="size-[12px]" />}{g.toUpperCase()}
                 </p>
                 <ul className="grid gap-[6px]">
@@ -202,7 +202,7 @@ function UpcomingRow({ x }: { x: Upcoming }) {
       <span className="min-w-0 flex-1 text-[12.5px] leading-snug">{x.title}</span>
     </>
   );
-  return <li>{x.href ? <Link href={x.href} className="flex items-center gap-[8px] rounded-[7px] p-[3px] hover:bg-[#f7f5f0]">{body}</Link> : <span className="flex items-center gap-[8px] p-[3px]">{body}</span>}</li>;
+  return <li>{x.href ? <Link href={x.href} className="flex items-center gap-[8px] rounded-[7px] p-[3px] hover:bg-[#f9f5ee]">{body}</Link> : <span className="flex items-center gap-[8px] p-[3px]">{body}</span>}</li>;
 }
 
 const ACTION_ICON: Record<NextAction["kind"], LucideIcon> = {
@@ -215,7 +215,7 @@ function Update({ a, onSendDue, onGoLive }: { a: NextAction; onSendDue: () => vo
     a.kind === "inbox" ? "/hq/inbox"
     : a.kind === "reminders" ? "/hq/outbox"
     : `/hq/members/${a.memberId}${a.kind === "book" || a.kind === "visit" ? "#visit" : a.kind === "check" ? "#documents" : ""}`;
-  const link = (label: string) => <Link href={href} className="inline-flex h-[34px] items-center gap-[5px] rounded-[7px] border border-cs-line bg-white px-[11px] text-[12.5px] font-medium hover:border-[#cfcac0]">{label}<ArrowRight className="size-[13px]" /></Link>;
+  const link = (label: string) => <Link href={href} className="inline-flex h-[34px] items-center gap-[5px] rounded-[7px] border border-cs-line bg-white px-[11px] text-[12.5px] font-medium hover:border-[#d0c7bf]">{label}<ArrowRight className="size-[13px]" /></Link>;
   const button =
     a.kind === "golive" ? <Btn kind="primary" icon={BadgeCheck} onClick={() => onGoLive(a.memberId!)}>Go live</Btn>
     : a.kind === "reminders" ? <Btn kind="primary" icon={Send} onClick={onSendDue}>Send all</Btn>

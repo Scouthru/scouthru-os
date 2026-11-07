@@ -19,9 +19,9 @@ import { cn } from "@/lib/cn";
 const REJECT_REASONS = ["Scan is unreadable", "Expired", "Wrong document", "Name doesn't match the company"];
 const STATE_BADGE = {
   approved: ["Approved", "bg-cs-ok-bg text-cs-ok"],
-  check: ["To check", "bg-cs-orange-bg text-[#b8641f]"],
+  check: ["To check", "bg-cs-orange-bg text-[#a9713f]"],
   rejected: ["Rejected", "bg-cs-red-bg text-cs-red"],
-  missing: ["Missing", "bg-[#f1efe9] text-cs-ink-2"],
+  missing: ["Missing", "bg-[#f5efe5] text-cs-ink-2"],
 } as const;
 
 type Preview = { fileKey?: string; name: string; thumb?: string; title: string };
@@ -62,7 +62,7 @@ export function PhotoBoxes({ m, compact }: { m: Member; compact?: boolean }) {
               onFiles={(files) => addPhotos(m.id, files.map((file) => ({ file, kind })))}>
               <div className="grid grid-cols-2 gap-[4px]">
                 {these.slice(0, 4).map((x) => (
-                  <div key={x.id} className="group relative aspect-square overflow-hidden rounded-[6px] bg-[#f3f0e9]">
+                  <div key={x.id} className="group relative aspect-square overflow-hidden rounded-[6px] bg-[#f6f0e6]">
                     <button type="button" onClick={() => setPreview({ fileKey: x.fileKey, name: x.name, thumb: x.thumb, title: `${x.kind} · ${m.name}` })} className="size-full" title="Open">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={x.thumb} alt={x.kind} className="size-full object-cover" />

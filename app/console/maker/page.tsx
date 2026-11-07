@@ -55,9 +55,9 @@ export default function MakerDashboard() {
   const ACTIONS: { label: string; icon: LucideIcon; color: string; href: string }[] = [
     { label: "Send Quote", icon: Send, color: "", href: firstQuote?.href ?? "/console/maker/enquiries" },
     { label: "Log a Lead", icon: Plus, color: "text-cs-orange", href: "/console/maker/enquiries?newLead=1" },
-    { label: "Update Batch", icon: Factory, color: "text-[#2f3431]", href: "/console/maker/orders" },
+    { label: "Update Batch", icon: Factory, color: "text-[#36312d]", href: "/console/maker/orders" },
     { label: "Request Materials", icon: PackageOpen, color: "text-cs-violet", href: "/console/maker/materials?new=1" },
-    { label: "Dispatch Shipment", icon: Truck, color: "text-[#2f3431]", href: "/console/maker/dispatch" },
+    { label: "Dispatch Shipment", icon: Truck, color: "text-[#36312d]", href: "/console/maker/dispatch" },
     { label: "Share Lab Results", icon: ShieldCheck, color: "text-cs-green-2", href: "/console/maker/quality" },
   ];
 
@@ -80,7 +80,7 @@ export default function MakerDashboard() {
             <ul className="mt-[8px] min-h-0 flex-1 space-y-[6px] overflow-y-auto pr-[2px]">
               {items.map((i) => (
                 <li key={i.key}>
-                  <Link href={i.href} className="flex items-center gap-[10px] rounded-[8px] border border-cs-line px-[9px] py-[7px] hover:border-[#cfcac0]">
+                  <Link href={i.href} className="flex items-center gap-[10px] rounded-[8px] border border-cs-line px-[9px] py-[7px] hover:border-[#d0c7bf]">
                     <span className={cn("grid size-[34px] shrink-0 place-items-center rounded-[7px]", TONE[i.tone].bg, TONE[i.tone].fg)}><i.icon className="size-[17px]" strokeWidth={1.7} /></span>
                     <span className="min-w-0 flex-1"><span className="block text-[12.5px] font-medium">{i.title}</span><span className="block truncate text-[11px] text-cs-ink-2">{i.sub}</span></span>
                     <span className="shrink-0 text-[11px] text-cs-ink-2">{i.when}</span>
@@ -95,7 +95,7 @@ export default function MakerDashboard() {
             <CardTitle sub="Jump straight into the work.">Quick Actions</CardTitle>
             <div className="mt-[16px] grid grid-cols-2 gap-[9px]">
               {ACTIONS.map((a, i) => (
-                <Link key={a.label} href={a.href} className={cn("flex h-[54px] items-center gap-[10px] rounded-[7px] px-[12px] text-[12.5px] font-medium leading-tight", i === 0 ? "bg-cs-green text-white hover:bg-[#8f3a18]" : "border border-cs-line bg-white text-[#1f2421] hover:border-[#cfcac0]")}>
+                <Link key={a.label} href={a.href} className={cn("flex h-[54px] items-center gap-[10px] rounded-[7px] px-[12px] text-[12.5px] font-medium leading-tight", i === 0 ? "bg-cs-green text-white hover:bg-[#7c2c14]" : "border border-cs-line bg-white text-[#25211e] hover:border-[#d0c7bf]")}>
                   <a.icon className={cn("size-[20px] shrink-0", a.color)} strokeWidth={1.6} />{a.label}<ChevronRight className="ml-auto size-[15px]" />
                 </Link>
               ))}
@@ -142,7 +142,7 @@ export default function MakerDashboard() {
             <ul className="mt-[6px] min-h-0 flex-1 overflow-y-auto pb-[10px]">
               {activity.map((a) => (
                 <li key={a.id} className="border-b border-cs-line py-[8px] last:border-0">
-                  <Link href={a.href} className="block text-[12px] hover:text-cs-green"><span className="line-clamp-2 text-[#2f3431]">{a.text}</span><span className="text-[11px] text-cs-ink-2">{a.who} · {ago(a.at)}</span></Link>
+                  <Link href={a.href} className="block text-[12px] hover:text-cs-green"><span className="line-clamp-2 text-[#36312d]">{a.text}</span><span className="text-[11px] text-cs-ink-2">{a.who} · {ago(a.at)}</span></Link>
                 </li>
               ))}
               {activity.length === 0 && <li className="py-6 text-center text-[12.5px] text-cs-ink-2">Your quotes, updates and dispatches show up here.</li>}

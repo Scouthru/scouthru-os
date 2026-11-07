@@ -73,7 +73,7 @@ export default function MemberFile() {
             </p>
           </div>
           <div className="flex flex-wrap gap-[8px]">
-            {m.phone && <a href={`tel:+91${m.phone}`} className="inline-flex h-[38px] items-center gap-[6px] rounded-[7px] border border-cs-line px-[12px] text-[13px] font-medium hover:border-[#cfcac0]"><Phone className="size-[15px]" />Call</a>}
+            {m.phone && <a href={`tel:+91${m.phone}`} className="inline-flex h-[38px] items-center gap-[6px] rounded-[7px] border border-cs-line px-[12px] text-[13px] font-medium hover:border-[#d0c7bf]"><Phone className="size-[15px]" />Call</a>}
             <Btn icon={Send} onClick={() => send(PACKS[0])}>Message</Btn>
             {primary}
           </div>
@@ -127,8 +127,8 @@ export default function MemberFile() {
           <div id="documents" className="scroll-mt-[130px]">
             <Box title="2 · Documents" icon={FileText} sub={p.missingDocs.length ? `${p.missingDocs.length} missing${p.toCheck.length ? ` · ${p.toCheck.length} to check` : ""}` : p.toCheck.length ? `${p.toCheck.length} to check` : "All approved"}
               right={
-                <label className="flex cursor-pointer items-center gap-[8px] text-[12.5px] text-[#3e4440]">
-                  <input type="checkbox" checked={m.autoRemind} onChange={(e) => edit((x) => { x.autoRemind = e.target.checked; })} className="size-[15px] accent-[#a8461f]" />
+                <label className="flex cursor-pointer items-center gap-[8px] text-[12.5px] text-[#48413b]">
+                  <input type="checkbox" checked={m.autoRemind} onChange={(e) => edit((x) => { x.autoRemind = e.target.checked; })} className="size-[15px] accent-[#9c3a1e]" />
                   Chase missing documents every 3 days
                 </label>
               }>
@@ -147,19 +147,19 @@ export default function MemberFile() {
                   <div className="grid content-start gap-[10px]">
                     <Field label="Visit date"><input type="date" className={inputCls} value={m.visit?.date ?? ""} onChange={(e) => edit((x) => { x.visit = { date: e.target.value, done: x.visit?.done ?? false, checks: x.visit?.checks ?? {}, notes: x.visit?.notes ?? "", score: x.visit?.score }; })} /></Field>
                     <div>
-                      <span className="mb-[5px] block text-[12px] font-medium text-[#3e4440]">What we checked</span>
+                      <span className="mb-[5px] block text-[12px] font-medium text-[#48413b]">What we checked</span>
                       <ul className="grid gap-[2px]">
                         {VISIT_CHECKS[m.type].map((c) => (
                           <li key={c}>
-                            <label className={cn("flex items-center gap-[9px] rounded-[7px] px-[6px] py-[6px] text-[13px]", m.visit?.date ? "cursor-pointer hover:bg-[#f7f5f0]" : "opacity-50")}>
-                              <input type="checkbox" disabled={!m.visit?.date} checked={!!m.visit?.checks[c]} onChange={(e) => edit((x) => { x.visit!.checks[c] = e.target.checked; })} className="size-[15px] accent-[#a8461f]" />{c}
+                            <label className={cn("flex items-center gap-[9px] rounded-[7px] px-[6px] py-[6px] text-[13px]", m.visit?.date ? "cursor-pointer hover:bg-[#f9f5ee]" : "opacity-50")}>
+                              <input type="checkbox" disabled={!m.visit?.date} checked={!!m.visit?.checks[c]} onChange={(e) => edit((x) => { x.visit!.checks[c] = e.target.checked; })} className="size-[15px] accent-[#9c3a1e]" />{c}
                             </label>
                           </li>
                         ))}
                       </ul>
                     </div>
                     <div>
-                      <span className="mb-[5px] block text-[12px] font-medium text-[#3e4440]">Overall score</span>
+                      <span className="mb-[5px] block text-[12px] font-medium text-[#48413b]">Overall score</span>
                       <div className="flex gap-[4px]">
                         {[1, 2, 3, 4, 5].map((n) => (
                           <button key={n} type="button" disabled={!m.visit?.date} onClick={() => edit((x) => { x.visit!.score = n; })} aria-label={`${n} out of 5`} className="disabled:opacity-40">
@@ -192,7 +192,7 @@ export default function MemberFile() {
                   {sends.map((x) => (
                     <li key={x.id} className="flex items-center gap-[9px] text-[13px]">
                       {x.channel === "WhatsApp" ? <MessageCircle className="size-[15px] shrink-0 text-cs-ok" /> : <Mail className="size-[15px] shrink-0 text-cs-blue" />}
-                      <span className="flex-1">{x.pack}{x.auto && <span className="ml-[6px] rounded-full bg-[#f1efe9] px-[6px] text-[10.5px] text-cs-ink-2">automatic</span>}</span>
+                      <span className="flex-1">{x.pack}{x.auto && <span className="ml-[6px] rounded-full bg-[#f5efe5] px-[6px] text-[10.5px] text-cs-ink-2">automatic</span>}</span>
                       <span className="text-[11.5px] text-cs-ink-2">{ago(x.at)}</span>
                     </li>
                   ))}
@@ -226,7 +226,7 @@ export default function MemberFile() {
               </form>
               <ul className="mt-[10px] grid gap-[8px]">
                 {m.notes.map((n, i) => (
-                  <li key={i} className="rounded-[8px] bg-[#faf8f4] px-[10px] py-[8px] text-[13px]">{n.text}<span className="mt-[2px] block text-[11px] text-cs-ink-2">{ago(n.at)}</span></li>
+                  <li key={i} className="rounded-[8px] bg-[#fbf8f3] px-[10px] py-[8px] text-[13px]">{n.text}<span className="mt-[2px] block text-[11px] text-cs-ink-2">{ago(n.at)}</span></li>
                 ))}
               </ul>
             </Box>

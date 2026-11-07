@@ -6,6 +6,8 @@ import { CheckCircle2, ClipboardList, IndianRupee, PackageCheck, PackageOpen, Pl
 import { Btn, Empty, Field, Hero, Modal, Pill, RowMenu, StatStrip, Stepper, Tabs, inputCls } from "@/components/console/kit";
 import { KV, PO_STEPS, PO_TONE, Page, Panel, PayModal, Split, tdc, thc } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
+import { NextAction, Timeline } from "@/components/console/flow";
+import { poNext, poTimeline } from "@/lib/console/flow";
 import { confirmPO, receivePO, requestMaterials } from "@/lib/console/actions-network";
 import { mine, openOrders } from "@/lib/console/actions-maker";
 import { ago, fmtDate, fmtDateTime, fmtNum, inr } from "@/lib/console/format";
@@ -69,7 +71,7 @@ function MakerMaterials() {
                   {list.map((p) => {
                     const on = cur?.id === p.id;
                     return (
-                      <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#faf9f5]")}>
+                      <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
                         <td className={cn(tdc, on && "border-l-2 border-l-cs-green")}><p className="font-medium">{p.id}</p><p className="max-w-[220px] truncate text-[11px] text-cs-ink-2">{p.title}</p></td>
                         <td className={tdc}>{supplier(p.supplierId)}</td>
                         <td className={tdc}>{fmtDate(p.needBy)}</td>
@@ -107,16 +109,20 @@ function MakerMaterials() {
 }
 
 function PODetail({ p, supplierName, onAccept, onReceive, onPay }: { p: PurchaseOrder; supplierName: string; onAccept: () => void; onReceive: () => void; onPay: () => void }) {
+  const { s } = useConsole();
   const step = p.status === "Declined" ? 0 : PO_STEPS.indexOf(p.status);
+  const flow = poNext(s, p, "maker");
+  const act = flow.action === "confirm" ? onAccept : flow.action === "receive" ? onReceive : flow.action === "pay" ? onPay : undefined;
   return (
     <Panel bodyClass="px-[15px] pb-[14px] pt-[14px]">
+      <NextAction step={flow} onAction={act} className="mb-[12px]" />
       <div className="flex items-start gap-[12px]">
         <span className="grid size-[52px] shrink-0 place-items-center rounded-[10px] bg-cs-mint text-cs-green"><PackageOpen className="size-[24px]" strokeWidth={1.6} /></span>
         <div className="min-w-0"><h3 className="serif text-[19px] font-semibold leading-tight">{p.title}</h3><p className="mt-[2px] text-[12px] text-cs-ink-2">{p.id} · {supplierName}{p.orderId ? ` · for ${p.orderId}` : ""}</p><Pill tone={PO_TONE[p.status]} className="mt-[6px]">{p.status === "RFQ" ? "Waiting for quote" : p.status}</Pill></div>
       </div>
       <div className="mt-[14px]"><Stepper size={34} current={step} allDone={p.status === "Paid"} steps={PO_STEPS.map((x) => ({ label: STEP_LABEL[x], icon: x === "Paid" ? IndianRupee : x === "Dispatched" ? Truck : x === "Received" ? PackageCheck : ClipboardList }))} /></div>
       <h4 className="serif mt-[14px] text-[16px] font-semibold">Items</h4>
-      <ul className="mt-[4px] divide-y divide-[#f1efea] text-[12px]">
+      <ul className="mt-[4px] divide-y divide-[#f5efe6] text-[12px]">
         {p.lines.map((l) => <li key={l.sku} className="flex justify-between gap-2 py-[5px]"><span className="min-w-0 truncate">{l.name} <span className="text-cs-ink-2">· {l.sku}</span></span><b className="shrink-0">{fmtNum(l.qty)} {l.unit}</b></li>)}
       </ul>
       <dl className="mt-[10px]">
@@ -130,10 +136,8 @@ function PODetail({ p, supplierName, onAccept, onReceive, onPay }: { p: Purchase
         {p.status === "Dispatched" && <Btn kind="primary" icon={PackageCheck} className="flex-1" onClick={onReceive}>Mark received</Btn>}
         {p.invoice && !p.invoice.paidAt && <Btn icon={IndianRupee} className="flex-1" onClick={onPay}>Pay {inr(p.invoice.amount)}</Btn>}
       </div>
-      <h4 className="serif mt-[14px] text-[16px] font-semibold">History</h4>
-      <ul className="mt-[6px] space-y-[6px] text-[12px]">
-        {p.events.slice().reverse().map((e, i) => <li key={i} className="flex gap-[9px]"><span className="mt-[5px] size-[7px] shrink-0 rounded-full bg-cs-green-2" /><span className="min-w-0 flex-1">{e.text}<span className="block text-[11px] text-cs-ink-2">{fmtDateTime(e.at)}</span></span></li>)}
-      </ul>
+      <h4 className="serif mt-[14px] text-[16px] font-semibold">Timeline</h4>
+      <Timeline items={poTimeline(s, p)} next={flow} className="mt-[8px]" />
       <p className="mt-[10px] text-[11px] text-cs-ink-2">Updated {ago(p.updatedAt)}</p>
     </Panel>
   );

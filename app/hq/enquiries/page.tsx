@@ -11,7 +11,7 @@ import { cn } from "@/lib/cn";
 
 const CHANNELS: Channel[] = ["Marketplace", "WhatsApp", "IndiaMART", "Phone", "Walk-in"];
 const STATUSES: EnquiryStatus[] = ["New", "Matched", "Quoted", "Won", "Lost"];
-const CHANNEL_TONE: Record<Channel, string> = { Marketplace: "bg-cs-mint text-cs-green-2", WhatsApp: "bg-cs-ok-bg text-cs-ok", IndiaMART: "bg-cs-blue-bg text-cs-blue", Phone: "bg-cs-violet-bg text-cs-violet", "Walk-in": "bg-[#f1efe9] text-[#3e4440]" };
+const CHANNEL_TONE: Record<Channel, string> = { Marketplace: "bg-cs-mint text-cs-green-2", WhatsApp: "bg-cs-ok-bg text-cs-ok", IndiaMART: "bg-cs-blue-bg text-cs-blue", Phone: "bg-cs-violet-bg text-cs-violet", "Walk-in": "bg-[#f5efe5] text-[#48413b]" };
 const STATUS_TONE: Record<EnquiryStatus, string> = { New: "text-cs-green", Matched: "text-cs-blue", Quoted: "text-cs-violet", Won: "text-cs-ok", Lost: "text-cs-ink-2" };
 
 /** Enquiries from the marketplace and from regular channels, matched to a factory. */

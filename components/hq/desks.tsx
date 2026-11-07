@@ -63,14 +63,14 @@ export function MyTasks({ className }: { className?: string }) {
   return (
     <Box title="My tasks" icon={ListTodo} sub={`${mine.filter((t) => !t.done).length} open`} className={className}>
       <form className="mb-[8px] flex gap-[8px]" onSubmit={(e) => { e.preventDefault(); const t = text.trim(); if (!t) return; update((d) => { d.tasks.unshift({ id: `t${Date.now()}`, text: t, done: false, at: new Date().toISOString(), assigneeId: me.id }); }); setText(""); }}>
-        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Add a task for yourself" className="h-[36px] min-w-0 flex-1 rounded-[8px] border border-[#d6d8d3] px-[11px] text-[13px] outline-none focus:border-cs-green" aria-label="New task" />
+        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Add a task for yourself" className="h-[36px] min-w-0 flex-1 rounded-[8px] border border-[#e1d8ca] px-[11px] text-[13px] outline-none focus:border-cs-green" aria-label="New task" />
         <Btn icon={Plus} type="submit">Add</Btn>
       </form>
       <ul className="grid">
         {[...mine.filter((t) => !t.done), ...mine.filter((t) => t.done).slice(0, 2)].map((t) => (
           <li key={t.id}>
-            <label className="flex cursor-pointer items-start gap-[9px] rounded-[7px] px-[5px] py-[6px] hover:bg-[#f7f5f0]">
-              <input type="checkbox" checked={t.done} onChange={(e) => update((d) => { d.tasks.find((x) => x.id === t.id)!.done = e.target.checked; })} className="mt-[2px] size-[15px] accent-[#a8461f]" />
+            <label className="flex cursor-pointer items-start gap-[9px] rounded-[7px] px-[5px] py-[6px] hover:bg-[#f9f5ee]">
+              <input type="checkbox" checked={t.done} onChange={(e) => update((d) => { d.tasks.find((x) => x.id === t.id)!.done = e.target.checked; })} className="mt-[2px] size-[15px] accent-[#9c3a1e]" />
               <span className={cn("min-w-0 flex-1 text-[13px]", t.done && "text-cs-ink-2 line-through")}>{t.text}</span>
               {t.memberId && <Link href={`/hq/members/${t.memberId}`} className="shrink-0 text-[11.5px] text-cs-green hover:underline">Open</Link>}
             </label>
@@ -184,7 +184,7 @@ export function OnboardingDesk() {
               <ul className="grid gap-[6px]">
                 {toCheck.map(({ m, kind }) => (
                   <li key={m.id + kind}>
-                    <button type="button" onClick={() => pick(m.id)} className="flex w-full items-center gap-[8px] rounded-[8px] px-[6px] py-[6px] text-left text-[13px] hover:bg-[#f7f5f0]">
+                    <button type="button" onClick={() => pick(m.id)} className="flex w-full items-center gap-[8px] rounded-[8px] px-[6px] py-[6px] text-left text-[13px] hover:bg-[#f9f5ee]">
                       <FileSearch className="size-[15px] shrink-0 text-cs-orange" /><span className="min-w-0 flex-1 truncate"><b className="font-semibold">{kind}</b> · {m.name}</span><ArrowRight className="size-[13px] text-cs-ink-2" />
                     </button>
                   </li>
@@ -427,7 +427,7 @@ export function AccountsDesk() {
               <ul className="divide-y divide-cs-line">
                 {week.map((v) => (
                   <li key={v.id} className="flex items-center gap-[10px] py-[9px]">
-                    <span className={cn("rounded-full px-[7px] py-[1px] text-[11px] font-medium", v.direction === "receive" ? "bg-cs-ok-bg text-cs-ok" : "bg-cs-orange-bg text-[#b8641f]")}>{v.direction === "receive" ? "In" : "Out"}</span>
+                    <span className={cn("rounded-full px-[7px] py-[1px] text-[11px] font-medium", v.direction === "receive" ? "bg-cs-ok-bg text-cs-ok" : "bg-cs-orange-bg text-[#a9713f]")}>{v.direction === "receive" ? "In" : "Out"}</span>
                     <span className="min-w-0 flex-1 truncate text-[13px]"><b className="font-semibold">{v.party}</b> · {v.no}</span>
                     <span className="text-[13px] font-semibold">₹{fmt(v.amount)}</span>
                     <span className="w-[70px] text-right text-[11.5px] text-cs-ink-2">{v.days === 0 ? "today" : `in ${v.days} days`}</span>

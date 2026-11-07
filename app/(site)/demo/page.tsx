@@ -28,16 +28,16 @@ export default function Demo() {
       <main className="mx-auto max-w-[1100px] px-5 py-[56px]">
         <p className="text-[11.5px] font-semibold tracking-[0.2em] text-cs-green-2">WORKING DEMO</p>
         <h1 className="serif mt-[14px] max-w-[18ch] text-[44px] font-semibold leading-[1.03] tracking-[-0.025em] sm:text-[56px]">Find the right factory. Run every order in one place.</h1>
-        <p className="mt-[14px] text-[16px] text-[#3e4440]">Pick a side and click through. All four portals share one network, so what you do on one side shows up on the others.</p>
+        <p className="mt-[14px] text-[16px] text-[#48413b]">Pick a side and click through. All four portals share one network, so what you do on one side shows up on the others.</p>
         <div className="mt-[28px] grid gap-[14px] md:grid-cols-2">
           {ROLES.map(([k, t, d, href, who, Icon, portal], i) => (
-            <Link key={k} href={href} onClick={() => signIn({ portal, plan: "Free" })} className={i % 3 === 0 ? "group flex flex-col gap-[8px] rounded-[14px] bg-cs-deep p-[26px] text-white" : "cs-card group flex flex-col gap-[8px] p-[26px] hover:border-[#cfcac0]"}>
+            <Link key={k} href={href} onClick={() => signIn({ portal, plan: "Free" })} className={i % 3 === 0 ? "group flex flex-col gap-[8px] rounded-[14px] bg-cs-deep p-[26px] text-white" : "cs-card group flex flex-col gap-[8px] p-[26px] hover:border-[#d0c7bf]"}>
               <div className="flex items-center justify-between">
                 <span className={i % 3 === 0 ? "text-[11.5px] font-semibold tracking-[0.18em] text-[#f2c4ad]" : "text-[11.5px] font-semibold tracking-[0.18em] text-cs-green-2"}>{k.toUpperCase()}</span>
                 <Icon className={i % 3 === 0 ? "size-[22px] text-[#f2c4ad]" : "size-[22px] text-cs-green-2"} strokeWidth={1.6} />
               </div>
               <p className="serif text-[27px] font-semibold leading-tight">{t}</p>
-              <p className={i % 3 === 0 ? "text-[14px] text-white/80" : "text-[14px] text-[#3e4440]"}>{d}</p>
+              <p className={i % 3 === 0 ? "text-[14px] text-white/80" : "text-[14px] text-[#48413b]"}>{d}</p>
               <span className={i % 3 === 0 ? "mt-[6px] inline-flex items-center gap-[6px] text-[13.5px] font-medium text-white" : "mt-[6px] inline-flex items-center gap-[6px] text-[13.5px] font-medium text-cs-green"}>Sign in as {who} <ArrowRight className="size-[14px] transition-transform group-hover:translate-x-[3px]" /></span>
             </Link>
           ))}

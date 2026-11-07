@@ -67,7 +67,7 @@ export default function MakerPaymentsPage() {
                   <thead><tr><th className={thc}>Order</th><th className={thc}>Invoice · Milestone</th><th className={thc}>Due</th><th className={thc}>Amount</th><th className={thc}>Status</th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
                   <tbody>
                     {shown.map(({ p, m, st }) => (
-                      <tr key={m.invoice} className="hover:bg-[#faf9f5]">
+                      <tr key={m.invoice} className="hover:bg-[#fbf8f4]">
                         <td className={tdc}><p className="font-medium">{p.orderId}</p><p className="max-w-[170px] truncate text-[11px] text-cs-ink-2">{p.name}</p></td>
                         <td className={tdc}>{m.invoice}<span className="block text-[11px] text-cs-ink-2">{m.name}</span></td>
                         <td className={tdc}>{fmtDate(m.due)}{st !== "Paid" && <span className={cn("block text-[11px]", st === "Overdue" ? "text-cs-red" : "text-cs-ink-2")}>{daysUntil(m.due) < 0 ? `${-daysUntil(m.due)} days late` : `in ${daysUntil(m.due)} days`}</span>}</td>
@@ -86,7 +86,7 @@ export default function MakerPaymentsPage() {
                       const inv = p.invoice!;
                       const late = !inv.paidAt && daysUntil(inv.due) < 0;
                       return (
-                        <tr key={p.id} className="hover:bg-[#faf9f5]">
+                        <tr key={p.id} className="hover:bg-[#fbf8f4]">
                           <td className={cn(tdc, "font-medium")}>{inv.no}</td>
                           <td className={tdc}>{s.suppliers.find((x) => x.id === p.supplierId)?.name}<span className="block text-[11px] text-cs-ink-2">{p.id} · {p.title}</span></td>
                           <td className={tdc}>{fmtDate(inv.due)}</td>
@@ -113,7 +113,7 @@ export default function MakerPaymentsPage() {
                   <li key={p.orderId} className="rounded-[9px] border border-cs-line p-[11px]">
                     <div className="flex items-center justify-between gap-2"><p className="text-[13px] font-semibold">{p.orderId}</p><span className="text-[12px] font-medium">{Math.round((paid / total) * 100)}% paid</span></div>
                     <p className="truncate text-[11.5px] text-cs-ink-2">{p.name}</p>
-                    <div className="mt-[7px] h-[7px] overflow-hidden rounded-full bg-[#e9ebe6]"><div className="h-full rounded-full bg-cs-green" style={{ width: `${(paid / total) * 100}%` }} /></div>
+                    <div className="mt-[7px] h-[7px] overflow-hidden rounded-full bg-[#f3ebde]"><div className="h-full rounded-full bg-cs-green" style={{ width: `${(paid / total) * 100}%` }} /></div>
                     <p className="mt-[5px] text-[11.5px] text-cs-ink-2">{inr(paid)} of {inr(total)}</p>
                     {next && (
                       <div className="mt-[6px] flex items-center justify-between gap-2 text-[11.5px]">

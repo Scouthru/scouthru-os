@@ -61,7 +61,7 @@ export function Conversation({ to, compact }: { to: string; compact?: boolean })
             const Icon = t ? ROLE_ICON[t.role] : Bot;
             return (
               <li key={m.id} className={cn("flex gap-[10px]", same && "-mt-[8px]")}>
-                <span className={cn("grid size-[32px] shrink-0 place-items-center rounded-full", same && "invisible", m.from === "hq" ? "bg-[#f1efe9] text-cs-ink-2" : mine ? "bg-cs-green text-white" : "bg-cs-mint text-cs-green-2")}><Icon className="size-[15px]" strokeWidth={1.8} /></span>
+                <span className={cn("grid size-[32px] shrink-0 place-items-center rounded-full", same && "invisible", m.from === "hq" ? "bg-[#f5efe5] text-cs-ink-2" : mine ? "bg-cs-green text-white" : "bg-cs-mint text-cs-green-2")}><Icon className="size-[15px]" strokeWidth={1.8} /></span>
                 <div className="min-w-0 flex-1">
                   {!same && (
                     <p className="flex items-baseline gap-[8px] text-[12.5px]">
@@ -69,7 +69,7 @@ export function Conversation({ to, compact }: { to: string; compact?: boolean })
                       <span className="text-[11px] text-cs-ink-2">{m.from === "hq" ? "automatic" : t ? ROLE_LABEL[t.role] : ""} · {ago(m.at)}</span>
                     </p>
                   )}
-                  <p className={cn("mt-[2px] whitespace-pre-wrap text-[13.5px] leading-[1.5]", m.from === "hq" && "text-[#3e4440]")}><Mentions text={m.text} me={me} /></p>
+                  <p className={cn("mt-[2px] whitespace-pre-wrap text-[13.5px] leading-[1.5]", m.from === "hq" && "text-[#48413b]")}><Mentions text={m.text} me={me} /></p>
                   {m.ref && <RefChip refd={m.ref} />}
                 </div>
               </li>
@@ -83,7 +83,7 @@ export function Conversation({ to, compact }: { to: string; compact?: boolean })
           <ul className="absolute bottom-full left-[10px] mb-[4px] w-[240px] rounded-[10px] border border-cs-line bg-white p-[4px] shadow-lg">
             {suggest.map((t) => (
               <li key={t.id}>
-                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => { setText((x) => x.replace(/@([^@\s]*)$/, `@${t.name} `)); setAt(null); }} className="w-full rounded-[7px] px-[9px] py-[6px] text-left text-[13px] hover:bg-[#f7f5f0]">
+                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => { setText((x) => x.replace(/@([^@\s]*)$/, `@${t.name} `)); setAt(null); }} className="w-full rounded-[7px] px-[9px] py-[6px] text-left text-[13px] hover:bg-[#f9f5ee]">
                   @{t.name} <span className="text-[11px] text-cs-ink-2">{ROLE_LABEL[t.role]}</span>
                 </button>
               </li>
@@ -97,7 +97,7 @@ export function Conversation({ to, compact }: { to: string; compact?: boolean })
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
             rows={1}
             placeholder={`Message ${title(s, me, to)} · @ to mention someone`}
-            className="max-h-[120px] min-h-[42px] flex-1 resize-none rounded-[10px] border border-[#d6d8d3] bg-white px-[12px] py-[10px] text-[13.5px] outline-none focus:border-cs-green"
+            className="max-h-[120px] min-h-[42px] flex-1 resize-none rounded-[10px] border border-[#e1d8ca] bg-white px-[12px] py-[10px] text-[13.5px] outline-none focus:border-cs-green"
             aria-label="Message"
           />
           <button type="submit" disabled={!text.trim()} aria-label="Send" className="grid size-[42px] shrink-0 place-items-center rounded-[10px] bg-cs-green text-white disabled:opacity-40"><SendHorizontal className="size-[18px]" /></button>
@@ -112,7 +112,7 @@ function Mentions({ text, me }: { text: string; me: Teammate }) {
   const names = s.team.map((t) => t.name).sort((a, b) => b.length - a.length);
   if (!names.length) return <>{text}</>;
   const re = new RegExp(`(@(?:${names.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")}))`, "g");
-  return <>{text.split(re).map((part, i) => (part.startsWith("@") && names.includes(part.slice(1)) ? <span key={i} className={cn("rounded-[4px] px-[2px] font-medium", part === `@${me.name}` ? "bg-cs-orange-bg text-[#b8641f]" : "text-cs-green")}>{part}</span> : part))}</>;
+  return <>{text.split(re).map((part, i) => (part.startsWith("@") && names.includes(part.slice(1)) ? <span key={i} className={cn("rounded-[4px] px-[2px] font-medium", part === `@${me.name}` ? "bg-cs-orange-bg text-[#a9713f]" : "text-cs-green")}>{part}</span> : part))}</>;
 }
 
 function RefChip({ refd }: { refd: NonNullable<ChatMessage["ref"]> }) {

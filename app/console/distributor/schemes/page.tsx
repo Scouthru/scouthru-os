@@ -62,7 +62,7 @@ export default function SchemesPage() {
                       <li key={x.sku} className="grid grid-cols-[42px_minmax(0,1fr)_minmax(0,150px)_70px] items-center gap-[12px] py-[10px]">
                         <Image src={x.img} alt="" width={42} height={42} className="size-[42px] rounded-[6px] object-cover" />
                         <div className="min-w-0"><p className="truncate text-[12.5px] font-medium">{x.product}</p><p className="text-[11px] text-cs-ink-2">{x.sku} · MRP {inr(x.mrp)} · {n} sold · {x.onHand} on hand</p></div>
-                        <span className="h-[10px] overflow-hidden rounded-full bg-[#eef0ec]"><span className="block h-full rounded-full bg-cs-green-2" style={{ width: `${st}%` }} /></span>
+                        <span className="h-[10px] overflow-hidden rounded-full bg-[#f6f0e6]"><span className="block h-full rounded-full bg-cs-green-2" style={{ width: `${st}%` }} /></span>
                         <span className="text-right text-[12px] font-semibold">{st}%<span className="block text-[10px] font-normal text-cs-ink-2">sell-through</span></span>
                       </li>
                     );
@@ -79,9 +79,9 @@ export default function SchemesPage() {
                 const exp = expired(x.validTill);
                 const on = x.active && !exp;
                 return (
-                  <li key={x.id} onClick={() => setSel(x.id)} className={cn("cursor-pointer rounded-[9px] border p-[11px]", sel === x.id ? "border-cs-green-2/70 bg-[#fbfdfb]" : "border-cs-line hover:border-[#cfcac0]")}>
+                  <li key={x.id} onClick={() => setSel(x.id)} className={cn("cursor-pointer rounded-[9px] border p-[11px]", sel === x.id ? "border-cs-green-2/70 bg-[#fdfcfb]" : "border-cs-line hover:border-[#d0c7bf]")}>
                     <div className="flex items-start gap-[10px]">
-                      <span className={cn("grid size-[34px] shrink-0 place-items-center rounded-full", on ? "bg-cs-mint text-cs-green" : "bg-[#f1f0ec] text-[#55605a]")}><Megaphone className="size-[16px]" strokeWidth={1.7} /></span>
+                      <span className={cn("grid size-[34px] shrink-0 place-items-center rounded-full", on ? "bg-cs-mint text-cs-green" : "bg-[#f6f0e7] text-[#645a51]")}><Megaphone className="size-[16px]" strokeWidth={1.7} /></span>
                       <div className="min-w-0 flex-1">
                         <p className="text-[12.5px] font-semibold">{x.title}</p>
                         <p className="text-[11px] text-cs-ink-2">{x.brand} · {exp ? "ended" : "valid till"} {fmtDate(x.validTill)}</p>
@@ -93,12 +93,12 @@ export default function SchemesPage() {
                         aria-label={`${x.active ? "Pause" : "Activate"} ${x.title}`}
                         disabled={exp}
                         onClick={(e) => { e.stopPropagation(); update((d) => toggleScheme(d, x.id)); toast(`${x.title}: ${x.active ? "paused" : "active"}`); }}
-                        className={cn("relative h-[22px] w-[40px] shrink-0 rounded-full transition disabled:opacity-40", x.active ? "bg-cs-green" : "bg-[#d6d8d3]")}
+                        className={cn("relative h-[22px] w-[40px] shrink-0 rounded-full transition disabled:opacity-40", x.active ? "bg-cs-green" : "bg-[#e1d8ca]")}
                       >
                         <span className={cn("absolute top-[3px] size-[16px] rounded-full bg-white transition-all", x.active ? "left-[21px]" : "left-[3px]")} />
                       </button>
                     </div>
-                    {sel === x.id && <p className="mt-[8px] rounded-[7px] bg-[#f7f6f2] px-[10px] py-[7px] text-[12px] text-[#3e4440]">{x.detail}</p>}
+                    {sel === x.id && <p className="mt-[8px] rounded-[7px] bg-[#f9f6f0] px-[10px] py-[7px] text-[12px] text-[#48413b]">{x.detail}</p>}
                     <div className="mt-[6px]"><Pill tone={exp ? "gray" : x.active ? "green" : "orange"}>{exp ? "Expired" : x.active ? "Active" : "Paused"}</Pill></div>
                   </li>
                 );

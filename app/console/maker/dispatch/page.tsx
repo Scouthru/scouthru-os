@@ -8,6 +8,8 @@ import { Btn, Empty, Field, Hero, Modal, Pill, RowMenu, StatStrip, Stepper, Tabs
 import { Carrier } from "@/components/console/ops";
 import { KV, Page, Panel, Split, tdc, thc } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
+import { NextAction, Timeline } from "@/components/console/flow";
+import { shipmentNext, shipmentTimeline } from "@/lib/console/flow";
 import { dispatchShipment } from "@/lib/console/actions-network";
 import { mine } from "@/lib/console/actions-maker";
 import { ago, download, fmtDate, fmtDateTime, fmtDay, fmtNum, inr } from "@/lib/console/format";
@@ -64,7 +66,7 @@ function MakerDispatch() {
                   {list.map((x) => {
                     const on = cur?.id === x.id;
                     return (
-                      <tr key={x.id} onClick={() => setSel(x.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#faf9f5]")}>
+                      <tr key={x.id} onClick={() => setSel(x.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
                         <td className={cn(tdc, on && "border-l-2 border-l-cs-green")}>
                           <div className="flex items-center gap-[10px]"><Image src={x.img} alt="" width={36} height={36} className="size-[36px] rounded-[6px] object-cover" /><div className="min-w-0"><p className="font-medium">{x.id}</p><p className="truncate text-[11px] text-cs-ink-2">{x.name}</p></div></div>
                         </td>
@@ -88,6 +90,7 @@ function MakerDispatch() {
                 <Image src={cur.img} alt="" width={64} height={64} className="size-[58px] rounded-[8px] object-cover" />
                 <div className="min-w-0"><h3 className="serif text-[19px] font-semibold leading-tight">{cur.id}</h3><p className="mt-[2px] text-[12px] text-cs-ink-2">{cur.name}{cur.orderId ? ` · ${cur.orderId}` : ""}</p><Pill tone={TONE[cur.status]} className="mt-[6px]">{cur.status}</Pill></div>
               </div>
+              <NextAction step={shipmentNext(s, cur, "maker")} onAction={cur.status === "Pending" ? () => setHandFor(cur) : undefined} className="mt-[12px]" />
               <div className="mt-[14px]">
                 <Stepper size={36} current={cur.step} allDone={cur.status === "Delivered"} steps={SHIP_STEPS.map((l, i) => ({ label: l, icon: i === 0 ? Box : i === 4 ? CheckCircle2 : Truck, sub: cur.stepDates[i] ? fmtDay(cur.stepDates[i]!) : undefined }))} />
               </div>
@@ -99,13 +102,8 @@ function MakerDispatch() {
                 <KV k="Value" v={inr(cur.value)} />
                 <KV k="Incoterms" v={cur.incoterms} />
               </dl>
-              {cur.status === "Pending" && <Btn kind="primary" icon={Send} className="mt-[12px] w-full" onClick={() => setHandFor(cur)}>Hand to carrier</Btn>}
-              <h4 className="serif mt-[14px] text-[16px] font-semibold">Tracking</h4>
-              <ul className="mt-[6px] space-y-[7px]">
-                {cur.events.map((e, i) => (
-                  <li key={i} className="flex gap-[9px] text-[12px]"><span className={cn("mt-[5px] size-[7px] shrink-0 rounded-full", e.tone === "green" ? "bg-cs-green-2" : "bg-cs-amber")} /><span className="min-w-0 flex-1">{e.text}<span className="block text-[11px] text-cs-ink-2">{fmtDateTime(e.at)}</span></span></li>
-                ))}
-              </ul>
+              <h4 className="serif mt-[14px] text-[16px] font-semibold">Timeline</h4>
+              <Timeline items={shipmentTimeline(s, cur)} next={shipmentNext(s, cur, "maker")} className="mt-[8px]" />
               <h4 className="serif mt-[14px] text-[16px] font-semibold">Documents</h4>
               <ul className="mt-[4px] space-y-[4px]">
                 {cur.documents.map((f) => <li key={f}><button type="button" onClick={() => download(f.replace(/\.pdf$/, ".txt"), `${f}\n${cur.id} · ${cur.name}\n${fmtNum(cur.qty)} units to ${cur.destination}`, "text/plain")} className="flex items-center gap-[6px] text-[12px] text-cs-green hover:underline"><Download className="size-[13px]" />{f}</button></li>)}

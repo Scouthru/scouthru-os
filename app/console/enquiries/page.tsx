@@ -12,10 +12,12 @@ import {
   Btn, Check, Empty, Field, FilterSelect, Hero, Menu, Modal, Pill, RowMenu, SearchBox, StatStrip, Tabs, inputCls, textareaCls, type Tone,
 } from "@/components/console/kit";
 import { useConsole } from "@/lib/console/store";
+import { NextAction, Timeline } from "@/components/console/flow";
+import { enquiryNext, enquiryTimeline } from "@/lib/console/flow";
 import { createEnquiry, requestSample, setEnquiryStage } from "@/lib/console/actions";
 import { deleteEnquiry, duplicateEnquiry, editEnquiry, messageMany, toggleQuoteShortlist, toggleShortlist, toggleStep } from "@/lib/console/actions-sourcing";
 import { PRODUCT_IMAGES } from "@/lib/console/seed";
-import { ago, daysUntil, fmtDate, fmtDateTime, fmtDay } from "@/lib/console/format";
+import { ago, daysUntil, fmtDate, fmtDay } from "@/lib/console/format";
 import type { ConsoleState, Enquiry, EnquiryStage, Manufacturer } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
 
@@ -177,7 +179,7 @@ function Enquiries() {
                   { key: "closed", label: `Closed (${count("closed")})` },
                 ]}
               />
-              <button type="button" onClick={() => setCreating(true)} className="mb-[8px] hidden h-[30px] items-center gap-[6px] rounded-[6px] bg-cs-green px-[11px] text-[12px] font-medium text-white hover:bg-[#8f3a18] min-[1024px]:flex" style={{ display: showPanel ? "none" : undefined }}>
+              <button type="button" onClick={() => setCreating(true)} className="mb-[8px] hidden h-[30px] items-center gap-[6px] rounded-[6px] bg-cs-green px-[11px] text-[12px] font-medium text-white hover:bg-[#7c2c14] min-[1024px]:flex" style={{ display: showPanel ? "none" : undefined }}>
                 <Plus className="size-[14px]" /> New Enquiry
               </button>
             </div>
@@ -195,7 +197,7 @@ function Enquiries() {
                 aria-label="Compact rows"
                 title={compact ? "Comfortable rows" : "Compact rows"}
                 onClick={() => setCompact((c) => !c)}
-                className={cn("grid size-[34px] place-items-center rounded-[6px] border", compact ? "border-cs-green bg-cs-mint text-cs-green" : "border-cs-line bg-white text-[#2f3431] hover:border-[#cfcac0]")}
+                className={cn("grid size-[34px] place-items-center rounded-[6px] border", compact ? "border-cs-green bg-cs-mint text-cs-green" : "border-cs-line bg-white text-[#36312d] hover:border-[#d0c7bf]")}
               >
                 <List className="size-[17px]" strokeWidth={1.8} />
               </button>
@@ -222,12 +224,12 @@ function Enquiries() {
               </label>
             </div>
 
-            <div className={cn("mt-[5px] flex flex-col", showPanel && "min-h-0 shrink grow basis-0")}>
-              <div className="mx-[8px] grid grid-cols-[28px_minmax(0,187fr)_minmax(0,89fr)_minmax(0,97fr)_minmax(0,90fr)_minmax(0,121fr)_minmax(0,113fr)_30px] items-center rounded-[6px] bg-[#faf9f5] py-[10px] pl-[10px] text-[11.5px] font-medium text-[#3e4440]">
+            <div className={cn("mt-[5px] flex flex-col max-lg:overflow-x-auto", showPanel && "min-[1024px]:min-h-0 min-[1024px]:shrink min-[1024px]:grow min-[1024px]:basis-0")}>
+              <div className="mx-[8px] grid max-lg:min-w-[720px] grid-cols-[28px_minmax(0,187fr)_minmax(0,89fr)_minmax(0,97fr)_minmax(0,90fr)_minmax(0,121fr)_minmax(0,113fr)_30px] items-center rounded-[6px] bg-[#fbf8f4] py-[10px] pl-[10px] text-[11.5px] font-medium text-[#48413b]">
                 <Check checked={allChecked} onChange={(on) => setBulk(on ? new Set(list.map((e) => e.id)) : new Set())} label="Select all" />
                 <span>Product &amp; Enquiry</span><span>Category</span><span>Manufacturers</span><span>Target MOQ</span><span>Stage</span><span>Last Update</span><span />
               </div>
-              <ul className={cn("overflow-y-auto px-[8px] pb-[8px] pt-[2px]", showPanel ? "min-h-[300px] shrink grow basis-0" : "max-h-[640px]")}>
+              <ul className={cn("overflow-y-auto px-[8px] pb-[8px] pt-[2px] max-lg:min-w-[736px]", showPanel ? "max-[1023px]:max-h-[420px] min-h-[300px] min-[1024px]:min-h-0 min-[1024px]:shrink min-[1024px]:grow min-[1024px]:basis-0" : "max-h-[640px]")}>
                 {list.map((e) => {
                   const on = showPanel && sel?.id === e.id;
                   return (
@@ -237,14 +239,14 @@ function Enquiries() {
                       className={cn(
                         "grid cursor-pointer grid-cols-[28px_minmax(0,187fr)_minmax(0,89fr)_minmax(0,97fr)_minmax(0,90fr)_minmax(0,121fr)_minmax(0,113fr)_30px] items-center rounded-[8px] border pl-[10px]",
                         compact ? "py-[5px]" : "py-[8px]",
-                        on ? "border-[1.5px] border-cs-green-2 bg-[#fbfdfb]" : "border-transparent border-b-cs-line hover:bg-[#fbfaf7]",
+                        on ? "border-[1.5px] border-cs-green-2 bg-[#fdfcfb]" : "border-transparent border-b-cs-line hover:bg-[#fcfaf6]",
                       )}
                     >
                       <Check checked={picked.has(e.id)} onChange={(v) => toggleBulk(e.id, on ? !bulk.has(e.id) : v)} label={`Select ${e.name}`} />
                       <div className="flex min-w-0 items-center gap-[10px]">
                         {!compact && <Image src={e.img} alt="" width={88} height={88} className="size-[42px] shrink-0 rounded-[6px] object-cover" />}
                         <div className="min-w-0">
-                          <p className="line-clamp-2 text-[11.5px] font-medium leading-[1.3] tracking-[-0.015em] text-[#1d211e]">{e.name}</p>
+                          <p className="line-clamp-2 text-[11.5px] font-medium leading-[1.3] tracking-[-0.015em] text-[#221f1c]">{e.name}</p>
                           <p className="mt-[2px] text-[11px] text-cs-ink-2">{e.id}</p>
                         </div>
                       </div>
@@ -304,16 +306,25 @@ function EnquiryPanel({ e, onClose, onSample, onMessage, onMove, onDuplicate, on
   e: Enquiry; onClose: () => void; onSample: (mfrId?: string) => void; onMessage: () => void; onMove: (st: EnquiryStage) => void; onDuplicate: () => void; onDelete: () => void;
 }) {
   const { s, update } = useConsole();
+  const router = useRouter();
   const [tab, setTab] = useState<"overview" | "responses" | "quotes" | "activity">("overview");
   const [editing, setEditing] = useState(false);
   const responses = e.responses;
+  const next = enquiryNext(s, e, "brand");
+  const doNext = () => {
+    if (next.action === "compare") setTab("quotes");
+    else if (next.action === "send") onMove("In Discussion");
+    else if (next.action === "samples") router.push("/console/samples");
+    else if (next.action === "production") router.push("/console/production");
+  };
 
   return (
     <aside className="flex min-w-0 flex-col gap-[7px]">
+      <NextAction step={next} onAction={doNext} />
       <div className="cs-card overflow-hidden">
       <div className="px-[18px] pt-[4px]">
         <div className="flex items-center justify-between">
-          <button type="button" aria-label="Close panel" onClick={onClose} className="-ml-[4px] grid size-[26px] place-items-center rounded-[6px] hover:bg-[#f1f0ec]"><X className="size-[17px]" /></button>
+          <button type="button" aria-label="Close panel" onClick={onClose} className="-ml-[4px] grid size-[26px] place-items-center rounded-[6px] hover:bg-[#f6f0e7]"><X className="size-[17px]" /></button>
           <Menu
             items={[
               { label: "Edit enquiry", icon: Pencil, onClick: () => { setEditing(true); setTab("overview"); } },
@@ -322,7 +333,7 @@ function EnquiryPanel({ e, onClose, onSample, onMessage, onMove, onDuplicate, on
               ...STAGES.filter((st) => st !== e.stage).map((st) => ({ label: `Move to ${st}`, onClick: () => onMove(st) })),
               ...(e.stage === "Draft" ? ["sep" as const, { label: "Delete draft", icon: Trash2, danger: true, onClick: onDelete }] : []),
             ]}
-            trigger={<span role="button" aria-label="Enquiry actions" className="grid size-[26px] cursor-pointer place-items-center rounded-[6px] hover:bg-[#f1f0ec]"><MoreHorizontal className="size-[18px]" /></span>}
+            trigger={<span role="button" aria-label="Enquiry actions" className="grid size-[26px] cursor-pointer place-items-center rounded-[6px] hover:bg-[#f6f0e7]"><MoreHorizontal className="size-[18px]" /></span>}
           />
         </div>
 
@@ -340,9 +351,9 @@ function EnquiryPanel({ e, onClose, onSample, onMessage, onMove, onDuplicate, on
                 <p className="mt-[3px] text-[12px] text-cs-ink-2">{e.id}</p>
                 <div className="mt-[8px] flex items-center gap-[6px]">
                   <div className="flex min-w-0 flex-1 flex-wrap gap-[6px]">
-                    {e.tags.map((t) => <span key={t} className="rounded-[5px] bg-[#f1f0ec] px-[10px] py-[4px] text-[11px] text-[#3e4440]">{t}</span>)}
+                    {e.tags.map((t) => <span key={t} className="rounded-[5px] bg-[#f6f0e7] px-[10px] py-[4px] text-[11px] text-[#48413b]">{t}</span>)}
                   </div>
-                  <button type="button" aria-label="Edit enquiry" onClick={() => setEditing(true)} className="grid size-[26px] place-items-center rounded-[6px] text-[#3e4440] hover:bg-[#f1f0ec]"><Pencil className="size-[15px]" strokeWidth={1.7} /></button>
+                  <button type="button" aria-label="Edit enquiry" onClick={() => setEditing(true)} className="grid size-[26px] place-items-center rounded-[6px] text-[#48413b] hover:bg-[#f6f0e7]"><Pencil className="size-[15px]" strokeWidth={1.7} /></button>
                 </div>
               </div>
             </div>
@@ -366,7 +377,7 @@ function EnquiryPanel({ e, onClose, onSample, onMessage, onMove, onDuplicate, on
             { key: "overview", label: "Overview" },
             { key: "responses", label: `Responses (${e.responses.length})` },
             { key: "quotes", label: `Quotes (${e.quotes.length})` },
-            { key: "activity", label: "Activity" },
+            { key: "activity", label: "Timeline" },
           ]}
         />
       </div>
@@ -376,12 +387,12 @@ function EnquiryPanel({ e, onClose, onSample, onMessage, onMove, onDuplicate, on
           <>
             <div className="flex items-center justify-between">
               <h3 className="serif text-[17px] font-semibold leading-[21px]">Enquiry Brief</h3>
-              <button type="button" onClick={() => setEditing(true)} className="flex items-center gap-[5px] text-[12px] text-[#2f3431] hover:text-cs-green"><Pencil className="size-[13px]" />Edit</button>
+              <button type="button" onClick={() => setEditing(true)} className="flex items-center gap-[5px] text-[12px] text-[#36312d] hover:text-cs-green"><Pencil className="size-[13px]" />Edit</button>
             </div>
             <p className="mt-[2px] text-[12px] leading-[1.42] text-cs-ink-2">{e.brief}</p>
             <p className="mt-[8px] text-[12px] font-semibold">Key Requirements</p>
             <div className="mt-[5px] flex flex-wrap gap-[7px]">
-              {e.requirements.map((r) => <span key={r} className="rounded-[5px] border border-cs-line bg-[#f7f6f2] px-[10px] py-[3px] text-[10.5px] text-[#3e4440]">{r}</span>)}
+              {e.requirements.map((r) => <span key={r} className="rounded-[5px] border border-cs-line bg-[#f9f6f0] px-[10px] py-[3px] text-[10.5px] text-[#48413b]">{r}</span>)}
               {e.requirements.length === 0 && <span className="text-[12px] text-cs-ink-2">None added yet.</span>}
             </div>
           </>
@@ -401,7 +412,7 @@ function EnquiryPanel({ e, onClose, onSample, onMessage, onMove, onDuplicate, on
                       <Pill tone={RESP_TONE[r.status]} className="text-[10.5px]">{r.status}</Pill>
                     </div>
                     <p className="text-[11px] text-cs-ink-2">{m.state}, India · ★ {m.rating} · {ago(r.at)}</p>
-                    <p className="mt-[3px] text-[11.5px] leading-[1.4] text-[#3e4440]">{r.note}</p>
+                    <p className="mt-[3px] text-[11.5px] leading-[1.4] text-[#48413b]">{r.note}</p>
                   </div>
                   <HeartBtn m={m} />
                 </li>
@@ -413,18 +424,7 @@ function EnquiryPanel({ e, onClose, onSample, onMessage, onMove, onDuplicate, on
 
         {tab === "quotes" && <QuotesTable e={e} onSample={onSample} />}
 
-        {tab === "activity" && (
-          <ul className="relative space-y-[10px] pl-[16px]">
-            <span className="absolute bottom-[6px] left-[4px] top-[6px] w-px bg-cs-line" />
-            {[...e.activity].reverse().map((a, i) => (
-              <li key={i} className="relative">
-                <span className="absolute -left-[16px] top-[5px] size-[9px] rounded-full bg-cs-green-2 ring-2 ring-white" />
-                <p className="text-[12.5px]"><span className="font-medium">{a.who}</span> · {a.text}</p>
-                <p className="text-[11px] text-cs-ink-2">{fmtDateTime(a.at)}</p>
-              </li>
-            ))}
-          </ul>
-        )}
+        {tab === "activity" && <Timeline items={enquiryTimeline(s, e)} next={next} className="pt-[4px]" />}
       </div>
 
       </div>
@@ -434,7 +434,7 @@ function EnquiryPanel({ e, onClose, onSample, onMessage, onMove, onDuplicate, on
       <div className="px-[14px] pb-[8px] pt-[6px]">
         <div className="flex items-center justify-between">
           <h3 className="serif text-[17px] font-semibold leading-[21px]">Manufacturer Responses ({e.responses.length})</h3>
-          <button type="button" onClick={() => setTab("responses")} className="flex items-center gap-[6px] text-[12px] font-medium text-[#2f3431] hover:text-cs-green">View All <span aria-hidden>→</span></button>
+          <button type="button" onClick={() => setTab("responses")} className="flex items-center gap-[6px] text-[12px] font-medium text-[#36312d] hover:text-cs-green">View All <span aria-hidden>→</span></button>
         </div>
         <div className="mt-[7px] grid grid-cols-3 gap-[12px]">
           {responses.slice(0, 3).map((r) => {
@@ -466,10 +466,10 @@ function EnquiryPanel({ e, onClose, onSample, onMessage, onMove, onDuplicate, on
           {e.steps.map((st, i) => (
             <li key={st.text}>
               <button type="button" onClick={() => update((d) => toggleStep(d, e.id, i))} className="flex h-[19px] w-full items-center gap-[10px] text-left">
-                <span className={cn("grid size-[16px] shrink-0 place-items-center rounded-full border", st.done ? "border-cs-green bg-cs-green text-white" : "border-[#9da39f] bg-white")}>
+                <span className={cn("grid size-[16px] shrink-0 place-items-center rounded-full border", st.done ? "border-cs-green bg-cs-green text-white" : "border-[#af9f91] bg-white")}>
                   {st.done && <CheckIcon className="size-[10px]" strokeWidth={3} />}
                 </span>
-                <span className={cn("flex-1 text-[11.5px]", st.done ? "text-[#1d211e]" : "text-[#3e4440]")}>{st.text}</span>
+                <span className={cn("flex-1 text-[11.5px]", st.done ? "text-[#221f1c]" : "text-[#48413b]")}>{st.text}</span>
                 <span className={cn("text-[11px]", !st.done && daysUntil(st.due) < 0 ? "text-cs-red" : "text-cs-ink-2")}>{st.done ? fmtDay(st.due) : `Due ${fmtDay(st.due)}`}</span>
               </button>
             </li>
@@ -497,7 +497,7 @@ function HeartBtn({ m, className }: { m: Manufacturer; className?: string }) {
       onClick={(ev) => { ev.preventDefault(); ev.stopPropagation(); update((d) => toggleShortlist(d, m.id)); toast(m.shortlisted ? `${m.name} removed from shortlist` : `${m.name} shortlisted`); }}
       className={cn("grid size-[24px] shrink-0 place-items-center rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.15)]", className)}
     >
-      <Heart className={cn("size-[13px]", m.shortlisted ? "fill-cs-red text-cs-red" : "text-[#2f3431]")} strokeWidth={2} />
+      <Heart className={cn("size-[13px]", m.shortlisted ? "fill-cs-red text-cs-red" : "text-[#36312d]")} strokeWidth={2} />
     </button>
   );
 }
@@ -534,7 +534,7 @@ function QuotesTable({ e, onSample }: { e: Enquiry; onSample: (mfrId: string) =>
                 <td className="py-[5px] text-right">
                   <div className="flex justify-end gap-[4px]">
                     <button type="button" title={q.shortlisted ? "Remove from shortlist" : "Shortlist quote"} aria-pressed={q.shortlisted} onClick={() => update((d) => toggleQuoteShortlist(d, e.id, q.mfrId))} className={cn("grid size-[26px] place-items-center rounded-[6px] border", q.shortlisted ? "border-cs-amber bg-[#fdf6e3]" : "border-cs-line")}>
-                      <Star className={cn("size-[13px]", q.shortlisted ? "fill-cs-amber text-cs-amber" : "text-[#55605a]")} />
+                      <Star className={cn("size-[13px]", q.shortlisted ? "fill-cs-amber text-cs-amber" : "text-[#645a51]")} />
                     </button>
                     <button type="button" title="Request sample" onClick={() => onSample(q.mfrId)} disabled={e.stage === "Closed"} className="grid size-[26px] place-items-center rounded-[6px] border border-cs-line disabled:opacity-40">
                       <FlaskConical className="size-[13px] text-cs-orange" />
@@ -621,12 +621,12 @@ function CreateEnquiry({ open, onClose, onCreated }: { open: boolean; onClose: (
         </div>
         <Field label="Brief"><textarea className={cn(textareaCls, tried && !f.brief.trim() && "border-cs-red")} rows={3} placeholder="What should it contain, how should it be packed, which certifications do you need?" value={f.brief} onChange={(x) => setF({ ...f, brief: x.target.value })} /></Field>
         <div>
-          <p className="mb-[6px] text-[12px] font-medium text-[#3e4440]">Key requirements</p>
+          <p className="mb-[6px] text-[12px] font-medium text-[#48413b]">Key requirements</p>
           <div className="flex flex-wrap gap-[6px]">
             {REQ_OPTIONS.map((r) => {
               const on = f.reqs.includes(r);
               return (
-                <button key={r} type="button" aria-pressed={on} onClick={() => setF({ ...f, reqs: on ? f.reqs.filter((x) => x !== r) : [...f.reqs, r] })} className={cn("rounded-full border px-[11px] py-[4px] text-[11.5px]", on ? "border-cs-green bg-cs-mint font-medium text-cs-green" : "border-cs-line text-[#3e4440]")}>
+                <button key={r} type="button" aria-pressed={on} onClick={() => setF({ ...f, reqs: on ? f.reqs.filter((x) => x !== r) : [...f.reqs, r] })} className={cn("rounded-full border px-[11px] py-[4px] text-[11.5px]", on ? "border-cs-green bg-cs-mint font-medium text-cs-green" : "border-cs-line text-[#48413b]")}>
                   {on && "✓ "}{r}
                 </button>
               );
@@ -634,7 +634,7 @@ function CreateEnquiry({ open, onClose, onCreated }: { open: boolean; onClose: (
           </div>
         </div>
         <div>
-          <p className="mb-[6px] text-[12px] font-medium text-[#3e4440]">Product image</p>
+          <p className="mb-[6px] text-[12px] font-medium text-[#48413b]">Product image</p>
           <div className="flex flex-wrap gap-[6px]">
             {Object.entries(PRODUCT_IMAGES).map(([k, src]) => (
               <button key={k} type="button" aria-label={`Use ${k} image`} aria-pressed={f.img === src} onClick={() => setF({ ...f, img: src })} className={cn("rounded-[7px] border-2 p-[1px]", f.img === src ? "border-cs-green" : "border-transparent")}>
@@ -676,7 +676,7 @@ function RequestSample({ enquiryId, mfrId, onClose }: { enquiryId: string; mfrId
       )}
     >
       {done ? (
-        <p className="text-[13px] leading-[1.5] text-[#3e4440]">
+        <p className="text-[13px] leading-[1.5] text-[#48413b]">
           <b>{done}</b> is on the Samples screen as <b>Submitted</b>. {mfrOf(s, mfr)?.name} has been asked for {fmtNum(Number(qty))} units; the enquiry moved to <b>Samples Requested</b>.
         </p>
       ) : (

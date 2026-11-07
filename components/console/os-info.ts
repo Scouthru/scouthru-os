@@ -12,6 +12,6 @@ export const PORTALS: [name: string, blurb: string, href: string, cta: string, i
 
 export const PLANS: [name: Plan, price: string, blurb: string, highlight: boolean][] = [
   ["Free", "₹0", "Post requirements, search the marketplace, and work on a limited number of enquiries each month.", false],
-  ["Pro", "₹4,999 / month", "Unlimited enquiries, large-lot leads, and the full Scouthru OS: enquiries, capacity, orders and payments.", true],
+  ["Pro", "", "Unlimited enquiries, large-lot leads, and the full Scouthru OS: enquiries, capacity, orders and payments.", true],
   ["Done for you", "Included in order price", "Scouthru runs your order end to end. No separate fee, one price per order.", false],
 ];

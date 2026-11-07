@@ -39,7 +39,7 @@ export function Panel({ title, sub, right, children, className, bodyClass }: { t
       {title && (
         <div className="flex items-start justify-between gap-3 px-[15px] pt-[14px]">
           <div className="min-w-0">
-            <h2 className="serif text-[18.5px] font-semibold leading-tight tracking-[-0.02em] text-[#151816]">{title}</h2>
+            <h2 className="serif text-[18.5px] font-semibold leading-tight tracking-[-0.02em] text-[#191614]">{title}</h2>
             {sub && <p className="mt-[2px] text-[12px] text-cs-ink-2">{sub}</p>}
           </div>
           {right}
@@ -52,9 +52,9 @@ export function Panel({ title, sub, right, children, className, bodyClass }: { t
 
 export function KV({ k, v, className }: { k: string; v: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("grid grid-cols-[118px_minmax(0,1fr)] gap-2 border-b border-[#f1efea] py-[6px] text-[12px] last:border-0", className)}>
+    <div className={cn("grid grid-cols-[118px_minmax(0,1fr)] gap-2 border-b border-[#f5efe6] py-[6px] text-[12px] last:border-0", className)}>
       <dt className="text-cs-ink-2">{k}</dt>
-      <dd className="min-w-0 text-[#1d211e]">{v}</dd>
+      <dd className="min-w-0 text-[#221f1c]">{v}</dd>
     </div>
   );
 }
@@ -62,7 +62,7 @@ export function KV({ k, v, className }: { k: string; v: React.ReactNode; classNa
 export function Meter({ value, tone = "green", className }: { value: number; tone?: "green" | "orange" | "red"; className?: string }) {
   const c = tone === "red" ? "bg-cs-red" : tone === "orange" ? "bg-cs-orange" : "bg-cs-green";
   return (
-    <div className={cn("h-[7px] overflow-hidden rounded-full bg-[#e9ebe6]", className)}>
+    <div className={cn("h-[7px] overflow-hidden rounded-full bg-[#f3ebde]", className)}>
       <div className={cn("h-full rounded-full", c)} style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
     </div>
   );
@@ -83,8 +83,8 @@ export const MAKER_SAMPLE_TONE: Record<SampleStatus, Tone> = {
 };
 
 /** Table header cell, same recipe as the brand list screens. */
-export const thc = "sticky top-0 z-10 whitespace-nowrap bg-[#f7f6f2] px-[8px] py-[9px] text-left text-[11px] font-medium text-[#4b524e]";
-export const tdc = "border-b border-[#f1efea] px-[8px] py-[9px] align-middle text-[12px]";
+export const thc = "sticky top-0 z-10 whitespace-nowrap bg-[#f9f6f0] px-[8px] py-[9px] text-left text-[11px] font-medium text-[#564e47]";
+export const tdc = "border-b border-[#f5efe6] px-[8px] py-[9px] align-middle text-[12px]";
 
 /** Pay a supplier invoice; the reference is required. Used on Materials and Payments. */
 export function PayModal({ p, onClose }: { p: PurchaseOrder; onClose: () => void }) {

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import {
-  Archive, ArchiveRestore, ArrowDown, ArrowUp, Box, CheckCircle2, Download, ExternalLink, FileText, FlaskConical, MapPin, Pencil, RefreshCw,
+  Archive, ArchiveRestore, ArrowDown, ArrowRight, ArrowUp, Box, CheckCircle2, Download, ExternalLink, FileText, FlaskConical, MapPin, Pencil, RefreshCw,
   Settings2, ShieldCheck, SlidersHorizontal, Star, Truck, Users, X,
 } from "lucide-react";
 import { Btn, Check, Empty, Field, FilterSelect, Hero, Menu, Modal, Pill, RowMenu, SearchBox, StatStrip, Tabs, inputCls, textareaCls, type Tone } from "@/components/console/kit";
@@ -150,7 +150,7 @@ function Products() {
             <div className="mt-[12px] min-h-0 flex-1 overflow-auto">
               <table className="w-full min-w-[720px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10 bg-white">
-                  <tr className="text-left text-[11px] text-[#4b524e]">
+                  <tr className="text-left text-[11px] text-[#564e47]">
                     <th className="w-[30px] border-b border-cs-line pb-[9px] pl-[10px] font-medium"><Check checked={list.length > 0 && list.every((x) => checked.includes(x.id))} onChange={(v) => setChecked(v ? list.map((x) => x.id) : [])} label="Select all" /></th>
                     <th className="border-b border-cs-line pb-[9px] pl-[14px] font-medium">Product</th>
                     <th className="border-b border-cs-line pb-[9px] font-medium">Category</th>
@@ -165,22 +165,22 @@ function Products() {
                   {list.map((x) => {
                     const on = x.id === sel;
                     return (
-                      <tr key={x.id} onClick={() => { setSel(x.id); setEditing(false); setChecked((c) => (c.length <= 1 ? [x.id] : c)); router.replace(`/console/products?id=${x.id}`, { scroll: false }); }} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td]:bg-[#fbfdfb] [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#faf9f6]")}>
+                      <tr key={x.id} onClick={() => { setSel(x.id); setEditing(false); setChecked((c) => (c.length <= 1 ? [x.id] : c)); router.replace(`/console/products?id=${x.id}`, { scroll: false }); }} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td]:bg-[#fdfcfb] [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
                         <td className="pl-[10px]"><Check checked={checked.includes(x.id)} onChange={() => setChecked((c) => (c.includes(x.id) ? c.filter((y) => y !== x.id) : [...c, x.id]))} label={`Select ${x.name}`} /></td>
                         <td className="py-[9px] pl-[14px]">
                           <div className="flex items-center gap-[12px]">
                             <Image src={x.img} alt="" width={44} height={44} className="size-[44px] shrink-0 rounded-[6px] object-cover" />
                             <div className="min-w-0">
-                              <p className="w-[116px] text-[11px] font-medium leading-[1.3] tracking-[-0.01em] text-[#1d211e]">{x.name}</p>
+                              <p className="w-[116px] text-[11px] font-medium leading-[1.3] tracking-[-0.01em] text-[#221f1c]">{x.name}</p>
                               <p className="text-[10.5px] text-cs-ink-2">{x.id}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="w-[90px] text-[11px] leading-tight text-[#3e4440]">{x.category}</td>
-                        <td className="w-[110px] text-[11px] leading-tight text-[#3e4440]">{mfrName(x.mfrId)}</td>
+                        <td className="w-[90px] text-[11px] leading-tight text-[#48413b]">{x.category}</td>
+                        <td className="w-[110px] text-[11px] leading-tight text-[#48413b]">{mfrName(x.mfrId)}</td>
                         <td><Pill tone={STAGE_TONE[x.stage]} className={cn("text-[11px]", x.stage === "In Development" && "!bg-cs-blue-bg !text-cs-blue")}>{x.stage}</Pill></td>
-                        <td className="text-[11.5px] leading-tight text-[#1d211e]">{fmtNum(x.moq)}<br /><span className="text-cs-ink-2">units</span></td>
-                        <td className="whitespace-nowrap text-[11px] leading-tight text-[#1d211e]">{fmtDate(x.updatedAt)}<br /><span className="text-cs-ink-2">{ago(x.updatedAt)}</span></td>
+                        <td className="text-[11.5px] leading-tight text-[#221f1c]">{fmtNum(x.moq)}<br /><span className="text-cs-ink-2">units</span></td>
+                        <td className="whitespace-nowrap text-[11px] leading-tight text-[#221f1c]">{fmtDate(x.updatedAt)}<br /><span className="text-cs-ink-2">{ago(x.updatedAt)}</span></td>
                         <td className="pr-[8px]">
                           <RowMenu items={[
                             { label: "Open", icon: ExternalLink, onClick: () => setSel(x.id) },
@@ -251,7 +251,7 @@ function ProductPanel({ p, editing, setEditing, onClose, onArchive, onPack, onRe
     <aside className="cs-card flex min-h-0 min-w-0 flex-col px-[14px] pb-[12px] pt-[12px]">
       <div className="-mx-[4px] min-h-0 flex-1 overflow-y-auto px-[4px]">
       <div className="flex items-center justify-between">
-        <button type="button" aria-label="Close panel" onClick={onClose} className="grid size-[24px] place-items-center rounded-[5px] hover:bg-[#f1f0ec]"><X className="size-[16px]" /></button>
+        <button type="button" aria-label="Close panel" onClick={onClose} className="grid size-[24px] place-items-center rounded-[5px] hover:bg-[#f6f0e7]"><X className="size-[16px]" /></button>
         <RowMenu items={[
           { label: "Edit brief", icon: Pencil, onClick: () => setEditing(true) },
           { label: p.stage === "Archived" ? "Unarchive" : "Archive", icon: p.stage === "Archived" ? ArchiveRestore : Archive, onClick: onArchive },
@@ -267,13 +267,16 @@ function ProductPanel({ p, editing, setEditing, onClose, onArchive, onPack, onRe
             <Pill tone={STAGE_TONE[p.stage]} className="!text-[11px]">{p.stage}</Pill>
           </div>
           <p className="mt-[2px] text-[12px] text-cs-ink-2">{p.id}</p>
-          <div className="mt-[6px] flex flex-wrap gap-[5px]">{p.tags.map((t) => <span key={t} className="rounded-[4px] bg-[#f1f0ec] px-[8px] py-[2px] text-[10.5px] text-[#3e4440]">{t}</span>)}</div>
+          <div className="mt-[6px] flex flex-wrap gap-[5px]">{p.tags.map((t) => <span key={t} className="rounded-[4px] bg-[#f6f0e7] px-[8px] py-[2px] text-[10.5px] text-[#48413b]">{t}</span>)}</div>
         </div>
       </div>
 
+      <Link href={`/console/products/${p.id}`} className="mt-[12px] flex h-[40px] items-center justify-center gap-[8px] rounded-[7px] bg-cs-green text-[13px] font-medium text-white hover:bg-[#7c2c14]">
+        Open product workspace<ArrowRight className="size-[15px]" />
+      </Link>
       <div className="mt-[12px] flex items-center justify-between">
         <p className="serif text-[16px] font-semibold">Product Brief</p>
-        {!editing && <button type="button" onClick={() => setEditing(true)} className="flex items-center gap-[5px] text-[12px] text-[#2f3431] hover:text-cs-green"><Pencil className="size-[13px]" />Edit</button>}
+        {!editing && <button type="button" onClick={() => setEditing(true)} className="flex items-center gap-[5px] text-[12px] text-[#36312d] hover:text-cs-green"><Pencil className="size-[13px]" />Edit</button>}
       </div>
       {editing ? (
         <div className="mt-[6px]">
@@ -283,22 +286,22 @@ function ProductPanel({ p, editing, setEditing, onClose, onArchive, onPack, onRe
             <Btn kind="primary" className="!h-[32px] !text-[12px]" disabled={!brief.trim()} onClick={save}>Save brief</Btn>
           </div>
         </div>
-      ) : <p className="mt-[3px] text-[11.5px] leading-[1.4] text-[#3e4440]">{p.brief}</p>}
+      ) : <p className="mt-[3px] text-[11.5px] leading-[1.4] text-[#48413b]">{p.brief}</p>}
 
       <div className="mt-[10px] grid grid-cols-2 gap-[8px]">
         <div className="flex gap-[8px] rounded-[8px] border border-cs-line px-[9px] py-[8px]">
-          <Users className="size-[18px] shrink-0 text-[#3e4440]" strokeWidth={1.6} />
-          <div className="min-w-0 text-[11px] leading-[1.45] tracking-[-0.01em]"><p className="text-[11.5px] font-semibold">Target Market</p>{p.market.map((m) => <p key={m} className="text-[#3e4440]">{m}</p>)}</div>
+          <Users className="size-[18px] shrink-0 text-[#48413b]" strokeWidth={1.6} />
+          <div className="min-w-0 text-[11px] leading-[1.45] tracking-[-0.01em]"><p className="text-[11.5px] font-semibold">Target Market</p>{p.market.map((m) => <p key={m} className="text-[#48413b]">{m}</p>)}</div>
         </div>
         <div className="flex gap-[8px] rounded-[8px] border border-cs-line px-[9px] py-[8px]">
-          <ShieldCheck className="size-[18px] shrink-0 text-[#3e4440]" strokeWidth={1.6} />
-          <div className="text-[11px] leading-[1.45]"><p className="text-[11.5px] font-semibold">Certifications</p>{p.certs.map((c) => <p key={c} className="flex items-center gap-[5px] text-[#3e4440]"><CheckCircle2 className="size-[12px] text-cs-green-2" />{c}</p>)}</div>
+          <ShieldCheck className="size-[18px] shrink-0 text-[#48413b]" strokeWidth={1.6} />
+          <div className="text-[11px] leading-[1.45]"><p className="text-[11.5px] font-semibold">Certifications</p>{p.certs.map((c) => <p key={c} className="flex items-center gap-[5px] text-[#48413b]"><CheckCircle2 className="size-[12px] text-cs-green-2" />{c}</p>)}</div>
         </div>
       </div>
 
       <div className="mt-[12px] flex items-center justify-between">
         <p className="serif text-[16px] font-semibold">Packaging Variants</p>
-        <button type="button" onClick={onPack} className="text-[11.5px] font-medium text-[#2f3431] hover:text-cs-green">View All →</button>
+        <button type="button" onClick={onPack} className="text-[11.5px] font-medium text-[#36312d] hover:text-cs-green">View All →</button>
       </div>
       <div className="mt-[6px] grid grid-cols-3 gap-[6px]">
         {p.packaging.slice(0, 3).map((k) => (
@@ -315,7 +318,7 @@ function ProductPanel({ p, editing, setEditing, onClose, onArchive, onPack, onRe
 
       <div className="mt-[12px] flex items-center justify-between">
         <p className="serif text-[16px] font-semibold">Manufacturing Partner</p>
-        <Link href={`/console/manufacturers?id=${p.mfrId}`} className="text-[11.5px] font-medium text-[#2f3431] hover:text-cs-green">View Details →</Link>
+        <Link href={`/console/manufacturers?id=${p.mfrId}`} className="text-[11.5px] font-medium text-[#36312d] hover:text-cs-green">View Details →</Link>
       </div>
       {mfr && (
         <div className="mt-[6px] flex items-center gap-[12px]">
@@ -331,18 +334,18 @@ function ProductPanel({ p, editing, setEditing, onClose, onArchive, onPack, onRe
 
       <div className="mt-[12px] flex items-center justify-between">
         <p className="serif text-[16px] font-semibold">Product Stage &amp; Timeline</p>
-        <button type="button" onClick={() => setAllSteps(!allSteps)} className="text-[11.5px] font-medium text-[#2f3431] hover:text-cs-green">{allSteps ? "Hide" : "View All"} →</button>
+        <button type="button" onClick={() => setAllSteps(!allSteps)} className="text-[11.5px] font-medium text-[#36312d] hover:text-cs-green">{allSteps ? "Hide" : "View All"} →</button>
       </div>
       <div className="relative mt-[8px] grid grid-cols-5">
         <div className="absolute left-[10%] right-[10%] top-[16px] flex">
-          {steps.slice(0, -1).map((st, i) => <span key={st.label} className={cn("h-[2px] flex-1", i < current ? "bg-cs-green" : "bg-[#dedcd6]")} />)}
+          {steps.slice(0, -1).map((st, i) => <span key={st.label} className={cn("h-[2px] flex-1", i < current ? "bg-cs-green" : "bg-[#e4dcd0]")} />)}
         </div>
         {steps.map((st, i) => {
           const done = i < current;
           const on = i === current;
           return (
             <div key={st.label} className="relative flex flex-col items-center text-center">
-              <span className={cn("grid size-[33px] place-items-center rounded-full border", on ? "border-cs-green bg-cs-green text-white" : done ? "border-cs-mint bg-cs-mint text-cs-green" : "border-[#e2e0da] bg-[#f6f5f1] text-[#4b524e]")}><st.icon className="size-[16px]" strokeWidth={1.7} /></span>
+              <span className={cn("grid size-[33px] place-items-center rounded-full border", on ? "border-cs-green bg-cs-green text-white" : done ? "border-cs-mint bg-cs-mint text-cs-green" : "border-[#e7e0d5] bg-[#f9f5ee] text-[#564e47]")}><st.icon className="size-[16px]" strokeWidth={1.7} /></span>
               <p className="mt-[4px] text-[11px] font-semibold">{st.label}</p>
               <p className="text-[9.5px] text-cs-ink-2">{dates[i] ? `${done || on ? "" : "Est. "}${fmtDate(dates[i]!).replace(/ \d{4}$/, "")}` : "—"}</p>
               <span className={cn("mt-[2px] rounded-[4px] px-[5px] py-[1px] text-[9.5px]", done ? "bg-cs-ok-bg text-cs-ok" : on ? "bg-cs-blue-bg text-cs-blue" : "text-cs-ink-2")}>{done ? "Completed" : on ? "In Progress" : "Upcoming"}</span>
@@ -351,7 +354,7 @@ function ProductPanel({ p, editing, setEditing, onClose, onArchive, onPack, onRe
         })}
       </div>
       {allSteps && (
-        <ul className="mt-[10px] space-y-[4px] rounded-[8px] bg-[#f7f6f2] px-[10px] py-[8px] text-[11.5px]">
+        <ul className="mt-[10px] space-y-[4px] rounded-[8px] bg-[#f9f6f0] px-[10px] py-[8px] text-[11.5px]">
           {steps.map((st, i) => <li key={st.label} className="flex justify-between"><span>{st.label}</span><span className="text-cs-ink-2">{dates[i] ? fmtDate(dates[i]!) : "Not started"}</span></li>)}
         </ul>
       )}
@@ -407,7 +410,7 @@ function ReorderModal({ p, onClose }: { p: Product; onClose: () => void }) {
         : <><Btn onClick={onClose}>Cancel</Btn><Btn kind="primary" icon={RefreshCw} disabled={moq <= 0} onClick={create}>Create reorder</Btn></>}
     >
       {made ? (
-        <p className="text-[13px] text-[#3e4440]">A new enquiry <b>{made}</b> for {fmtNum(moq)} units was sent to matched manufacturers. It&apos;s now in Enquiries.</p>
+        <p className="text-[13px] text-[#48413b]">A new enquiry <b>{made}</b> for {fmtNum(moq)} units was sent to matched manufacturers. It&apos;s now in Enquiries.</p>
       ) : (
         <div className="space-y-[12px]">
           <Field label="Quantity (units)" hint={`Last target MOQ was ${fmtNum(p.moq)} units`}><input type="number" min={1} className={inputCls} value={moq} onChange={(e) => setMoq(Math.max(0, +e.target.value))} /></Field>

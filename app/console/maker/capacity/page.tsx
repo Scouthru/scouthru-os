@@ -51,7 +51,7 @@ export default function MakerCapacityPage() {
                     </div>
                     <div className="flex items-center gap-[8px]">
                       <Pill tone={l.pct > 100 ? "red" : l.pct >= 70 ? "orange" : "green"}>{l.pct}% booked</Pill>
-                      <button type="button" aria-label={`Edit ${l.line} capacity`} onClick={() => setEdit(l.line)} className="grid size-[28px] place-items-center rounded-[6px] border border-cs-line hover:border-[#cfcac0]"><Pencil className="size-[13px]" /></button>
+                      <button type="button" aria-label={`Edit ${l.line} capacity`} onClick={() => setEdit(l.line)} className="grid size-[28px] place-items-center rounded-[6px] border border-cs-line hover:border-[#d0c7bf]"><Pencil className="size-[13px]" /></button>
                     </div>
                   </div>
                   <Meter value={l.pct} tone={l.pct > 100 ? "red" : l.pct >= 70 ? "orange" : "green"} className="mt-[9px]" />
@@ -61,7 +61,7 @@ export default function MakerCapacityPage() {
                       const load = l.orders.reduce((a, x) => { const end = new Date(x.order.targetDelivery); const start = m; return a + (end >= start ? x.perMonth : 0); }, 0);
                       const pct = l.perMonth ? Math.round((load / l.perMonth) * 100) : 0;
                       return (
-                        <div key={i} className="rounded-[6px] bg-[#f7f6f2] px-[8px] py-[6px]">
+                        <div key={i} className="rounded-[6px] bg-[#f9f6f0] px-[8px] py-[6px]">
                           <p className="text-[10.5px] text-cs-ink-2">{m.toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" })}</p>
                           <div className="mt-[4px] flex h-[34px] items-end"><div className={cn("w-full rounded-[3px]", pct > 100 ? "bg-cs-red" : pct >= 70 ? "bg-cs-orange" : "bg-cs-green")} style={{ height: `${Math.max(4, Math.min(100, pct))}%` }} /></div>
                           <p className="mt-[3px] text-[11px] font-medium">{pct}%</p>
@@ -87,7 +87,7 @@ export default function MakerCapacityPage() {
             {packs > 0 && (
               <div className={cn("mt-[14px] rounded-[9px] border p-[13px]", fit.fits ? "border-[#cfe5d4] bg-cs-mint/50" : "border-[#f3d6b9] bg-cs-orange-bg/60")}>
                 <p className="flex items-center gap-[8px] text-[14px] font-semibold">{fit.fits ? <CheckCircle2 className="size-[18px] text-cs-green-2" /> : <TriangleAlert className="size-[18px] text-cs-orange" />}{fit.fits ? "Yes, it fits this month" : "Not this month on our own lines"}</p>
-                <ul className="mt-[6px] space-y-[2px] text-[12.5px] text-[#3e4440]">
+                <ul className="mt-[6px] space-y-[2px] text-[12.5px] text-[#48413b]">
                   <li>Runs on: {fit.line}</li>
                   <li>Needs: {fmtNum(fit.need)} {fit.unit}</li>
                   <li>Free now: {fmtNum(fit.free)} {fit.unit}</li>

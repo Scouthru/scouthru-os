@@ -22,7 +22,7 @@ const within = (iso: string, days: number) => Date.now() - new Date(iso).getTime
 
 const TAG_TONE: Record<Activity["tag"], Tone> = { Sample: "green", Production: "green", Shipment: "violet", Quality: "red", Enquiry: "green", Payment: "orange", Product: "blue", Manufacturer: "blue" };
 
-const LEVEL: Record<string, string> = { High: "bg-cs-red-bg text-cs-red", Medium: "bg-cs-orange-bg text-[#b8641f]", Low: "bg-[#f1f0ec] text-[#4b524e]" };
+const LEVEL: Record<string, string> = { High: "bg-cs-red-bg text-cs-red", Medium: "bg-cs-orange-bg text-[#a9713f]", Low: "bg-[#f6f0e7] text-[#564e47]" };
 
 type Priority = { key: string; icon: LucideIcon; tone: Tone; title: string; sub: string; due: string; level: "High" | "Medium" | "Low"; href: string; rank: number };
 
@@ -49,7 +49,7 @@ function priorities(s: ConsoleState): Priority[] {
 /** Dated events ahead: arrivals, quality reviews, sample decisions, payments. */
 function milestones(s: ConsoleState) {
   const out: { at: string; icon: LucideIcon; color: string; title: string; sub: string; href: string }[] = [];
-  s.shipments.filter((x) => x.status !== "Delivered" && daysUntil(x.eta) >= 0).forEach((x) => out.push({ at: x.eta, icon: Truck, color: "text-[#2f3431]", title: "Shipment arrival", sub: `${x.id} – ${x.destination}`, href: `/console/shipments?id=${x.id}` }));
+  s.shipments.filter((x) => x.status !== "Delivered" && daysUntil(x.eta) >= 0).forEach((x) => out.push({ at: x.eta, icon: Truck, color: "text-[#36312d]", title: "Shipment arrival", sub: `${x.id} – ${x.destination}`, href: `/console/shipments?id=${x.id}` }));
   s.quality.filter((q) => q.status === "In Testing").forEach((q) => out.push({ at: q.release, icon: ShieldCheck, color: "text-cs-orange", title: "Quality review", sub: `${q.id} – ${q.name}`, href: `/console/quality?id=${q.id}` }));
   s.samples.filter((x) => x.status === "In Review" || x.status === "Testing").forEach((x) => out.push({ at: new Date(new Date(x.requestedAt).getTime() + 7 * D).toISOString(), icon: FlaskConical, color: "text-cs-amber", title: "Sample decision", sub: `${x.id} – ${x.name}`, href: `/console/samples?id=${x.id}` }));
   s.payments.forEach((p) => p.milestones.filter((m) => m.status === "Due Soon" || m.status === "Scheduled").forEach((m) => out.push({ at: m.due, icon: CreditCard, color: "text-cs-green-2", title: `${m.name} payment`, sub: `${m.invoice} – ${inr(m.amount)}`, href: `/console/payments?id=${p.orderId}` })));
@@ -58,7 +58,7 @@ function milestones(s: ConsoleState) {
 
 function ViewAll({ href }: { href: string }) {
   return (
-    <Link href={href} className="flex items-center gap-[6px] whitespace-nowrap pt-[2px] text-[12px] font-medium text-[#2f3431] hover:text-cs-green">
+    <Link href={href} className="flex items-center gap-[6px] whitespace-nowrap pt-[2px] text-[12px] font-medium text-[#36312d] hover:text-cs-green">
       View All <ArrowRight className="size-[14px]" />
     </Link>
   );
@@ -110,9 +110,9 @@ export default function Dashboard() {
   const ACTIONS: { label: string; icon: LucideIcon; color: string; go: () => void }[] = [
     { label: "Create Enquiry", icon: FileText, color: "", go: () => router.push("/console/enquiries?new=1") },
     { label: "Request Sample", icon: FlaskConical, color: "text-cs-orange", go: () => setQuick("sample") },
-    { label: "Create Production Order", icon: Box, color: "text-[#2f3431]", go: () => setQuick("order") },
+    { label: "Create Production Order", icon: Box, color: "text-[#36312d]", go: () => setQuick("order") },
     { label: "Log Quality Issue", icon: ShieldCheck, color: "text-cs-red", go: () => setQuick("issue") },
-    { label: "Track Shipment", icon: Truck, color: "text-[#2f3431]", go: () => setQuick("track") },
+    { label: "Track Shipment", icon: Truck, color: "text-[#36312d]", go: () => setQuick("track") },
     { label: "Record Payment", icon: CreditCard, color: "text-cs-green-2", go: () => setQuick("pay") },
   ];
 
@@ -147,7 +147,7 @@ export default function Dashboard() {
               <IconDot icon={st.icon} tone={st.tone} className="size-[38px] min-[1024px]:size-[46px]" />
               <div className="min-w-0 pt-[2px]">
                 <p className="text-[21px] font-semibold leading-none group-hover:text-cs-green">{st.value}</p>
-                <p className="mt-[7px] truncate text-[13px] text-[#3e4440]">{st.label}</p>
+                <p className="mt-[7px] truncate text-[13px] text-[#48413b]">{st.label}</p>
                 <p className={cn("mt-[4px] flex items-center gap-[4px] whitespace-nowrap text-[12px]", st.bad ? "text-cs-red" : st.up ? "text-cs-green-2" : "text-cs-ink-2")}>
                   {st.up && <ArrowUp className="size-[13px] shrink-0" strokeWidth={2} />}{st.delta}
                 </p>
@@ -172,13 +172,14 @@ export default function Dashboard() {
             >
               Enquiry to Delivery Pipeline
             </CardTitle>
-            <div className="relative mt-[22px] grid grid-cols-6">
+            <div className="-mx-[4px] mt-[22px] overflow-x-auto px-[4px] pb-[4px]">
+            <div className="relative grid min-w-[620px] grid-cols-6">
               <div className="absolute left-[8.3%] right-[8.3%] top-[26px] flex">
-                {PIPE.slice(0, -1).map((p, i) => <span key={p.label} className={cn("h-[2px] flex-1", i < 3 ? "bg-cs-green" : "bg-[#dedcd6]")} />)}
+                {PIPE.slice(0, -1).map((p, i) => <span key={p.label} className={cn("h-[2px] flex-1", i < 3 ? "bg-cs-green" : "bg-[#e4dcd0]")} />)}
               </div>
               {PIPE.map((p, i) => (
                 <Link key={p.label} href={p.href} className="group relative flex flex-col items-center">
-                  <span className={cn("relative grid size-[52px] place-items-center rounded-full transition group-hover:ring-2 group-hover:ring-cs-green/30", p.tone === "green" ? "bg-cs-mint text-cs-green" : p.tone === "violet" ? "bg-cs-violet-bg text-cs-violet" : "bg-[#f1f0ec] text-[#3a403c]")}>
+                  <span className={cn("relative grid size-[52px] place-items-center rounded-full transition group-hover:ring-2 group-hover:ring-cs-green/30", p.tone === "green" ? "bg-cs-mint text-cs-green" : p.tone === "violet" ? "bg-cs-violet-bg text-cs-violet" : "bg-[#f6f0e7] text-[#433d37]")}>
                     <p.icon className="size-[24px]" strokeWidth={1.6} />
                     {(i === 0 || i === 2) && (
                       <span className="absolute -bottom-[3px] -right-[3px] grid size-[18px] place-items-center rounded-full border-2 border-white bg-cs-green text-white">
@@ -186,13 +187,14 @@ export default function Dashboard() {
                       </span>
                     )}
                   </span>
-                  <p className="mt-[8px] text-[13.5px] font-medium text-[#1d211e]">{p.label}</p>
+                  <p className="mt-[8px] text-[13.5px] font-medium text-[#221f1c]">{p.label}</p>
                   <p className="serif mt-[5px] text-[20px] font-semibold leading-none">{p.n}</p>
                   <span className={cn("mt-[8px] flex items-center gap-[3px] whitespace-nowrap rounded-[5px] px-[10px] py-[3px] text-[12px] font-medium", p.tagTone === "blue" ? `${TONE.blue.bg} ${TONE.blue.fg}` : "bg-cs-mint text-cs-green-2")}>
                     {p.tagTone === "up" && !p.tag.startsWith("0 ") && <ArrowUp className="size-[12px]" strokeWidth={2.2} />}{p.tag.startsWith("0 ") ? "None new" : p.tag}
                   </span>
                 </Link>
               ))}
+            </div>
             </div>
           </section>
 
@@ -204,7 +206,7 @@ export default function Dashboard() {
                   key={a.label}
                   type="button"
                   onClick={a.go}
-                  className={cn("flex h-[54px] items-center gap-[10px] rounded-[7px] px-[12px] text-left text-[12.5px] font-medium leading-tight tracking-[-0.01em] min-[1024px]:whitespace-nowrap", i === 0 ? "bg-cs-green text-white hover:bg-[#8f3a18]" : "border border-cs-line bg-white text-[#1f2421] hover:border-[#cfcac0]")}
+                  className={cn("flex h-[54px] items-center gap-[10px] rounded-[7px] px-[12px] text-left text-[12.5px] font-medium leading-tight tracking-[-0.01em] min-[1024px]:whitespace-nowrap", i === 0 ? "bg-cs-green text-white hover:bg-[#7c2c14]" : "border border-cs-line bg-white text-[#25211e] hover:border-[#d0c7bf]")}
                 >
                   <a.icon className={cn("size-[21px] shrink-0", a.color)} strokeWidth={1.6} />
                   {a.label}
@@ -217,7 +219,7 @@ export default function Dashboard() {
 
         <div className="mt-[14px] grid gap-[10px] min-[1024px]:grid-cols-[minmax(0,1.69fr)_minmax(0,1.09fr)_minmax(0,1fr)]">
           <section className="cs-card px-[15px] pt-[16px]">
-            <CardTitle right={<button type="button" onClick={() => setAllActivity((v) => !v)} className="flex items-center gap-[6px] whitespace-nowrap pt-[2px] text-[12px] font-medium text-[#2f3431] hover:text-cs-green">{allActivity ? "Show Less" : "View All"} <ArrowRight className="size-[14px]" /></button>}>Recent Activity</CardTitle>
+            <CardTitle right={<button type="button" onClick={() => setAllActivity((v) => !v)} className="flex items-center gap-[6px] whitespace-nowrap pt-[2px] text-[12px] font-medium text-[#36312d] hover:text-cs-green">{allActivity ? "Show Less" : "View All"} <ArrowRight className="size-[14px]" /></button>}>Recent Activity</CardTitle>
             <ul className={cn("relative mt-[8px]", allActivity && "max-h-[520px] overflow-y-auto")}>
               <span className="absolute bottom-[30px] left-[4px] top-[24px] w-px bg-cs-line" />
               {activity.map((a) => (
@@ -232,7 +234,7 @@ export default function Dashboard() {
                     </span>
                   )}
                   <Link href={a.href} className="min-w-0 flex-1 hover:text-cs-green">
-                    <p className="text-[12.5px] font-medium text-[#1d211e]">{a.who}</p>
+                    <p className="text-[12.5px] font-medium text-[#221f1c]">{a.who}</p>
                     <p className="mt-[1px] line-clamp-2 text-[11px] leading-[1.4] tracking-[-0.01em] text-cs-ink-2">{a.text}</p>
                   </Link>
                   <Pill tone={TAG_TONE[a.tag]} className="w-[64px] justify-center px-0">{a.tag}</Pill>
@@ -254,10 +256,10 @@ export default function Dashboard() {
             </div>
             <ul className="mt-[8px] space-y-[7px] pb-[10px]">
               {pri.slice(0, 5).map((p) => (
-                <li key={p.key} className="relative flex min-w-0 items-start gap-[10px] rounded-[8px] border border-cs-line px-[8px] py-[7px] hover:border-[#cfcac0]">
+                <li key={p.key} className="relative flex min-w-0 items-start gap-[10px] rounded-[8px] border border-cs-line px-[8px] py-[7px] hover:border-[#d0c7bf]">
                   <span className={cn("grid size-[38px] shrink-0 place-items-center rounded-[7px]", TONE[p.tone].bg, TONE[p.tone].fg)}><p.icon className="size-[20px]" strokeWidth={1.7} /></span>
                   <Link href={p.href} className="min-w-0 flex-1">
-                    <p className="text-[12px] font-medium text-[#1d211e]">{p.title}</p>
+                    <p className="text-[12px] font-medium text-[#221f1c]">{p.title}</p>
                     <p className="mt-[1px] truncate pr-[24px] text-[10.5px] tracking-[-0.01em] text-cs-ink-2">{p.sub}</p>
                     <p className="mt-[2px] text-[11px] text-cs-red">{p.due}</p>
                   </Link>
@@ -299,13 +301,13 @@ export default function Dashboard() {
                   return (
                     <li key={m.title + m.sub} className="border-b border-cs-line last:border-0">
                       <Link href={m.href} className="flex items-center gap-[12px] py-[5px] hover:text-cs-green">
-                        <span className="grid h-[36px] w-[30px] shrink-0 place-content-center rounded-[6px] bg-[#f3f1ec] text-center leading-none">
+                        <span className="grid h-[36px] w-[30px] shrink-0 place-content-center rounded-[6px] bg-[#f6f1e9] text-center leading-none">
                           <span className="serif block text-[14.5px] font-semibold">{ist(m.at).d}</span>
                           <span className="block text-[10px] text-cs-ink-2">{fmtMon(m.at)}</span>
                         </span>
                         <m.icon className={cn("size-[20px] shrink-0", m.color)} strokeWidth={1.6} />
                         <div className="min-w-0">
-                          <p className="text-[12.5px] text-[#1d211e]">{m.title}</p>
+                          <p className="text-[12.5px] text-[#221f1c]">{m.title}</p>
                           <p className="truncate text-[11px] text-cs-ink-2">{m.sub}</p>
                         </div>
                       </Link>

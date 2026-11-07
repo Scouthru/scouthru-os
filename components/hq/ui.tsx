@@ -23,7 +23,7 @@ export function Box({ title, icon: Icon, sub, right, href, children, className }
     </>
   );
   return (
-    <section className={cn("flex min-w-0 flex-col rounded-[14px] border border-cs-line bg-white p-[18px] shadow-[0_1px_2px_rgba(20,30,25,0.04)]", className)}>
+    <section className={cn("flex min-w-0 flex-col rounded-[14px] border border-cs-line bg-white p-[18px] shadow-[0_1px_2px_rgba(60,40,25,0.04)]", className)}>
       <div className="mb-[12px] flex flex-wrap items-start justify-between gap-3">
         {href ? <Link href={href} className="flex min-w-0 shrink-0 items-center gap-[10px] hover:text-cs-green">{head}</Link> : <h2 className="flex min-w-0 shrink-0 items-center gap-[10px]">{head}</h2>}
         {right}
@@ -71,7 +71,7 @@ export function TypeBadge({ type, className }: { type: MemberType; className?: s
 
 const STAGE_TONE: Record<Stage, string> = {
   New: "bg-cs-blue-bg text-cs-blue",
-  Documents: "bg-cs-orange-bg text-[#b8641f]",
+  Documents: "bg-cs-orange-bg text-[#a9713f]",
   Visit: "bg-cs-violet-bg text-cs-violet",
   Review: "bg-cs-mint text-cs-green",
   Live: "bg-cs-ok-bg text-cs-ok",
@@ -90,7 +90,7 @@ export function StageTrack({ s, m, compact }: { s: HqState; m: Member; compact?:
         const now = i === p.index && p.stage !== "Live";
         return (
           <li key={st} className="flex-1">
-            <span className={cn("block h-[6px] rounded-full", done ? "bg-cs-green" : now ? "bg-cs-orange/70" : "bg-[#ece8df]")} />
+            <span className={cn("block h-[6px] rounded-full", done ? "bg-cs-green" : now ? "bg-cs-orange/70" : "bg-[#ede7de]")} />
             {!compact && (
               <span className={cn("mt-[6px] flex items-center gap-[3px] text-[11.5px]", done ? "text-cs-green-2" : now ? "font-semibold text-cs-ink" : "text-cs-ink-2")}>
                 {done && <Check className="size-[11px]" />}{st}
@@ -138,7 +138,7 @@ export function packText(pack: string, m: Member, s: HqState) {
     "Renewal reminder": expiring.length
       ? `Your ${expiring.map((r) => `${r.doc.kind} ${r.days < 0 ? "has expired" : `runs out in ${r.days} days`}`).join(" and ")}. Please send the renewed copy so your listing stays active.`
       : "All your licences are up to date.",
-    "Plans and pricing": "Free: ₹0. Pro: ₹4,999 a month. Done for you: included in the order price.",
+    "Plans and pricing": "Free: ₹0. Pro: ask us and we will share the details. Done for you: included in the order price.",
     "Agreement to sign": "Please review and sign the attached Scouthru partner agreement.",
     "Login details": `Your Scouthru account is ready. Sign in with ${m.email || m.phone} at scouthru.com.`,
   };
@@ -237,7 +237,7 @@ export function FilePreview({ file, onClose }: { file: { fileKey?: string; name:
   const image = state.type?.startsWith("image/") || (state.missing && file.thumb);
   return (
     <Modal open onClose={onClose} width={860} title={file.title} sub={file.name}
-      footer={state.url ? <a href={state.url} download={file.name} className="inline-flex h-[38px] items-center gap-[7px] rounded-[7px] border border-cs-line px-[14px] text-[13px] font-medium hover:border-[#cfcac0]"><Download className="size-[15px]" />Download</a> : undefined}>
+      footer={state.url ? <a href={state.url} download={file.name} className="inline-flex h-[38px] items-center gap-[7px] rounded-[7px] border border-cs-line px-[14px] text-[13px] font-medium hover:border-[#d0c7bf]"><Download className="size-[15px]" />Download</a> : undefined}>
       {image ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={state.url ?? file.thumb} alt={file.title} className="mx-auto max-h-[65vh] rounded-[8px] object-contain" />

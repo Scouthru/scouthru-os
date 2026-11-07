@@ -12,6 +12,7 @@ import { ROLE_ICON, ROLE_JOB, ROLE_LABEL, TABS_FOR, canOpen, ownersOf, unread, u
 import type { Teammate } from "@/lib/hq/types";
 import { AddMemberDialog, SendDialog, StagePill } from "./ui";
 import { cn } from "@/lib/cn";
+import { BrandMark } from "@/components/brand-mark";
 
 /** Dialogs any HQ page (or the command bar) can open. */
 export type HqAction = "add" | "send";
@@ -98,16 +99,16 @@ function CommandBar() {
             if (e.key === "Escape") { setOpen(false); input.current?.blur(); }
           }}
           placeholder="Find a member, or type what you want to do…"
-          className="min-w-0 flex-1 bg-transparent text-[14px] outline-none placeholder:text-[#7a7f7b]"
+          className="min-w-0 flex-1 bg-transparent text-[14px] outline-none placeholder:text-[#897c70]"
           aria-label="Search members or actions"
         />
         <kbd className="hidden rounded-[5px] border border-cs-line px-[6px] text-[11px] text-cs-ink-2 sm:block">/</kbd>
       </div>
       {open && results.length > 0 && (
-        <ul className="absolute left-0 right-0 top-full z-40 mt-[6px] max-h-[60vh] overflow-y-auto rounded-[12px] border border-cs-line bg-white p-[6px] shadow-[0_18px_48px_rgba(20,30,25,0.16)]" role="listbox">
+        <ul className="absolute left-0 right-0 top-full z-40 mt-[6px] max-h-[60vh] overflow-y-auto rounded-[12px] border border-cs-line bg-white p-[6px] shadow-[0_18px_48px_rgba(60,40,25,0.16)]" role="listbox">
           {results.map((r, i) => (
             <li key={r.key} role="option" aria-selected={i === cursor}>
-              <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => pick(i)} onMouseEnter={() => setCursor(i)} className={cn("flex w-full items-center gap-[10px] rounded-[8px] px-[10px] py-[8px] text-left", i === cursor && "bg-[#f7f5f0]")}>
+              <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => pick(i)} onMouseEnter={() => setCursor(i)} className={cn("flex w-full items-center gap-[10px] rounded-[8px] px-[10px] py-[8px] text-left", i === cursor && "bg-[#f9f5ee]")}>
                 {r.icon ? <r.icon className="size-[16px] shrink-0 text-cs-green-2" strokeWidth={1.8} /> : <span className="size-[16px] shrink-0" />}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[13.5px] font-medium">{r.label}</span>
@@ -193,17 +194,17 @@ export function HqShell({ children }: { children: React.ReactNode }) {
   const allowed = !me || canOpen(me.role, path);
 
   return (
-    <div className="min-h-dvh bg-[#f6f3ec]">
-      <header className="sticky top-0 z-30 border-b border-cs-line bg-[#f6f3ec]/95 backdrop-blur">
+    <div className="min-h-dvh bg-[#f7f2eb]">
+      <header className="sticky top-0 z-30 border-b border-cs-line bg-[#f7f2eb]/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-6 gap-y-[10px] px-4 pt-[12px] sm:px-6">
-          <Link href="/hq" className="flex items-baseline gap-[7px]">
-            <span className="serif text-[26px] font-semibold leading-none tracking-[-0.02em] text-cs-green">Scouthru</span>
+          <Link href="/hq" className="flex items-center gap-[7px]">
+            <BrandMark className="h-[28px] text-cs-green" />
             <span className="rounded-[5px] bg-cs-deep px-[6px] py-[2px] text-[10.5px] font-semibold tracking-[0.14em] text-white">HQ</span>
           </Link>
           <div className="order-last w-full sm:order-none sm:w-auto sm:flex-1">{me && (me.role === "owner" || me.role === "onboarding") && <CommandBar />}</div>
           <div className="ml-auto flex items-center gap-[10px]">
             {me && (me.role === "owner" || me.role === "onboarding") && (
-              <button type="button" onClick={() => setAction({ action: "add" })} className="inline-flex h-[40px] items-center gap-[7px] rounded-[9px] bg-cs-green px-[14px] text-[13px] font-medium text-white hover:bg-[#8f3a18]">
+              <button type="button" onClick={() => setAction({ action: "add" })} className="inline-flex h-[40px] items-center gap-[7px] rounded-[9px] bg-cs-green px-[14px] text-[13px] font-medium text-white hover:bg-[#7c2c14]">
                 <UserPlus className="size-[16px]" /><span className="hidden sm:inline">Add member</span>
               </button>
             )}
@@ -214,7 +215,7 @@ export function HqShell({ children }: { children: React.ReactNode }) {
           {tabs.map((href) => {
             const t = TAB[href];
             return (
-              <Link key={href} href={href} className={cn("flex items-center gap-[7px] whitespace-nowrap border-b-2 px-[12px] pb-[10px] pt-[4px] text-[13.5px] font-medium", active(href) ? "border-cs-green text-cs-green" : "border-transparent text-[#3e4440] hover:text-cs-ink")}>
+              <Link key={href} href={href} className={cn("flex items-center gap-[7px] whitespace-nowrap border-b-2 px-[12px] pb-[10px] pt-[4px] text-[13.5px] font-medium", active(href) ? "border-cs-green text-cs-green" : "border-transparent text-[#48413b] hover:text-cs-ink")}>
                 <t.icon className="size-[16px]" strokeWidth={1.8} />{href === "/hq" ? homeLabel : t.label}
                 {!!counts[href] && <span className="rounded-full bg-cs-green px-[6px] text-[10.5px] font-semibold leading-[17px] text-white">{counts[href]}</span>}
               </Link>
@@ -245,7 +246,7 @@ function MeMenu({ me, onSwitch }: { me: Teammate; onSwitch: () => void }) {
   const Icon = ROLE_ICON[me.role];
   return (
     <div className="relative">
-      <button type="button" onClick={() => setOpen((o) => !o)} onBlur={() => setTimeout(() => setOpen(false), 150)} aria-expanded={open} className="flex h-[40px] items-center gap-[8px] rounded-[9px] border border-cs-line bg-white pl-[6px] pr-[10px] text-left hover:border-[#cfcac0]">
+      <button type="button" onClick={() => setOpen((o) => !o)} onBlur={() => setTimeout(() => setOpen(false), 150)} aria-expanded={open} className="flex h-[40px] items-center gap-[8px] rounded-[9px] border border-cs-line bg-white pl-[6px] pr-[10px] text-left hover:border-[#d0c7bf]">
         <span className="grid size-[28px] place-items-center rounded-full bg-cs-mint text-cs-green-2"><Icon className="size-[15px]" strokeWidth={1.8} /></span>
         <span className="hidden leading-tight sm:block">
           <span className="block max-w-[140px] truncate text-[12.5px] font-semibold">{me.name}</span>
@@ -254,9 +255,9 @@ function MeMenu({ me, onSwitch }: { me: Teammate; onSwitch: () => void }) {
         <ChevronDown className="size-[14px] text-cs-ink-2" />
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-[6px] w-[240px] rounded-[11px] border border-cs-line bg-white p-[6px] shadow-[0_18px_48px_rgba(20,30,25,0.16)]">
+        <div className="absolute right-0 top-full z-50 mt-[6px] w-[240px] rounded-[11px] border border-cs-line bg-white p-[6px] shadow-[0_18px_48px_rgba(60,40,25,0.16)]">
           <p className="px-[10px] pb-[6px] pt-[4px] text-[11.5px] text-cs-ink-2">{ROLE_JOB[me.role]}</p>
-          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={onSwitch} className="flex w-full items-center gap-[9px] rounded-[8px] px-[10px] py-[8px] text-left text-[13px] hover:bg-[#f7f5f0]"><LogOut className="size-[15px] text-cs-ink-2" />Sign out / switch person</button>
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={onSwitch} className="flex w-full items-center gap-[9px] rounded-[8px] px-[10px] py-[8px] text-left text-[13px] hover:bg-[#f9f5ee]"><LogOut className="size-[15px] text-cs-ink-2" />Sign out / switch person</button>
         </div>
       )}
     </div>
@@ -266,10 +267,10 @@ function MeMenu({ me, onSwitch }: { me: Teammate; onSwitch: () => void }) {
 /** Staff sign-in. Demo: pick a seat. Real logins (email or Google, staff only) arrive with the backend. */
 function SignInScreen({ team, onPick, toasts }: { team: Teammate[]; onPick: (id: string) => void; toasts: { id: number; text: string; tone: "ok" | "info" | "bad" }[] }) {
   return (
-    <div className="grid min-h-dvh place-items-center bg-[#f6f3ec] px-4 py-[40px]">
+    <div className="grid min-h-dvh place-items-center bg-[#f7f2eb] px-4 py-[40px]">
       <div className="w-full max-w-[560px]">
-        <p className="flex items-baseline gap-[7px]">
-          <span className="serif text-[30px] font-semibold leading-none tracking-[-0.02em] text-cs-green">Scouthru</span>
+        <p className="flex items-center gap-[7px]">
+          <BrandMark className="h-[32px] text-cs-green" />
           <span className="rounded-[5px] bg-cs-deep px-[6px] py-[2px] text-[11px] font-semibold tracking-[0.14em] text-white">HQ</span>
         </p>
         <h1 className="serif mt-[18px] text-[28px] font-semibold leading-tight">Team sign in</h1>
@@ -302,7 +303,7 @@ function SignInScreen({ team, onPick, toasts }: { team: Teammate[]; onPick: (id:
 function NotYours({ path }: { path: string }) {
   return (
     <div className="grid place-items-center py-[80px] text-center">
-      <span className="grid size-[52px] place-items-center rounded-full bg-[#f1efe9] text-cs-ink-2"><Lock className="size-[22px]" /></span>
+      <span className="grid size-[52px] place-items-center rounded-full bg-[#f5efe5] text-cs-ink-2"><Lock className="size-[22px]" /></span>
       <p className="serif mt-[12px] text-[22px] font-semibold">This area isn&apos;t part of your work</p>
       <p className="mt-[4px] text-[13.5px] text-cs-ink-2">It belongs to {ownersOf(path).map((r) => ROLE_LABEL[r]).join(", ")}.</p>
       <Link href="/hq" className="mt-[14px] inline-flex items-center gap-[5px] text-[13.5px] font-medium text-cs-green hover:underline">Back to your dashboard <ArrowRight className="size-[14px]" /></Link>

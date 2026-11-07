@@ -163,7 +163,7 @@ function Manufacturers() {
               <FilterSelect label="Location" value={loc} options={opts.locs} onChange={setLoc} className={cn("w-[74px]", SEL)} />
               <FilterSelect label="MOQ" value={moq} options={Object.keys(MOQ_RANGES)} onChange={setMoq} className={cn("w-[55px]", SEL)} />
               <FilterSelect label="Capacity" value={cap} options={opts.caps} onChange={setCap} className={cn("w-[71px]", SEL)} />
-              <button type="button" aria-label="Compact rows" aria-pressed={compact} title={compact ? "Comfortable rows" : "Compact rows"} onClick={() => setCompact((c) => !c)} className={cn("grid size-[34px] place-items-center rounded-[6px] border", compact ? "border-cs-green bg-cs-mint text-cs-green" : "border-cs-line bg-white text-[#2f3431]")}>
+              <button type="button" aria-label="Compact rows" aria-pressed={compact} title={compact ? "Comfortable rows" : "Compact rows"} onClick={() => setCompact((c) => !c)} className={cn("grid size-[34px] place-items-center rounded-[6px] border", compact ? "border-cs-green bg-cs-mint text-cs-green" : "border-cs-line bg-white text-[#36312d]")}>
                 <List className="size-[17px]" strokeWidth={1.8} />
               </button>
             </div>
@@ -196,49 +196,52 @@ function Manufacturers() {
               </div>
             )}
 
-            <div className={cn("mx-[8px] mt-[2px] grid items-center py-[10px] pl-[10px] text-[11.5px] font-medium text-[#3e4440]", COLS)}>
-              <Check checked={allChecked} onChange={(on) => setBulk(on ? new Set(list.map((m) => m.id)) : new Set())} label="Select all" />
-              <span>Manufacturer</span><span>Location</span><span>Certifications</span><span>Capabilities</span><span>Min. MOQ</span><span>Response Time</span><span />
-            </div>
-            <ul className={cn("overflow-y-auto px-[8px] pb-[8px]", showPanel ? "min-h-[300px] shrink grow basis-0" : "max-h-[640px]")}>
-              {list.map((m) => {
-                const on = showPanel && sel?.id === m.id;
-                const fast = m.responseDays[1] <= 2;
-                return (
-                  <li
-                    key={m.id}
-                    onClick={() => select(m.id)}
-                    className={cn("grid cursor-pointer items-center rounded-[8px] border pl-[10px]", COLS, compact ? "py-[5px]" : "py-[7px]", on ? "border-[1.5px] border-cs-green-2 bg-[#fbfdfb]" : "border-transparent border-b-cs-line hover:bg-[#fbfaf7]")}
-                  >
-                    <Check checked={picked.has(m.id)} onChange={(v) => setBulk((b) => { const n = new Set(b); const add = on ? !b.has(m.id) : v; if (add) n.add(m.id); else n.delete(m.id); return n; })} label={`Select ${m.name}`} />
-                    <div className="flex min-w-0 items-center gap-[12px]">
-                      {!compact && <Image src={m.img} alt="" width={96} height={96} className="size-[46px] shrink-0 rounded-[6px] object-cover" />}
-                      <div className="min-w-0">
-                        <p className="truncate text-[12px] font-medium text-[#1d211e]" title={m.shortlisted ? `${m.name} (shortlisted)` : m.name}>{m.name}</p>
-                        <p className="mt-[3px] flex items-center gap-[4px] text-[11.5px]"><Star className="size-[12px] fill-cs-amber text-cs-amber" />{m.rating} <span className="text-cs-ink-2">({m.reviews})</span></p>
+            {/* Phones: the 8-column list scrolls sideways instead of crushing its columns together. */}
+            <div className={cn("flex flex-col max-lg:overflow-x-auto", showPanel && "min-[1024px]:min-h-0 min-[1024px]:shrink min-[1024px]:grow min-[1024px]:basis-0")}>
+              <div className={cn("mx-[8px] mt-[2px] grid items-center max-lg:min-w-[720px] py-[10px] pl-[10px] text-[11.5px] font-medium text-[#48413b]", COLS)}>
+                <Check checked={allChecked} onChange={(on) => setBulk(on ? new Set(list.map((m) => m.id)) : new Set())} label="Select all" />
+                <span>Manufacturer</span><span>Location</span><span>Certifications</span><span>Capabilities</span><span>Min. MOQ</span><span>Response Time</span><span />
+              </div>
+              <ul className={cn("overflow-y-auto px-[8px] pb-[8px] max-lg:min-w-[736px]", showPanel ? "max-[1023px]:max-h-[420px] min-h-[300px] min-[1024px]:min-h-0 min-[1024px]:shrink min-[1024px]:grow min-[1024px]:basis-0" : "max-h-[640px]")}>
+                {list.map((m) => {
+                  const on = showPanel && sel?.id === m.id;
+                  const fast = m.responseDays[1] <= 2;
+                  return (
+                    <li
+                      key={m.id}
+                      onClick={() => select(m.id)}
+                      className={cn("grid cursor-pointer items-center rounded-[8px] border pl-[10px]", COLS, compact ? "py-[5px]" : "py-[7px]", on ? "border-[1.5px] border-cs-green-2 bg-[#fdfcfb]" : "border-transparent border-b-cs-line hover:bg-[#fcfaf6]")}
+                    >
+                      <Check checked={picked.has(m.id)} onChange={(v) => setBulk((b) => { const n = new Set(b); const add = on ? !b.has(m.id) : v; if (add) n.add(m.id); else n.delete(m.id); return n; })} label={`Select ${m.name}`} />
+                      <div className="flex min-w-0 items-center gap-[12px]">
+                        {!compact && <Image src={m.img} alt="" width={96} height={96} className="size-[46px] shrink-0 rounded-[6px] object-cover" />}
+                        <div className="min-w-0">
+                          <p className="truncate text-[12px] font-medium text-[#221f1c]" title={m.shortlisted ? `${m.name} (shortlisted)` : m.name}>{m.name}</p>
+                          <p className="mt-[3px] flex items-center gap-[4px] text-[11.5px]"><Star className="size-[12px] fill-cs-amber text-cs-amber" />{m.rating} <span className="text-cs-ink-2">({m.reviews})</span></p>
+                        </div>
                       </div>
-                    </div>
-                    <span className="flex items-start gap-[3px] text-[10.5px] leading-[1.35] tracking-[-0.01em] text-[#3e4440]"><MapPin className="mt-[1px] size-[12px] shrink-0" /><span>{m.state},<br />India</span></span>
-                    <span className="flex flex-wrap items-center gap-[5px]">
-                      {m.certs.slice(0, 2).map((c) => <span key={c} className="rounded-[4px] bg-[#f1f0ec] px-[6px] py-[3px] text-[10px] text-[#3e4440]">{c}</span>)}
-                      {m.certs.length > 2 && <span title={m.certs.slice(2).join(", ")} className="rounded-[4px] bg-[#f1f0ec] px-[6px] py-[3px] text-[10px] text-[#3e4440]">+{m.certs.length - 2}</span>}
-                    </span>
-                    <span className="line-clamp-2 pr-2 text-[11px] leading-[1.35] text-cs-ink-2">{m.capabilities.join(", ")}</span>
-                    <span className="leading-tight"><span className="block text-[12.5px]">{fmtNum(m.moq)}</span><span className="text-[11px] text-cs-ink-2">units</span></span>
-                    <span><span className={cn("inline-block rounded-[5px] px-[12px] py-[5px] text-[11px] font-medium", fast ? "bg-cs-mint text-cs-green-2" : "bg-cs-orange-bg text-[#b8641f]")}>{respDays(m)}</span></span>
-                    <RowMenu
-                      items={[
-                        { label: "View profile", icon: ExternalLink, onClick: () => setProfile(m.id) },
-                        { label: m.shortlisted ? "Remove from shortlist" : "Add to shortlist", icon: m.shortlisted ? BookmarkMinus : Bookmark, onClick: () => shortlistToggle(m) },
-                        { label: "Message", icon: Send, onClick: () => setMsgTo([m.id]) },
-                        { label: "Start an enquiry", icon: Plus, onClick: () => router.push("/console/enquiries?new=1") },
-                      ]}
-                    />
-                  </li>
-                );
-              })}
-              {list.length === 0 && <Empty>No manufacturers match these filters. <button type="button" className="font-medium text-cs-green underline" onClick={() => { setQ(""); setCat(""); setCert(""); setLoc(""); setMoq(""); setCap(""); setTab("all"); }}>Clear filters</button></Empty>}
-            </ul>
+                      <span className="flex items-start gap-[3px] text-[10.5px] leading-[1.35] tracking-[-0.01em] text-[#48413b]"><MapPin className="mt-[1px] size-[12px] shrink-0" /><span>{m.state},<br />India</span></span>
+                      <span className="flex flex-wrap items-center gap-[5px]">
+                        {m.certs.slice(0, 2).map((c) => <span key={c} className="rounded-[4px] bg-[#f6f0e7] px-[6px] py-[3px] text-[10px] text-[#48413b]">{c}</span>)}
+                        {m.certs.length > 2 && <span title={m.certs.slice(2).join(", ")} className="rounded-[4px] bg-[#f6f0e7] px-[6px] py-[3px] text-[10px] text-[#48413b]">+{m.certs.length - 2}</span>}
+                      </span>
+                      <span className="line-clamp-2 pr-2 text-[11px] leading-[1.35] text-cs-ink-2">{m.capabilities.join(", ")}</span>
+                      <span className="leading-tight"><span className="block text-[12.5px]">{fmtNum(m.moq)}</span><span className="text-[11px] text-cs-ink-2">units</span></span>
+                      <span><span className={cn("inline-block rounded-[5px] px-[12px] py-[5px] text-[11px] font-medium", fast ? "bg-cs-mint text-cs-green-2" : "bg-cs-orange-bg text-[#a9713f]")}>{respDays(m)}</span></span>
+                      <RowMenu
+                        items={[
+                          { label: "View profile", icon: ExternalLink, onClick: () => setProfile(m.id) },
+                          { label: m.shortlisted ? "Remove from shortlist" : "Add to shortlist", icon: m.shortlisted ? BookmarkMinus : Bookmark, onClick: () => shortlistToggle(m) },
+                          { label: "Message", icon: Send, onClick: () => setMsgTo([m.id]) },
+                          { label: "Start an enquiry", icon: Plus, onClick: () => router.push("/console/enquiries?new=1") },
+                        ]}
+                      />
+                    </li>
+                  );
+                })}
+                {list.length === 0 && <Empty>No manufacturers match these filters. <button type="button" className="font-medium text-cs-green underline" onClick={() => { setQ(""); setCat(""); setCert(""); setLoc(""); setMoq(""); setCap(""); setTab("all"); }}>Clear filters</button></Empty>}
+              </ul>
+            </div>
           </section>
 
           {showPanel && sel && (
@@ -275,7 +278,7 @@ function MfrPanel({ m, onClose, onProfile, onShortlist, onMessage }: { m: Manufa
     <aside className="cs-card min-w-0 overflow-hidden">
       <div className="px-[15px] pt-[6px]">
         <div className="flex items-center justify-between">
-          <button type="button" aria-label="Close panel" onClick={onClose} className="-ml-[4px] grid size-[26px] place-items-center rounded-[6px] hover:bg-[#f1f0ec]"><X className="size-[17px]" /></button>
+          <button type="button" aria-label="Close panel" onClick={onClose} className="-ml-[4px] grid size-[26px] place-items-center rounded-[6px] hover:bg-[#f6f0e7]"><X className="size-[17px]" /></button>
           <Menu
             items={[
               { label: "View full profile", icon: ExternalLink, onClick: onProfile },
@@ -284,7 +287,7 @@ function MfrPanel({ m, onClose, onProfile, onShortlist, onMessage }: { m: Manufa
               "sep",
               { label: "Start an enquiry", icon: Plus, onClick: () => router.push("/console/enquiries?new=1") },
             ]}
-            trigger={<span role="button" aria-label="Manufacturer actions" className="grid size-[26px] cursor-pointer place-items-center rounded-[6px] hover:bg-[#f1f0ec]"><MoreHorizontal className="size-[18px]" /></span>}
+            trigger={<span role="button" aria-label="Manufacturer actions" className="grid size-[26px] cursor-pointer place-items-center rounded-[6px] hover:bg-[#f6f0e7]"><MoreHorizontal className="size-[18px]" /></span>}
           />
         </div>
         <div className="mt-[4px] flex gap-[16px]">
@@ -294,7 +297,7 @@ function MfrPanel({ m, onClose, onProfile, onShortlist, onMessage }: { m: Manufa
             <h2 className="serif mt-[4px] text-[19px] font-semibold leading-[1.15] tracking-[-0.025em]">{m.name}</h2>
             <p className="mt-[2px] text-[12.5px] text-cs-ink-2">{kind(m)}</p>
             <p className="mt-[3px] flex items-center gap-[5px] text-[12px]"><Star className="size-[13px] fill-cs-amber text-cs-amber" /><b className="font-semibold">{m.rating}</b><span className="text-cs-ink-2">({m.reviews} reviews)</span></p>
-            <p className="mt-[2px] flex items-center gap-[5px] text-[12px] text-[#3e4440]"><MapPin className="size-[13px]" />{m.state}, India</p>
+            <p className="mt-[2px] flex items-center gap-[5px] text-[12px] text-[#48413b]"><MapPin className="size-[13px]" />{m.state}, India</p>
           </div>
         </div>
         <div className="mt-[12px] grid grid-cols-3 gap-[8px] [&_button]:h-[36px] [&_svg]:shrink-0">
@@ -321,10 +324,10 @@ function MfrPanel({ m, onClose, onProfile, onShortlist, onMessage }: { m: Manufa
         {tab === "overview" && (
           <>
             <h3 className="serif text-[16px] font-semibold leading-[20px]">About</h3>
-            <p className="mt-[1px] text-[12px] leading-[1.3] text-[#3e4440]">{m.about}</p>
+            <p className="mt-[1px] text-[12px] leading-[1.3] text-[#48413b]">{m.about}</p>
             <Facts m={m} />
             <SectionHead title="Product Categories" onAll={() => setTab("capabilities")} />
-            <div className="mt-[7px] grid grid-cols-4 gap-[6px]">
+            <div className="mt-[7px] grid grid-cols-2 gap-[6px] sm:grid-cols-4">
               {m.categories.slice(0, 4).map((c) => (
                 <div key={c} className="flex items-center gap-[5px] rounded-[7px] border border-cs-line px-[4px] py-[5px]">
                   {CAT_IMG[c] ? <Image src={CAT_IMG[c]} alt="" width={96} height={84} className="h-[34px] w-[34px] shrink-0 object-contain" /> : <span className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[5px] bg-cs-mint text-cs-green"><Building2 className="size-[16px]" /></span>}
@@ -334,13 +337,13 @@ function MfrPanel({ m, onClose, onProfile, onShortlist, onMessage }: { m: Manufa
             </div>
             <h3 className="serif mt-[10px] text-[16px] font-semibold leading-[20px]">Certifications &amp; Compliance</h3>
             <div className="mt-[6px] flex flex-wrap gap-[6px]">
-              {m.certs.map((c) => <span key={c} className="rounded-[5px] bg-[#f1f0ec] px-[10px] py-[4px] text-[11px] text-[#3e4440]">{certLabel(c)}</span>)}
+              {m.certs.map((c) => <span key={c} className="rounded-[5px] bg-[#f6f0e7] px-[10px] py-[4px] text-[11px] text-[#48413b]">{certLabel(c)}</span>)}
             </div>
             <div className="mt-[10px] flex items-center justify-between">
               <h3 className="serif text-[16px] font-semibold leading-[20px]">Recent Performance</h3>
               <span className="text-[11px] text-cs-ink-2">vs. network average</span>
             </div>
-            <div className="mt-[6px] grid grid-cols-4 gap-[6px]">
+            <div className="mt-[6px] grid grid-cols-2 gap-[6px] sm:grid-cols-4">
               <Perf icon={Truck} value={`${m.onTime}%`} label="On-Time Delivery" good={m.onTime >= net.onTime} delta={pct(m.onTime, net.onTime)} />
               <Perf icon={ShieldCheck} value={`${m.qualityIssues}%`} label="Quality Issues" good={m.qualityIssues <= net.issues} delta={pct(m.qualityIssues, net.issues)} invert />
               <Perf icon={FileText} value={`${m.avgResponse} days`} label="Avg. Response" good={m.avgResponse <= net.resp} delta={pct(m.avgResponse, net.resp)} invert />
@@ -367,7 +370,7 @@ function MfrPanel({ m, onClose, onProfile, onShortlist, onMessage }: { m: Manufa
             </div>
             <div>
               <p className="font-semibold">Product categories</p>
-              <div className="mt-[6px] flex flex-wrap gap-[6px]">{m.categories.map((c) => <span key={c} className="rounded-[5px] bg-[#f1f0ec] px-[10px] py-[4px] text-[11.5px]">{c}</span>)}</div>
+              <div className="mt-[6px] flex flex-wrap gap-[6px]">{m.categories.map((c) => <span key={c} className="rounded-[5px] bg-[#f6f0e7] px-[10px] py-[4px] text-[11.5px]">{c}</span>)}</div>
             </div>
             <dl className="grid grid-cols-2 gap-[8px]">
               {[["Minimum order", `${fmtNum(m.moq)} units`], ["Monthly capacity", `${m.unitsPerMonth} units`], ["Facility", `${m.sqft} sq ft`], ["Typical reply", respDays(m)], ["Experience", `${m.years}+ years`], ["Brands served", `${m.brands}+`]].map(([k, v]) => (
@@ -416,7 +419,7 @@ function SectionHead({ title, onAll }: { title: string; onAll: () => void }) {
   return (
     <div className="mt-[10px] flex items-center justify-between">
       <h3 className="serif text-[16px] font-semibold leading-[20px]">{title}</h3>
-      <button type="button" onClick={onAll} className="flex items-center gap-[6px] text-[12px] font-medium text-[#2f3431] hover:text-cs-green">View All <span aria-hidden>→</span></button>
+      <button type="button" onClick={onAll} className="flex items-center gap-[6px] text-[12px] font-medium text-[#36312d] hover:text-cs-green">View All <span aria-hidden>→</span></button>
     </div>
   );
 }
@@ -424,11 +427,11 @@ function SectionHead({ title, onAll }: { title: string; onAll: () => void }) {
 function Facts({ m }: { m: Manufacturer }) {
   const items: [typeof Clock3, string, string][] = [[Clock3, `${m.years}+`, "Years Experience"], [Users, `${m.brands}+`, "Global Brands"], [Gauge, m.unitsPerMonth, "Units/Month"], [MapPin, m.sqft, "Sq. Ft. Facility"]];
   return (
-    <div className="mt-[9px] grid grid-cols-4 border-y border-cs-line py-[6px]">
+    <div className="mt-[9px] grid grid-cols-2 gap-y-[8px] border-y border-cs-line py-[6px] sm:grid-cols-4 sm:gap-y-0">
       {items.map(([Icon, v, l], i) => (
-        <div key={l} className={cn("flex items-center gap-[7px] px-[7px]", i > 0 && "border-l border-cs-line")}>
+        <div key={l} className={cn("flex items-center gap-[7px] px-[7px]", i % 2 === 1 && "border-l border-cs-line", i === 2 && "sm:border-l sm:border-cs-line")}>
           <span className="grid size-[26px] shrink-0 place-items-center rounded-full bg-cs-mint text-cs-green-2"><Icon className="size-[14px]" strokeWidth={1.7} /></span>
-          <span className="min-w-0 leading-tight"><span className="serif block text-[14px] font-semibold">{v}</span><span className="block whitespace-nowrap text-[8.5px] leading-[1.15] tracking-[-0.01em] text-cs-ink-2">{l}</span></span>
+          <span className="min-w-0 leading-tight"><span className="serif block text-[14px] font-semibold">{v}</span><span className="block text-[8.5px] leading-[1.15] tracking-[-0.01em] text-cs-ink-2">{l}</span></span>
         </div>
       ))}
     </div>
@@ -441,7 +444,7 @@ function Perf({ icon: Icon, value, label, good, delta, invert }: { icon: typeof 
     <div className="rounded-[8px] border border-cs-line px-[6px] py-[4px]">
       <div className="flex items-start gap-[5px]">
         <span className={cn("grid size-[24px] shrink-0 place-items-center rounded-full", label === "Customer Rating" ? "bg-cs-orange-bg text-cs-orange" : "bg-cs-mint text-cs-green-2")}><Icon className="size-[13px]" strokeWidth={1.7} /></span>
-        <span className="min-w-0 leading-tight"><span className="block whitespace-nowrap text-[12.5px] font-semibold">{value}</span><span className="block whitespace-nowrap text-[8.5px] leading-[1.15] tracking-[-0.01em] text-cs-ink-2">{label}</span></span>
+        <span className="min-w-0 leading-tight"><span className="block whitespace-nowrap text-[12.5px] font-semibold">{value}</span><span className="block text-[8.5px] leading-[1.15] tracking-[-0.01em] text-cs-ink-2">{label}</span></span>
       </div>
       <span className={cn("ml-[29px] mt-[2px] inline-flex items-center gap-[2px] rounded-[4px] px-[5px] text-[10px] font-medium", good ? "bg-cs-mint text-cs-green-2" : "bg-cs-red-bg text-cs-red")}>
         <Arrow className="size-[10px]" strokeWidth={2.4} />{delta}%
@@ -460,14 +463,14 @@ function Reviews({ m }: { m: Manufacturer }) {
       <div className="flex items-center gap-[16px]">
         <div className="text-center">
           <p className="serif text-[36px] font-semibold leading-none">{m.rating}</p>
-          <p className="mt-[4px] flex justify-center gap-[1px]">{[1, 2, 3, 4, 5].map((i) => <Star key={i} className={cn("size-[12px]", i <= Math.round(m.rating) ? "fill-cs-amber text-cs-amber" : "text-[#d6d8d3]")} />)}</p>
+          <p className="mt-[4px] flex justify-center gap-[1px]">{[1, 2, 3, 4, 5].map((i) => <Star key={i} className={cn("size-[12px]", i <= Math.round(m.rating) ? "fill-cs-amber text-cs-amber" : "text-[#e1d8ca]")} />)}</p>
           <p className="mt-[3px] text-[11px] text-cs-ink-2">{m.reviews} reviews</p>
         </div>
         <div className="flex-1 space-y-[4px]">
           {split.map(([st, p]) => (
             <div key={st} className="flex items-center gap-[8px] text-[11px]">
               <span className="w-[16px] text-cs-ink-2">{st}★</span>
-              <span className="h-[6px] flex-1 overflow-hidden rounded-full bg-[#f1f0ec]"><span className="block h-full rounded-full bg-cs-green-2" style={{ width: `${p}%` }} /></span>
+              <span className="h-[6px] flex-1 overflow-hidden rounded-full bg-[#f6f0e7]"><span className="block h-full rounded-full bg-cs-green-2" style={{ width: `${p}%` }} /></span>
               <span className="w-[30px] text-right text-cs-ink-2">{p}%</span>
             </div>
           ))}
@@ -517,7 +520,7 @@ function ProfileModal({ id, onClose, onMessage }: { id: string; onClose: () => v
           </ul>
         </div>
         <div className="space-y-[12px]">
-          <p className="text-[13px] leading-[1.5] text-[#3e4440]">{m.about}</p>
+          <p className="text-[13px] leading-[1.5] text-[#48413b]">{m.about}</p>
           <Facts m={m} />
           <div>
             <p className="text-[12px] font-semibold">Capabilities</p>
@@ -525,7 +528,7 @@ function ProfileModal({ id, onClose, onMessage }: { id: string; onClose: () => v
           </div>
           <div>
             <p className="text-[12px] font-semibold">Certifications</p>
-            <div className="mt-[6px] flex flex-wrap gap-[6px]">{m.certs.map((c) => <span key={c} className="rounded-[5px] bg-[#f1f0ec] px-[9px] py-[3px] text-[11.5px]">{certLabel(c)}</span>)}</div>
+            <div className="mt-[6px] flex flex-wrap gap-[6px]">{m.certs.map((c) => <span key={c} className="rounded-[5px] bg-[#f6f0e7] px-[9px] py-[3px] text-[11.5px]">{certLabel(c)}</span>)}</div>
           </div>
           <div>
             <p className="text-[12px] font-semibold">Your work with {m.short}</p>

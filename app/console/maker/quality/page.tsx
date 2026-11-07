@@ -8,6 +8,8 @@ import { Btn, Check, Empty, Pill, StatStrip, Tabs, inputCls, type Tone } from "@
 import { Avatar, WideHero } from "@/components/console/making";
 import { KV, Meter, Page, Panel, Split, tdc, thc } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
+import { NextAction, Timeline } from "@/components/console/flow";
+import { qualityNext, qualityTimeline } from "@/lib/console/flow";
 import { submitLabResults } from "@/lib/console/actions-network";
 import { mine, replyOnBatch } from "@/lib/console/actions-maker";
 import { ago, fmtDate, fmtNum } from "@/lib/console/format";
@@ -71,7 +73,7 @@ function MakerQuality() {
                     const passed = b.tests.filter((t) => t.status === "Pass").length;
                     const on = cur?.id === b.id;
                     return (
-                      <tr key={b.id} onClick={() => setSel(b.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#faf9f5]")}>
+                      <tr key={b.id} onClick={() => setSel(b.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
                         <td className={cn(tdc, on && "border-l-2 border-l-cs-green")}>
                           <div className="flex items-center gap-[10px]">
                             <Image src={b.img} alt="" width={36} height={36} className="size-[36px] rounded-[6px] object-cover" />
@@ -98,13 +100,14 @@ function MakerQuality() {
 }
 
 function BatchPanel({ b }: { b: QualityBatch }) {
-  const { update, toast } = useConsole();
+  const { s, update, toast } = useConsole();
   const [draft, setDraft] = useState<Record<string, "Pass" | "Fail" | "">>(() => Object.fromEntries(b.tests.map((t) => [t.name, t.status === "Pass" || t.status === "Fail" ? t.status : ""])));
   const coaDone = b.checklist.find((c) => c.label === "COA reviewed")?.status === "Completed";
   const [coa, setCoa] = useState(coaDone);
   const [reply, setReply] = useState("");
   const changed = b.tests.some((t) => (draft[t.name] || "") !== (t.status === "Pass" || t.status === "Fail" ? t.status : "")) || coa !== coaDone;
   const locked = b.status === "Passed";
+  const flow = qualityNext(s, b, "maker");
 
   return (
     <Panel bodyClass="px-[15px] pb-[14px] pt-[14px]">
@@ -116,6 +119,7 @@ function BatchPanel({ b }: { b: QualityBatch }) {
           <Pill tone={STATUS_TONE[b.status]} className="mt-[6px]">{b.status === "Passed" ? "Released by the brand" : b.status}</Pill>
         </div>
       </div>
+      <NextAction step={flow} onAction={flow.action === "results" ? () => document.getElementById("lab-results")?.scrollIntoView({ behavior: "smooth", block: "start" }) : undefined} className="mt-[12px]" />
       <dl className="mt-[10px]">
         <KV k="Batch size" v={`${fmtNum(b.size)} units`} />
         <KV k="Manufactured" v={fmtDate(b.mfgDate)} />
@@ -123,15 +127,15 @@ function BatchPanel({ b }: { b: QualityBatch }) {
         {b.shipmentId && <KV k="Shipment" v={b.shipmentId} />}
       </dl>
 
-      <h4 className="serif mt-[12px] text-[16px] font-semibold">Lab results</h4>
-      <ul className="mt-[4px] divide-y divide-[#f1efea]">
+      <h4 id="lab-results" className="serif mt-[12px] scroll-mt-[80px] text-[16px] font-semibold">Lab results</h4>
+      <ul className="mt-[4px] divide-y divide-[#f5efe6]">
         {b.tests.map((t) => (
           <li key={t.name} className="flex items-center justify-between gap-2 py-[5px] text-[12px]">
             <span className="min-w-0 truncate">{t.name}</span>
             <div className="flex gap-[4px]" role="group" aria-label={t.name}>
               {(["Pass", "Fail"] as const).map((v) => (
                 <button key={v} type="button" disabled={locked} onClick={() => setDraft({ ...draft, [t.name]: draft[t.name] === v ? "" : v })}
-                  className={cn("h-[24px] rounded-[5px] border px-[9px] text-[11px] font-medium disabled:opacity-60", draft[t.name] === v ? (v === "Pass" ? "border-cs-green bg-cs-green text-white" : "border-cs-red bg-cs-red text-white") : "border-cs-line bg-white text-[#3e4440]")}>{v}</button>
+                  className={cn("h-[24px] rounded-[5px] border px-[9px] text-[11px] font-medium disabled:opacity-60", draft[t.name] === v ? (v === "Pass" ? "border-cs-green bg-cs-green text-white" : "border-cs-red bg-cs-red text-white") : "border-cs-line bg-white text-[#48413b]")}>{v}</button>
               ))}
             </div>
           </li>
@@ -149,14 +153,17 @@ function BatchPanel({ b }: { b: QualityBatch }) {
       <h4 className="serif mt-[14px] text-[16px] font-semibold">Brand checklist</h4>
       <ul className="mt-[4px] space-y-[3px] text-[12px]">
         {b.checklist.map((c) => (
-          <li key={c.label} className="flex items-center justify-between"><span className="flex items-center gap-[6px]"><CheckCircle2 className={cn("size-[14px]", c.status === "Completed" ? "text-cs-green-2" : "text-[#c9ccc7]")} />{c.label}</span><span className="text-[11px] text-cs-ink-2">{c.status}</span></li>
+          <li key={c.label} className="flex items-center justify-between"><span className="flex items-center gap-[6px]"><CheckCircle2 className={cn("size-[14px]", c.status === "Completed" ? "text-cs-green-2" : "text-[#d2c9c1]")} />{c.label}</span><span className="text-[11px] text-cs-ink-2">{c.status}</span></li>
         ))}
       </ul>
+
+      <h4 className="serif mt-[14px] text-[16px] font-semibold">Timeline</h4>
+      <Timeline items={qualityTimeline(s, b)} next={flow} className="mt-[8px]" />
 
       <h4 className="serif mt-[14px] text-[16px] font-semibold">Notes ({b.notes.length})</h4>
       <ul className="mt-[6px] space-y-[8px]">
         {b.notes.map((n, i) => (
-          <li key={i} className="flex gap-[9px]"><Avatar name={n.who} size={26} /><div className="min-w-0 text-[12px]"><p><b>{n.who}</b> <span className="text-cs-ink-2">· {ago(n.at)}</span></p><p className="text-[#3e4440]">{n.text}</p></div></li>
+          <li key={i} className="flex gap-[9px]"><Avatar name={n.who} size={26} /><div className="min-w-0 text-[12px]"><p><b>{n.who}</b> <span className="text-cs-ink-2">· {ago(n.at)}</span></p><p className="text-[#48413b]">{n.text}</p></div></li>
         ))}
         {b.notes.length === 0 && <li className="text-[12px] text-cs-ink-2">No notes yet.</li>}
       </ul>

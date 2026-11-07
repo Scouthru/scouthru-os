@@ -82,7 +82,7 @@ export function DeskShell({
                   href={n.href}
                   onClick={() => setOpen(false)}
                   aria-current={on ? "page" : undefined}
-                  className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] font-medium text-[#c5cec9] transition-colors hover:bg-white/5 hover:text-white", on && "bg-pine-2 font-semibold text-white")}
+                  className={cn("flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] font-medium text-[#d2c9c1] transition-colors hover:bg-white/5 hover:text-white", on && "bg-pine-2 font-semibold text-white")}
                 >
                   {Icon && <Icon className={cn("size-[17px] shrink-0", on ? "text-apricot" : "text-white/55")} />}
                   <span className="flex-1">{n.label}</span>
@@ -99,7 +99,7 @@ export function DeskShell({
   const help = (
     <div className="rounded-[14px] bg-pine-2 p-4">
       <p className="text-[14px] font-semibold text-white">{cta.title}</p>
-      <p className="mt-1 text-[12px] leading-snug text-[#c5cec9]">{cta.text}</p>
+      <p className="mt-1 text-[12px] leading-snug text-[#d2c9c1]">{cta.text}</p>
       <Link href={cta.href} onClick={() => setOpen(false)} className="mt-3 flex h-10 items-center justify-center gap-1.5 rounded-lg bg-flame text-[14px] font-semibold text-white hover:bg-flame-2">
         {cta.label} <ArrowUpRight className="size-4" />
       </Link>
@@ -158,7 +158,7 @@ export function DeskShell({
               {menu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setMenu(false)} />
-                  <div role="menu" className="rise absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[14px] border border-line bg-white py-1.5 shadow-[0_18px_40px_-20px_rgba(16,32,27,.45)]">
+                  <div role="menu" className="rise absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[14px] border border-line bg-white py-1.5 shadow-[0_18px_40px_-20px_rgba(34,30,27,.45)]">
                     <div className="border-b border-line px-4 py-2.5 md:hidden"><p className="text-[14px] font-semibold">{company}</p><p className="text-[12px] text-ink-2">{role}</p></div>
                     <Link role="menuitem" href="/demo" onClick={() => setMenu(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-[14px] hover:bg-soft"><Repeat className="size-4 text-ink-2" />Switch view</Link>
                     <Link role="menuitem" href="/marketplace" onClick={() => setMenu(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-[14px] hover:bg-soft"><Store className="size-4 text-ink-2" />Marketplace</Link>

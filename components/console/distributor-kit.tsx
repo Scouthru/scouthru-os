@@ -100,7 +100,7 @@ export function ReceiveModal({ sh, onClose }: { sh: Shipment | null; onClose: ()
       </>}
     >
       <div className="space-y-[12px]">
-        <div className="grid grid-cols-3 gap-[10px] rounded-[8px] bg-[#f7f6f2] p-[12px] text-[12px]">
+        <div className="grid grid-cols-3 gap-[10px] rounded-[8px] bg-[#f9f6f0] p-[12px] text-[12px]">
           <div><p className="text-cs-ink-2">Invoiced</p><p className="text-[16px] font-semibold">{fmtNum(sh.qty)}</p></div>
           <div><p className="text-cs-ink-2">Short / excess</p><p className={short > 0 ? "text-[16px] font-semibold text-cs-red" : "text-[16px] font-semibold"}>{short > 0 ? `−${fmtNum(short)}` : short < 0 ? `+${fmtNum(-short)}` : "0"}</p></div>
           <div><p className="text-cs-ink-2">Good into stock</p><p className="text-[16px] font-semibold text-cs-green">{fmtNum(Math.max(0, received - damaged))}</p></div>
@@ -157,7 +157,7 @@ export function NewOrderModal({ open, onClose, onCreated }: { open: boolean; onC
           <datalist id="dist-areas">{areas.map((a) => <option key={a} value={a} />)}</datalist>
         </div>
         <div>
-          <p className="mb-[6px] text-[12px] font-medium text-[#3e4440]">Lines</p>
+          <p className="mb-[6px] text-[12px] font-medium text-[#48413b]">Lines</p>
           <div className="space-y-[8px]">
             {lines.map((l, i) => {
               const st = s.distStock.find((x) => x.sku === l.sku);
@@ -168,7 +168,7 @@ export function NewOrderModal({ open, onClose, onCreated }: { open: boolean; onC
                   </select>
                   <input className={inputCls} type="number" min={1} value={l.qty} onChange={(e) => setLines(lines.map((x, k) => (k === i ? { ...x, qty: Math.max(0, Number(e.target.value)) } : x)))} aria-label="Quantity" />
                   <span className="text-right text-[12.5px] font-medium">{inr((st?.price ?? 0) * l.qty)}</span>
-                  <button type="button" aria-label="Remove line" disabled={lines.length === 1} onClick={() => setLines(lines.filter((_, k) => k !== i))} className="grid size-[32px] place-items-center rounded-[6px] text-cs-ink-2 hover:bg-[#f1f0ec] disabled:opacity-30"><Trash2 className="size-[15px]" /></button>
+                  <button type="button" aria-label="Remove line" disabled={lines.length === 1} onClick={() => setLines(lines.filter((_, k) => k !== i))} className="grid size-[32px] place-items-center rounded-[6px] text-cs-ink-2 hover:bg-[#f6f0e7] disabled:opacity-30"><Trash2 className="size-[15px]" /></button>
                 </div>
               );
             })}
@@ -205,10 +205,10 @@ export function CollectModal({ order, onClose }: { order: RetailOrder | null; on
     >
       <div className="space-y-[12px]">
         <div>
-          <p className="mb-[6px] text-[12px] font-medium text-[#3e4440]">Mode</p>
+          <p className="mb-[6px] text-[12px] font-medium text-[#48413b]">Mode</p>
           <div className="flex gap-[8px]">
             {(["Cash", "UPI", "Cheque"] as const).map((m) => (
-              <button key={m} type="button" onClick={() => setMode(m)} aria-pressed={mode === m} className={mode === m ? "h-[36px] rounded-full border border-cs-green bg-cs-green px-[16px] text-[12.5px] font-medium text-white" : "h-[36px] rounded-full border border-cs-line bg-white px-[16px] text-[12.5px] font-medium hover:border-[#9aa19c]"}>{m}</button>
+              <button key={m} type="button" onClick={() => setMode(m)} aria-pressed={mode === m} className={mode === m ? "h-[36px] rounded-full border border-cs-green bg-cs-green px-[16px] text-[12.5px] font-medium text-white" : "h-[36px] rounded-full border border-cs-line bg-white px-[16px] text-[12.5px] font-medium hover:border-[#ad9c8e]"}>{m}</button>
             ))}
           </div>
         </div>

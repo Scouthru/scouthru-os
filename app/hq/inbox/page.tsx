@@ -40,7 +40,7 @@ export default function InboxPage() {
               return (
                 <li key={it.id} className="grid items-center gap-[10px] py-[12px] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,0.8fr)_auto]">
                   <button type="button" onClick={() => setPreview(it)} className="group flex min-w-0 items-center gap-[11px] text-left">
-                    <span className="grid size-[48px] shrink-0 place-items-center overflow-hidden rounded-[8px] bg-[#f3f0e9]">
+                    <span className="grid size-[48px] shrink-0 place-items-center overflow-hidden rounded-[8px] bg-[#f6f0e6]">
                       {it.thumb ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={it.thumb} alt="" className="size-full object-cover" />

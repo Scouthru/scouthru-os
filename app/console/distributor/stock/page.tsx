@@ -84,7 +84,7 @@ function Stock() {
             <div className="mt-[14px] min-h-0 flex-1 overflow-auto">
               <table className="w-full min-w-[720px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10">
-                  <tr className="bg-[#f7f6f2]">
+                  <tr className="bg-[#f9f6f0]">
                     <th className={cn(th, "rounded-l-[6px] pl-[10px]")}>Product</th>
                     <th className={th}>Batch</th>
                     <th className={th}>Expiry</th>
@@ -102,7 +102,7 @@ function Stock() {
                     const f = flag(x);
                     const exp = daysTo(x.expiry);
                     return (
-                      <tr key={x.sku} onClick={() => pick(x.sku)} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fbfdfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#faf9f6]")}>
+                      <tr key={x.sku} onClick={() => pick(x.sku)} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
                         <td className="py-[9px] pl-[10px] pr-[8px]">
                           <div className="flex items-center gap-[10px]">
                             <Image src={x.img} alt="" width={42} height={42} className="size-[42px] shrink-0 rounded-[6px] object-cover" />
@@ -142,7 +142,7 @@ function Stock() {
                   <p className="text-[12px] text-cs-ink-2">{cur.sku} · {cur.brand}</p>
                   <div className="mt-[5px]"><Pill tone={flag(cur) === "Healthy" ? "green" : flag(cur) === "Below reorder" ? "orange" : "red"}>{flag(cur)}</Pill></div>
                 </div>
-                <button type="button" aria-label="Close" onClick={() => { setSel(null); router.replace("/console/distributor/stock", { scroll: false }); }} className="grid size-[28px] place-items-center rounded-[6px] hover:bg-[#f1f0ec]"><X className="size-[16px]" /></button>
+                <button type="button" aria-label="Close" onClick={() => { setSel(null); router.replace("/console/distributor/stock", { scroll: false }); }} className="grid size-[28px] place-items-center rounded-[6px] hover:bg-[#f6f0e7]"><X className="size-[16px]" /></button>
               </div>
               <dl className="mt-[12px] grid grid-cols-3 gap-[8px] text-[12px]">
                 {[["On hand", fmtNum(cur.onHand)], ["Value", inr(cur.onHand * cur.price)], ["Batch", cur.batch], ["Expiry", fmtDate(cur.expiry)], ["MRP", inr(cur.mrp)], ["Margin", `${Math.round(((cur.mrp - cur.price) / cur.mrp) * 100)}%`]].map(([k, v]) => (
@@ -150,7 +150,7 @@ function Stock() {
                 ))}
               </dl>
               <div className="mt-[12px] flex items-end gap-[8px]">
-                <label className="flex-1"><span className="mb-[4px] block text-[11.5px] font-medium text-[#3e4440]">Reorder level</span><input className={inputCls} type="number" min={0} value={level} onChange={(e) => setLevel(Number(e.target.value))} /></label>
+                <label className="flex-1"><span className="mb-[4px] block text-[11.5px] font-medium text-[#48413b]">Reorder level</span><input className={inputCls} type="number" min={0} value={level} onChange={(e) => setLevel(Number(e.target.value))} /></label>
                 <Btn className="h-[38px]" disabled={level === cur.reorderAt || level < 0} onClick={() => { update((d) => setReorderLevel(d, cur.sku, level)); toast(`Reorder level for ${cur.sku} set to ${level}`); }}>Save</Btn>
               </div>
               <div className="mt-[14px] min-h-0 flex-1 overflow-y-auto">

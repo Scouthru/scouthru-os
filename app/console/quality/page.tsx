@@ -14,6 +14,8 @@ import {
 } from "@/components/console/kit";
 import { Avatar, Loading, QB_TONE, WideHero, CT } from "@/components/console/making";
 import { useConsole } from "@/lib/console/store";
+import { NextAction, Timeline as FlowTimeline } from "@/components/console/flow";
+import { qualityNext, qualityTimeline } from "@/lib/console/flow";
 import { approveBatch, log, raiseIssue, retestBatch } from "@/lib/console/actions";
 import { ago, download, fmtDate, fmtDateTime, fmtNum } from "@/lib/console/format";
 import type { CheckStatus, ConsoleState, QualityBatch, TestStatus } from "@/lib/console/types";
@@ -58,10 +60,10 @@ function workflow(q: QualityBatch): StepState[] {
 const STEP_PILL: Record<StepState, string> = {
   Completed: "bg-cs-ok-bg text-cs-ok",
   "In Progress": "bg-cs-blue-bg text-cs-blue",
-  Pending: "bg-cs-orange-bg text-[#b8641f]",
+  Pending: "bg-cs-orange-bg text-[#a9713f]",
   "Issues Found": "bg-cs-red-bg text-cs-red",
 };
-const CHECK_PILL: Record<CheckStatus, string> = { Completed: "bg-cs-ok-bg text-cs-ok", "In Progress": "bg-cs-blue-bg text-cs-blue", Pending: "bg-cs-orange-bg text-[#b8641f]" };
+const CHECK_PILL: Record<CheckStatus, string> = { Completed: "bg-cs-ok-bg text-cs-ok", "In Progress": "bg-cs-blue-bg text-cs-blue", Pending: "bg-cs-orange-bg text-[#a9713f]" };
 const NEXT_CHECK: Record<CheckStatus, CheckStatus> = { Pending: "In Progress", "In Progress": "Completed", Completed: "Pending" };
 const DOC_ICON: Record<string, LucideIcon> = { GMP: ShieldCheck, FSSAI: FileText, "ISO 22000": Globe, COA: FlaskConical, "Stability Data": BarChart3, "Microbial Test": Settings2 };
 const RANGES: Record<string, number> = { "Last 7 days": 7, "Last 30 days": 30, "Last 90 days": 90 };
@@ -71,7 +73,7 @@ function T({ children, right, sub, size = 16.5 }: { children: React.ReactNode; r
   return (
     <div className="flex items-start justify-between gap-[8px]">
       <div className="min-w-0">
-        <h2 className="serif truncate font-semibold leading-tight tracking-[-0.02em] text-[#151816]" style={{ fontSize: size }}>{children}</h2>
+        <h2 className="serif truncate font-semibold leading-tight tracking-[-0.02em] text-[#191614]" style={{ fontSize: size }}>{children}</h2>
         {sub && <p className="mt-[3px] text-[12.5px] text-cs-ink-2">{sub}</p>}
       </div>
       {right && <div className="shrink-0">{right}</div>}
@@ -83,7 +85,7 @@ function TestBadge({ status }: { status: TestStatus }) {
   if (status === "Pass") return <span className="flex items-center gap-[6px] text-[12px] text-cs-ok"><span className="grid size-[15px] place-items-center rounded-full bg-cs-ok text-white"><CheckIcon className="size-[9px]" strokeWidth={3} /></span>Pass</span>;
   if (status === "Fail") return <span className="flex items-center gap-[6px] text-[12px] text-cs-red"><span className="grid size-[15px] place-items-center rounded-full bg-cs-red text-white"><X className="size-[9px]" strokeWidth={3} /></span>Fail</span>;
   if (status === "In Progress") return <span className="flex items-center gap-[5px] rounded-[5px] bg-cs-blue-bg px-[7px] py-[2px] text-[11.5px] text-cs-blue"><span className="size-[10px] rounded-full border-2 border-cs-blue border-r-transparent" />In Progress</span>;
-  return <span className="flex items-center gap-[5px] rounded-[5px] bg-cs-orange-bg px-[7px] py-[2px] text-[11.5px] text-[#b8641f]"><span className="size-[10px] rounded-full border-2 border-cs-orange border-r-transparent" />Pending</span>;
+  return <span className="flex items-center gap-[5px] rounded-[5px] bg-cs-orange-bg px-[7px] py-[2px] text-[11.5px] text-[#a9713f]"><span className="size-[10px] rounded-full border-2 border-cs-orange border-r-transparent" />Pending</span>;
 }
 
 /** Stable "valid until" per document so the modal reads the same across visits. */
@@ -192,19 +194,24 @@ function QualityInner() {
           { icon: BarChart3, tone: "green", value: `${rate}%`, label: "Batch Approval Rate", delta: `${passed} of ${decided.length} decided batches` },
         ]} />
 
+        {batch && (() => {
+          const flow = qualityNext(s, batch, "brand");
+          return <NextAction step={flow} className="mt-[11px]" onAction={flow.action === "approve" ? approve : flow.action === "decide" ? () => document.getElementById("batch-details")?.scrollIntoView({ behavior: "smooth", block: "start" }) : flow.action === "shipment" && batch.shipmentId ? () => router.push(`/console/shipments?id=${batch.shipmentId}`) : undefined} />;
+        })()}
         <div className="mt-[11px] grid gap-[11px] min-[1024px]:grid-cols-[minmax(0,582fr)_minmax(0,321fr)_minmax(0,291fr)]">
           {/* column 1 */}
           <div className="flex min-w-0 flex-col gap-[12px]">
             <section className="cs-card px-[15px] pb-[14px] pt-[12px]">
               <T size={19} sub={batch ? `Track the quality journey for ${batch.id} from testing to final approval.` : "Track the quality journey for each batch from testing to final approval."}>Quality Workflow</T>
               {batch ? (
-                <div className="relative mt-[18px] grid grid-cols-5">
+                <div className="mt-[18px] overflow-x-auto pb-[4px]">
+                <div className="relative grid min-w-[540px] grid-cols-5">
                   <div className="absolute left-[10%] right-[10%] top-[22px] flex">
-                    {WF.slice(0, -1).map((w, i) => <span key={w.label} className={cn("h-[2px] flex-1", wf[i] === "Completed" ? "bg-cs-green" : "bg-[#dedcd6]")} />)}
+                    {WF.slice(0, -1).map((w, i) => <span key={w.label} className={cn("h-[2px] flex-1", wf[i] === "Completed" ? "bg-cs-green" : "bg-[#e4dcd0]")} />)}
                   </div>
                   {WF.map((w, i) => (
                     <div key={w.label} className="relative flex flex-col items-center text-center">
-                      <span className={cn("relative grid size-[46px] place-items-center rounded-full", wf[i] === "Pending" ? "border border-[#e2e0da] bg-[#f6f5f1] text-[#4b524e]" : wf[i] === "Issues Found" ? "bg-cs-red-bg text-cs-red" : "bg-cs-mint text-cs-green")}>
+                      <span className={cn("relative grid size-[46px] place-items-center rounded-full", wf[i] === "Pending" ? "border border-[#e7e0d5] bg-[#f9f5ee] text-[#564e47]" : wf[i] === "Issues Found" ? "bg-cs-red-bg text-cs-red" : "bg-cs-mint text-cs-green")}>
                         <w.icon className="size-[21px]" strokeWidth={1.6} />
                         {wf[i] === "Completed" && <span className="absolute -bottom-[2px] -right-[2px] grid size-[17px] place-items-center rounded-full border-2 border-white bg-cs-green text-white"><CheckIcon className="size-[9px]" strokeWidth={3} /></span>}
                       </span>
@@ -212,6 +219,7 @@ function QualityInner() {
                       <span className={cn("mt-[6px] rounded-[5px] px-[9px] py-[2px] text-[11px] font-medium", STEP_PILL[wf[i]])}>{wf[i]}</span>
                     </div>
                   ))}
+                </div>
                 </div>
               ) : <Empty>Select a batch to see its workflow.</Empty>}
             </section>
@@ -233,10 +241,10 @@ function QualityInner() {
                   <button type="button" onClick={clearSel} className="ml-auto text-cs-ink-2 hover:underline">Clear</button>
                 </div>
               )}
-              <table className="mt-[10px] w-full table-fixed text-[11px] [&_td]:pr-[6px] [&_th]:pr-[6px] [&_th]:whitespace-nowrap">
+              <div className="max-lg:overflow-x-auto"><table className="mt-[10px] w-full max-lg:min-w-[640px] table-fixed text-[11px] [&_td]:pr-[6px] [&_th]:pr-[6px] [&_th]:whitespace-nowrap">
                 <colgroup><col className="w-[34px]" /><col className="w-[112px]" /><col className="w-[83px]" /><col className="w-[83px]" /><col className="w-[45px]" /><col className="w-[85px]" /><col /><col className="w-[28px]" /></colgroup>
                 <thead>
-                  <tr className="text-left text-[11px] text-[#3e4440]">
+                  <tr className="text-left text-[11px] text-[#48413b]">
                     <th className="w-[34px] py-[8px] pl-[10px]"><Check label="Select all batches" checked={list.length > 0 && list.every((x) => sel.includes(x.id))} onChange={(v) => { if (v) { setPicked(list.map((x) => x.id)); setOffActive(false); } else clearSel(); }} /></th>
                     <th className="font-medium">Batch ID</th><th className="font-medium">Product</th><th className="font-medium">Manufacturer</th><th className="font-medium">Tests</th><th className="font-medium">Overall Status</th><th className="font-medium">Last Updated</th><th />
                   </tr>
@@ -247,7 +255,7 @@ function QualityInner() {
                     const on = batch?.id === x.id;
                     const done = x.tests.filter((t) => t.status === "Pass" || t.status === "Fail").length;
                     return (
-                      <tr key={x.id} onClick={() => select(x.id)} className={cn("cursor-pointer", on ? "outline outline-[1.5px] -outline-offset-1 outline-cs-green-2 [&>td]:bg-[#fbfdfb]" : "border-t border-[#f1efea] hover:bg-[#faf9f6]")}>
+                      <tr key={x.id} onClick={() => select(x.id)} className={cn("cursor-pointer", on ? "outline outline-[1.5px] -outline-offset-1 outline-cs-green-2 [&>td]:bg-[#fdfcfb]" : "border-t border-[#f5efe6] hover:bg-[#fbf9f5]")}>
                         <td className={cn("pl-[10px]", on && "rounded-l-[8px]")}><Check label={`Select ${x.id}`} checked={sel.includes(x.id)} onChange={(v) => { setPicked((p) => (v ? [...p, x.id] : p.filter((y) => y !== x.id))); if (on) setOffActive(!v); }} /></td>
                         <td className={compact ? "py-[5px]" : "py-[13px]"}>
                           <span className="flex items-center gap-[8px]">
@@ -256,7 +264,7 @@ function QualityInner() {
                           </span>
                         </td>
                         <td className="text-[10.5px] leading-[15px] tracking-[-0.01em]">{x.name}</td>
-                        <td className="text-[10.5px] leading-[15px] tracking-[-0.01em] text-[#3e4440]">{mfr(x.mfrId)?.name}</td>
+                        <td className="text-[10.5px] leading-[15px] tracking-[-0.01em] text-[#48413b]">{mfr(x.mfrId)?.name}</td>
                         <td className="whitespace-nowrap">{done} / {x.tests.length}</td>
                         <td><Pill tone={QB_TONE[x.status]} className="px-[8px] py-[2px] text-[10.5px]">{x.status}</Pill></td>
                         <td className="whitespace-nowrap leading-[15px]">{fmtDate(x.updatedAt)}<br /><span className="text-[10.5px] text-cs-ink-2">{ago(x.updatedAt)}</span></td>
@@ -273,7 +281,7 @@ function QualityInner() {
                     );
                   })}
                 </tbody>
-              </table>
+              </table></div>
             </section>
           </div>
 
@@ -286,7 +294,7 @@ function QualityInner() {
                   const Icon = DOC_ICON[c.name] ?? FileText;
                   return (
                     <button key={c.name} type="button" onClick={() => setDoc(c.name)} className="flex h-[54px] items-start gap-[6px] rounded-[7px] border border-cs-line px-[7px] py-[8px] text-left hover:border-cs-green-2/60">
-                      <Icon className="mt-[1px] size-[16px] shrink-0 text-[#3e4440]" strokeWidth={1.6} />
+                      <Icon className="mt-[1px] size-[16px] shrink-0 text-[#48413b]" strokeWidth={1.6} />
                       <span className="min-w-0">
                         <span className="block whitespace-nowrap text-[10px] font-medium leading-tight tracking-[-0.02em]">{c.name}</span>
                         <Pill tone={c.status === "Valid" ? "green" : c.status === "Expiring" ? "orange" : "red"} className="mt-[4px] px-[7px] py-[1px] text-[10px]">{c.status}</Pill>
@@ -302,11 +310,11 @@ function QualityInner() {
               <ul className="mt-[4px]">
                 {issuesOpen.length === 0 && <li className="flex items-center gap-[8px] py-[10px] text-[12.5px] text-cs-green-2"><CheckCircle2 className="size-[16px]" />No open quality issues.</li>}
                 {issuesOpen.slice(0, 3).map((i) => (
-                  <li key={i.id} className="flex items-start gap-[9px] border-b border-[#f1efea] py-[7px] leading-[15px] last:border-0">
+                  <li key={i.id} className="flex items-start gap-[9px] border-b border-[#f5efe6] py-[7px] leading-[15px] last:border-0">
                     <span className={cn("grid size-[32px] shrink-0 place-items-center rounded-[7px]", i.level === "Medium" ? "bg-cs-orange-bg text-cs-orange" : "bg-cs-red-bg text-cs-red")}>{i.level === "Medium" ? <FlaskConical className="size-[17px]" strokeWidth={1.7} /> : <AlertTriangle className="size-[17px]" strokeWidth={1.7} />}</span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[11px] font-semibold tracking-[-0.01em]">{i.title}</p>
-                      <p className="truncate text-[10px] tracking-[-0.01em] text-[#3e4440]">{i.ref}</p>
+                      <p className="truncate text-[10px] tracking-[-0.01em] text-[#48413b]">{i.ref}</p>
                       <p className="text-[10px] text-cs-ink-2">{ago(i.at)}</p>
                     </div>
                     <Pill tone={i.level === "High" ? "red" : i.level === "Medium" ? "orange" : "gray"} className="mt-[4px] px-[7px] py-[1px] text-[10.5px]">{i.level}</Pill>
@@ -329,8 +337,8 @@ function QualityInner() {
                         align="right"
                         items={(["Pass", "Fail", "In Progress", "Pending"] as const).map((st) => ({ label: `Set ${st}`, onClick: () => setTest(t.name, st), disabled: t.status === st }))}
                         trigger={
-                          <button type="button" className="flex w-full items-center gap-[9px] rounded-[5px] px-[2px] py-[3px] text-left hover:bg-[#faf9f6]">
-                            {(() => { const I = testIcon(t.name); return <I className="size-[15px] shrink-0 text-[#3e4440]" strokeWidth={1.6} />; })()}
+                          <button type="button" className="flex w-full items-center gap-[9px] rounded-[5px] px-[2px] py-[3px] text-left hover:bg-[#fbf9f5]">
+                            {(() => { const I = testIcon(t.name); return <I className="size-[15px] shrink-0 text-[#48413b]" strokeWidth={1.6} />; })()}
                             <span className="min-w-0 flex-1 truncate text-[11px]">{t.name}</span>
                             <TestBadge status={t.status} />
                           </button>
@@ -344,8 +352,8 @@ function QualityInner() {
           </div>
 
           {/* column 3: batch details */}
-          <section className="cs-card min-w-0 px-[12px] pb-[10px] pt-[11px]">
-            <T right={batch && <button type="button" aria-label="Close batch details" onClick={() => setClosed(true)} className="-mt-[2px] grid size-[20px] place-items-center rounded-[5px] hover:bg-[#f1f0ec]"><X className="size-[15px]" /></button>}>Batch Details</T>
+          <section id="batch-details" className="cs-card min-w-0 scroll-mt-[80px] px-[12px] pb-[10px] pt-[11px]">
+            <T right={batch && <button type="button" aria-label="Close batch details" onClick={() => setClosed(true)} className="-mt-[2px] grid size-[20px] place-items-center rounded-[5px] hover:bg-[#f6f0e7]"><X className="size-[15px]" /></button>}>Batch Details</T>
             {!batch ? (
               <div className="py-[30px] text-center text-[12.5px] text-cs-ink-2">
                 Select a batch from the list to review its tests and approve it.
@@ -370,7 +378,7 @@ function QualityInner() {
                     ["Target Market", batch.market],
                     ["Expected Release", fmtDate(batch.release)],
                   ] as [string, React.ReactNode][]).map(([k, v]) => (
-                    <div key={k} className="grid grid-cols-[116px_1fr] py-[2px] text-[10.5px] leading-[16px]"><dt className="text-[#3e4440]">{k}</dt><dd className="min-w-0 truncate">{v}</dd></div>
+                    <div key={k} className="grid grid-cols-[116px_1fr] py-[2px] text-[10.5px] leading-[16px]"><dt className="text-[#48413b]">{k}</dt><dd className="min-w-0 truncate">{v}</dd></div>
                   ))}
                 </dl>
 
@@ -378,7 +386,7 @@ function QualityInner() {
                   <div className="flex items-center justify-between"><p className="serif text-[15px] font-semibold">Quality Status</p><Pill tone={QB_TONE[batch.status]} className="px-[7px] py-[1px] text-[10.5px]">{batch.status}</Pill></div>
                   <p className="mt-[4px] flex items-center gap-[6px] text-[11px]"><ShieldCheck className="size-[15px] text-cs-blue" strokeWidth={1.7} />{testsDone} of {batch.tests.length} tests completed</p>
                   <div className="mt-[4px] flex items-center gap-[8px]">
-                    <div className="h-[6px] flex-1 overflow-hidden rounded-full bg-[#e9e7e1]"><div className="h-full rounded-full bg-cs-green-2" style={{ width: `${testPct}%` }} /></div>
+                    <div className="h-[6px] flex-1 overflow-hidden rounded-full bg-[#ece7de]"><div className="h-full rounded-full bg-cs-green-2" style={{ width: `${testPct}%` }} /></div>
                     <span className="text-[11px]">{testPct}%</span>
                   </div>
                 </div>
@@ -392,7 +400,7 @@ function QualityInner() {
                           type="button"
                           title="Click to change status"
                           onClick={() => mod(batch.id, (x, d) => { const it = x.checklist.find((y) => y.label === c.label); if (it) { it.status = NEXT_CHECK[it.status]; log(d, { text: `${x.id} checklist: ${c.label} → ${it.status}`, tag: "Quality", href: `/console/quality?id=${x.id}` }); } })}
-                          className="flex w-full items-center gap-[7px] rounded-[4px] py-[2px] text-left hover:bg-[#faf9f6]"
+                          className="flex w-full items-center gap-[7px] rounded-[4px] py-[2px] text-left hover:bg-[#fbf9f5]"
                         >
                           {c.status === "Completed"
                             ? <span className="grid size-[15px] shrink-0 place-items-center rounded-full bg-cs-green-2 text-white"><CheckIcon className="size-[9px]" strokeWidth={3} /></span>
@@ -415,7 +423,7 @@ function QualityInner() {
                       <div className="min-w-0">
                         <p className="text-[11.5px] font-semibold">{batch.notes[0].who}</p>
                         <p className="text-[10.5px] text-cs-ink-2">{fmtDateTime(batch.notes[0].at)}</p>
-                        <p className="mt-[2px] line-clamp-2 text-[11px] leading-[1.4] text-[#3e4440]">{batch.notes[0].text}</p>
+                        <p className="mt-[2px] line-clamp-2 text-[11px] leading-[1.4] text-[#48413b]">{batch.notes[0].text}</p>
                       </div>
                     </div>
                   )}
@@ -432,6 +440,10 @@ function QualityInner() {
                 <div className="mt-[7px] grid grid-cols-2 gap-[8px]">
                   <Btn icon={RotateCcw} className="!h-[35px] !gap-[6px] !px-[6px] !text-[11.5px]" onClick={() => { setReason(""); setModal("retest"); }}>Request Re-Test</Btn>
                   <Btn kind="danger" icon={AlertTriangle} className="!h-[35px] !gap-[6px] !px-[6px] !text-[11.5px]" onClick={() => { setIssue({ title: "", level: "Medium", detail: "" }); setModal("issue"); }}>Raise Issue</Btn>
+                </div>
+                <div className="mt-[10px] border-t border-cs-line pt-[8px]">
+                  <p className="serif text-[15px] font-semibold">Timeline</p>
+                  <FlowTimeline items={qualityTimeline(s, batch)} next={qualityNext(s, batch, "brand")} className="mt-[8px]" />
                 </div>
               </>
             )}
@@ -460,7 +472,7 @@ function QualityInner() {
         <ul className="mt-[12px] max-h-[45dvh] space-y-[12px] overflow-y-auto">
           {batch?.notes.length === 0 && <Empty>No notes yet.</Empty>}
           {batch?.notes.map((n, i) => (
-            <li key={i} className="flex gap-[10px]"><Avatar name={n.who} size={32} /><div><p className="text-[12.5px] font-semibold">{n.who} <span className="ml-[4px] text-[11px] font-normal text-cs-ink-2">{fmtDateTime(n.at)}</span></p><p className="text-[12.5px] text-[#3e4440]">{n.text}</p></div></li>
+            <li key={i} className="flex gap-[10px]"><Avatar name={n.who} size={32} /><div><p className="text-[12.5px] font-semibold">{n.who} <span className="ml-[4px] text-[11px] font-normal text-cs-ink-2">{fmtDateTime(n.at)}</span></p><p className="text-[12.5px] text-[#48413b]">{n.text}</p></div></li>
           ))}
         </ul>
       </Modal>
@@ -484,7 +496,7 @@ function QualityInner() {
         <table className="w-full text-[12.5px]">
           <tbody>
             {batch?.tests.map((t) => (
-              <tr key={t.name} className="border-b border-[#f1efea]">
+              <tr key={t.name} className="border-b border-[#f5efe6]">
                 <td className="py-[8px]">{t.name}</td>
                 <td><TestBadge status={t.status} /></td>
                 <td className="text-right">
@@ -499,7 +511,7 @@ function QualityInner() {
       <Modal open={modal === "batches"} onClose={() => setModal(null)} title="All quality batches" sub={`${s.quality.length} batches`} width={680}>
         <ul className="max-h-[55dvh] divide-y divide-cs-line overflow-y-auto">
           {s.quality.map((x) => (
-            <li key={x.id}><button type="button" onClick={() => { select(x.id); setModal(null); }} className="flex w-full items-center gap-[10px] py-[9px] text-left hover:bg-[#f7f6f2]">
+            <li key={x.id}><button type="button" onClick={() => { select(x.id); setModal(null); }} className="flex w-full items-center gap-[10px] py-[9px] text-left hover:bg-[#f9f6f0]">
               <Image src={x.img} alt="" width={64} height={64} className="size-[36px] rounded-[6px] object-cover" />
               <span className="flex-1"><b className="text-[13px] font-semibold">{x.id}</b> <span className="text-[12.5px]">{x.name}</span><span className="block text-[11.5px] text-cs-ink-2">{mfr(x.mfrId)?.name} · updated {ago(x.updatedAt)}</span></span>
               <Pill tone={QB_TONE[x.status]}>{x.status}</Pill>
@@ -511,8 +523,8 @@ function QualityInner() {
       <Modal open={modal === "docs"} onClose={() => setModal(null)} title="Compliance documents" width={560}>
         <ul className="divide-y divide-cs-line">
           {s.compliance.map((c) => (
-            <li key={c.name}><button type="button" onClick={() => { setModal(null); setDoc(c.name); }} className="flex w-full items-center gap-[10px] py-[9px] text-left hover:bg-[#f7f6f2]">
-              <FileText className="size-[18px] text-[#3e4440]" strokeWidth={1.6} /><span className="flex-1 text-[13px]">{c.name}<span className="block text-[11.5px] text-cs-ink-2">Valid until {fmtDate(validUntil(c.name))}</span></span>
+            <li key={c.name}><button type="button" onClick={() => { setModal(null); setDoc(c.name); }} className="flex w-full items-center gap-[10px] py-[9px] text-left hover:bg-[#f9f6f0]">
+              <FileText className="size-[18px] text-[#48413b]" strokeWidth={1.6} /><span className="flex-1 text-[13px]">{c.name}<span className="block text-[11.5px] text-cs-ink-2">Valid until {fmtDate(validUntil(c.name))}</span></span>
               <Pill tone={c.status === "Valid" ? "green" : c.status === "Expiring" ? "orange" : "red"}>{c.status}</Pill>
             </button></li>
           ))}

@@ -6,6 +6,8 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { CheckCircle2, FileText, FlaskConical, Paperclip, Send, Timer, Truck, Upload, XCircle } from "lucide-react";
 import { Btn, Empty, Field, Modal, Pill, RowMenu, SearchBox, StatStrip, Tabs, inputCls, textareaCls } from "@/components/console/kit";
 import { Avatar, WideHero } from "@/components/console/making";
+import { NextAction, Timeline } from "@/components/console/flow";
+import { sampleNext, sampleTimeline } from "@/lib/console/flow";
 import { KV, MAKER_SAMPLE_TONE, Page, Panel, Split, tdc, thc } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
 import { attachToSample, dispatchSample, replyOnSample } from "@/lib/console/actions-network";
@@ -71,7 +73,7 @@ function MakerSamples() {
                   {list.map((x) => {
                     const on = current?.id === x.id;
                     return (
-                      <tr key={x.id} onClick={() => setSel(x.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#faf9f5]")}>
+                      <tr key={x.id} onClick={() => setSel(x.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
                         <td className={cn(tdc, on && "border-l-2 border-l-cs-green")}>
                           <div className="flex items-center gap-[10px]">
                             <Image src={x.img} alt="" width={36} height={36} className="size-[36px] rounded-[6px] object-cover" />
@@ -110,10 +112,11 @@ function SampleDetail({ x, onSend }: { x: Sample; onSend: () => void }) {
   const [reply, setReply] = useState("");
   const [file, setFile] = useState("");
   const e = s.enquiries.find((y) => y.id === x.enquiryId);
-  const canSend = x.status === "Submitted" || x.status === "Changes Requested";
   const files = FILES(x.id).filter((f) => !x.attachments.includes(f));
+  const next = sampleNext(s, x, "maker");
   return (
     <Panel bodyClass="px-[15px] pb-[14px] pt-[14px]">
+      <NextAction step={next} onAction={next.action === "dispatch" || next.action === "revise" ? onSend : undefined} className="mb-[12px]" />
       <div className="flex items-start gap-[12px]">
         <Image src={x.img} alt="" width={72} height={72} className="size-[64px] rounded-[8px] object-cover" />
         <div className="min-w-0">
@@ -148,7 +151,7 @@ function SampleDetail({ x, onSend }: { x: Sample; onSend: () => void }) {
         {x.comments.map((c, i) => (
           <li key={i} className="flex gap-[9px]">
             <Avatar name={c.who} size={28} />
-            <div className="min-w-0 text-[12px]"><p><b>{c.who}</b> <span className="text-cs-ink-2">· {ago(c.at)}</span></p><p className="mt-[1px] leading-[1.45] text-[#3e4440]">{c.text}</p></div>
+            <div className="min-w-0 text-[12px]"><p><b>{c.who}</b> <span className="text-cs-ink-2">· {ago(c.at)}</span></p><p className="mt-[1px] leading-[1.45] text-[#48413b]">{c.text}</p></div>
           </li>
         ))}
         {x.comments.length === 0 && <li className="text-[12px] text-cs-ink-2">No comments yet.</li>}
@@ -158,8 +161,9 @@ function SampleDetail({ x, onSend }: { x: Sample; onSend: () => void }) {
         <Btn type="submit" icon={Send} className="h-[34px] text-[12px]" disabled={!reply.trim()}>Send</Btn>
       </form>
 
-      {canSend && <Btn kind="primary" icon={Truck} className="mt-[14px] w-full" onClick={onSend}>{x.status === "Submitted" ? "Mark dispatched" : "Send revised sample"}</Btn>}
-      {x.status === "Approved" && <p className="mt-[14px] flex items-center gap-[7px] rounded-[8px] bg-cs-mint/60 px-[11px] py-[9px] text-[12.5px] text-cs-green"><CheckCircle2 className="size-[16px]" />Approved by the brand{x.orderId ? ` · order ${x.orderId}` : ""}.</p>}
+
+      <h4 className="serif mt-[16px] text-[16px] font-semibold">Timeline</h4>
+      <Timeline items={sampleTimeline(s, x)} next={next} className="mt-[8px]" />
     </Panel>
   );
 }

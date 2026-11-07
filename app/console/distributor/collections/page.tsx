@@ -96,7 +96,7 @@ function Collections() {
             <div className="mt-[14px] min-h-0 flex-1 overflow-auto">
               <table className="w-full min-w-[700px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10">
-                  <tr className="bg-[#f7f6f2]">
+                  <tr className="bg-[#f9f6f0]">
                     <th className={cn(th, "rounded-l-[6px] pl-[10px]")}>Order &amp; Retailer</th>
                     <th className={th}>Delivered</th>
                     <th className={th}>Age</th>
@@ -111,8 +111,8 @@ function Collections() {
                     const on = o.id === sel;
                     const late = o.payment === "Due" && age(o) > 7;
                     return (
-                      <tr key={o.id} onClick={() => { setSel(o.id); router.replace(`/console/distributor/collections?id=${o.id}`, { scroll: false }); }} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fbfdfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#faf9f6]")}>
-                        <td className="py-[10px] pl-[10px] pr-[8px]"><p className="text-[11.5px] font-semibold">{o.id}</p><p className="max-w-[200px] truncate text-[11px] text-[#3e4440]">{o.retailer}</p></td>
+                      <tr key={o.id} onClick={() => { setSel(o.id); router.replace(`/console/distributor/collections?id=${o.id}`, { scroll: false }); }} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
+                        <td className="py-[10px] pl-[10px] pr-[8px]"><p className="text-[11.5px] font-semibold">{o.id}</p><p className="max-w-[200px] truncate text-[11px] text-[#48413b]">{o.retailer}</p></td>
                         <td className="whitespace-nowrap px-[8px] text-[11.5px]">{o.deliveredAt ? fmtDate(o.deliveredAt) : "—"}</td>
                         <td className={cn("px-[8px] text-[11.5px]", late && "font-semibold text-cs-red")}>{age(o)} days</td>
                         <td className="whitespace-nowrap px-[8px] text-[11.5px] font-medium">{inr(o.value)}</td>
