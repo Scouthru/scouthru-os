@@ -276,8 +276,9 @@ function Enquiries() {
 
           {showPanel && sel && (
             <EnquiryPanel
-              key={sel.id}
+              key={`${sel.id}-${params.get("tab") ?? ""}`}
               e={sel}
+              startTab={params.get("tab") === "quotes" ? "quotes" : "overview"}
               onClose={() => { setPanelOpen(false); router.replace("/console/enquiries", { scroll: false }); }}
               onSample={(mfrId) => setSampleFor({ enquiryId: sel.id, mfrId })}
               onMessage={() => setMessageFor(sel.id)}
@@ -302,12 +303,12 @@ function Enquiries() {
 
 /* ------------------------------------------------------------------ panel */
 
-function EnquiryPanel({ e, onClose, onSample, onMessage, onMove, onDuplicate, onDelete }: {
-  e: Enquiry; onClose: () => void; onSample: (mfrId?: string) => void; onMessage: () => void; onMove: (st: EnquiryStage) => void; onDuplicate: () => void; onDelete: () => void;
+function EnquiryPanel({ e, startTab = "overview", onClose, onSample, onMessage, onMove, onDuplicate, onDelete }: {
+  e: Enquiry; startTab?: "overview" | "quotes"; onClose: () => void; onSample: (mfrId?: string) => void; onMessage: () => void; onMove: (st: EnquiryStage) => void; onDuplicate: () => void; onDelete: () => void;
 }) {
   const { s, update } = useConsole();
   const router = useRouter();
-  const [tab, setTab] = useState<"overview" | "responses" | "quotes" | "activity">("overview");
+  const [tab, setTab] = useState<"overview" | "responses" | "quotes" | "activity">(startTab);
   const [editing, setEditing] = useState(false);
   const responses = e.responses;
   const next = enquiryNext(s, e, "brand");

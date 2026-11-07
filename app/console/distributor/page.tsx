@@ -9,6 +9,7 @@ import { Btn, CardTitle, Hero, Pill, RowMenu, StatStrip, TONE, type Tone } from 
 import { Avatar } from "@/components/console/making";
 import { RestockModal, ageDays, inboundFor, stockValue } from "@/components/console/distributor-kit";
 import { useConsole } from "@/lib/console/store";
+import { attention } from "@/lib/console/flow";
 import { startRoute } from "@/lib/console/actions-network";
 import { distributorActivity } from "@/lib/console/actions-distributor";
 import { ago, fmtDate, fmtNum, inr, ist, lakh } from "@/lib/console/format";
@@ -16,6 +17,10 @@ import { cn } from "@/lib/cn";
 
 
 type Pri = { key: string; icon: typeof Truck; tone: Tone; title: string; sub: string; due: string; level: "High" | "Medium" | "Low"; href: string; rank: number };
+const PRI_KIND: Record<string, { icon: typeof Truck; tone: Tone; level: Pri["level"] }> = {
+  Inbound: { icon: PackageOpen, tone: "orange", level: "High" }, Collection: { icon: BadgeIndianRupee, tone: "red", level: "High" },
+  Stock: { icon: AlertTriangle, tone: "orange", level: "Medium" }, "Retail order": { icon: ShoppingCart, tone: "blue", level: "Medium" },
+};
 const LEVEL: Record<string, string> = { High: "bg-cs-red-bg text-cs-red", Medium: "bg-cs-orange-bg text-[#a9713f]", Low: "bg-[#f6f0e7] text-[#564e47]" };
 
 export default function DistributorDashboard() {
@@ -31,15 +36,12 @@ export default function DistributorDashboard() {
   const overdue = due.filter((o) => ageDays(o.deliveredAt ?? o.at) > 7);
   const today = ist().wd;
 
-  const pri = useMemo<Pri[]>(() => {
-    const out: Pri[] = [];
-    inbound.filter((x) => !x.grn && x.sh.status === "Delivered").forEach(({ sh }) => out.push({ key: sh.id, icon: PackageOpen, tone: "orange", title: "Count shipment at the dock", sub: `${sh.id} – ${sh.name}`, due: `Delivered ${ago(sh.updatedAt)}`, level: "High", href: `/console/distributor/inbound?id=${sh.id}`, rank: 0 }));
-    overdue.forEach((o) => out.push({ key: o.id, icon: BadgeIndianRupee, tone: "red", title: "Collect overdue payment", sub: `${o.id} – ${o.retailer} · ${inr(o.value)}`, due: `${ageDays(o.deliveredAt ?? o.at)} days since delivery`, level: "High", href: `/console/distributor/collections?id=${o.id}`, rank: 1 }));
-    low.forEach((x) => out.push({ key: x.sku, icon: AlertTriangle, tone: "orange", title: "Below reorder level", sub: `${x.sku} – ${x.product}`, due: `${x.onHand} on hand · reorder at ${x.reorderAt}`, level: x.onHand < x.reorderAt / 2 ? "High" : "Medium", href: `/console/distributor/stock?sku=${x.sku}`, rank: 2 }));
-    s.retailOrders.filter((o) => o.status === "New").forEach((o) => out.push({ key: o.id, icon: ShoppingCart, tone: "blue", title: "Pack new order", sub: `${o.id} – ${o.retailer}`, due: `Received ${ago(o.at)}`, level: "Medium", href: `/console/distributor/orders?id=${o.id}`, rank: 3 }));
-    inbound.filter((x) => !x.grn && x.sh.status !== "Delivered").forEach(({ sh }) => out.push({ key: sh.id, icon: Truck, tone: "violet", title: "Inbound shipment", sub: `${sh.id} – ${sh.name}`, due: `ETA ${fmtDate(sh.eta)}`, level: "Low", href: `/console/distributor/inbound?id=${sh.id}`, rank: 4 }));
-    return out.sort((a, b) => a.rank - b.rank);
-  }, [s, inbound, overdue, low]);
+  // Same rules as the Inbound banner and every other dashboard (lib/console/flow.ts).
+  const pri = useMemo<Pri[]>(() => attention(s, "distributor").map((l, i) => {
+    const late = !!l.step.due && new Date(l.step.due) < new Date();
+    const k = PRI_KIND[l.kind] ?? PRI_KIND.Inbound;
+    return { key: `${l.kind}-${l.id}`, icon: k.icon, tone: k.tone, title: l.step.title, sub: `${l.id}${l.step.detail ? ` – ${l.step.detail}` : ""}`, due: l.step.due ? `${late ? "Overdue since" : "Due"} ${fmtDate(l.step.due)}` : "", level: late ? "High" : k.level, href: l.href, rank: i };
+  }), [s]);
 
   const sales = useMemo(() => {
     const by = new Map<string, { qty: number; value: number }>();

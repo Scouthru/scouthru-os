@@ -11,6 +11,8 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { Btn, CardTitle, Field, Hero, IconDot, Modal, Pill, RowMenu, TONE, inputCls, type Tone } from "@/components/console/kit";
 import { useConsole } from "@/lib/console/store";
+import { NeedsAttention } from "@/components/console/flow";
+import { attention, waitingCount } from "@/lib/console/flow";
 import { openEnquiries as openEnq, ordersRunning, samplesInReview, shipmentsMoving } from "@/lib/console/counts";
 import { createOrderFromSample, raiseIssue, recordPayment, requestSample, sampleOrderDefaults } from "@/lib/console/actions";
 import { ago, daysUntil, fmtMon, fmtNum, inr, ist } from "@/lib/console/format";
@@ -141,6 +143,7 @@ export default function Dashboard() {
       />
 
       <div className="px-[15px] pb-[18px]">
+        <NeedsAttention items={attention(s, "brand")} waiting={waitingCount(s, "brand")} className="mb-[12px]" />
         <section className="cs-card relative -mt-[1px] grid grid-cols-2 gap-y-4 py-[15px] min-[768px]:grid-cols-3 min-[1024px]:grid-cols-6 min-[1024px]:gap-y-0">
           {STATS.map((st, i) => (
             <Link key={st.label} href={st.href} className={cn("group flex min-w-0 items-start gap-[10px] pl-[12px] min-[1024px]:gap-[14px] min-[1024px]:pl-[14px]", i > 0 && "min-[1024px]:border-l min-[1024px]:border-cs-line")}>

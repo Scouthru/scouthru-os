@@ -10,6 +10,7 @@ import type { LucideIcon } from "lucide-react";
 import { CardTitle, Hero, Pill, StatStrip, TONE, type Tone } from "@/components/console/kit";
 import { Meter } from "@/components/console/maker";
 import { useConsole } from "@/lib/console/store";
+import { attention } from "@/lib/console/flow";
 import { capacityLoad, milestoneStatus, mine } from "@/lib/console/actions-maker";
 import { ago, daysUntil, fmtDay, fmtNum, lakh } from "@/lib/console/format";
 import type { ConsoleState } from "@/lib/console/types";
@@ -17,22 +18,20 @@ import { cn } from "@/lib/cn";
 
 type Item = { key: string; icon: LucideIcon; tone: Tone; title: string; sub: string; when: string; href: string; rank: number };
 
+// Today = everything waiting on the factory, from the same rules as each record's banner.
+const KIND: Record<string, { icon: LucideIcon; tone: Tone }> = {
+  Enquiry: { icon: ClipboardList, tone: "orange" }, Sample: { icon: FlaskConical, tone: "orange" }, Production: { icon: PlayCircle, tone: "green" },
+  Quality: { icon: ShieldCheck, tone: "blue" }, Dispatch: { icon: Truck, tone: "violet" }, Materials: { icon: PackageOpen, tone: "violet" }, Payment: { icon: Wallet, tone: "red" },
+};
 function today(s: ConsoleState): Item[] {
-  const m = mine(s);
-  const out: Item[] = [];
-  m.enquiries.filter((e) => e.stage !== "Closed" && e.responses.some((r) => r.mfrId === s.makerId && (r.status === "Awaiting Reply" || r.status === "Shared Proposal"))).forEach((e) =>
-    out.push({ key: e.id, icon: ClipboardList, tone: "orange", title: "Send a quote", sub: `${e.id} · ${e.name} · ${fmtNum(e.moq)} units`, when: ago(e.updatedAt), href: `/console/maker/enquiries?id=${e.id}`, rank: 2 }));
-  m.samples.filter((x) => x.status === "Submitted" || x.status === "Changes Requested").forEach((x) =>
-    out.push({ key: x.id, icon: FlaskConical, tone: x.status === "Changes Requested" ? "red" : "orange", title: x.status === "Submitted" ? "Make and send sample" : "Revise sample", sub: `${x.id} · ${x.name}`, when: ago(x.requestedAt), href: `/console/maker/samples?id=${x.id}`, rank: 1 }));
-  m.orders.filter((o) => !o.confirmed).forEach((o) => out.push({ key: o.id, icon: PlayCircle, tone: "green", title: "Accept new order", sub: `${o.id} · ${o.name} · ${fmtNum(o.qty)} units`, when: ago(o.createdAt), href: `/console/maker/orders?id=${o.id}`, rank: 0 }));
-  m.quality.filter((q) => q.status === "In Testing" && q.tests.some((t) => t.status === "Pending" || t.status === "In Progress")).forEach((q) =>
-    out.push({ key: q.id, icon: ShieldCheck, tone: "blue", title: "Share lab results", sub: `${q.id} · ${q.name}`, when: ago(q.updatedAt), href: `/console/maker/quality?id=${q.id}`, rank: 3 }));
-  m.shipments.filter((x) => x.status === "Pending").forEach((x) => out.push({ key: x.id, icon: Truck, tone: "violet", title: "Hand to carrier", sub: `${x.id} · ${x.name} · ${fmtNum(x.qty)} units`, when: ago(x.updatedAt), href: `/console/maker/dispatch?id=${x.id}`, rank: 2 }));
-  m.pos.filter((p) => p.status === "Quoted" || p.status === "Dispatched").forEach((p) =>
-    out.push({ key: p.id, icon: PackageOpen, tone: "violet", title: p.status === "Quoted" ? "Accept supplier quote" : "Receive materials", sub: `${p.id} · ${p.title}`, when: ago(p.updatedAt), href: `/console/maker/materials?id=${p.id}`, rank: 4 }));
-  m.plans.forEach((p) => p.milestones.filter((x) => milestoneStatus(x) === "Overdue").forEach((x) =>
-    out.push({ key: x.invoice, icon: Wallet, tone: "red", title: "Chase overdue payment", sub: `${x.invoice} · ${p.orderId} · ₹${x.amount.toLocaleString("en-IN")}`, when: `${-daysUntil(x.due)} days late`, href: "/console/maker/payments", rank: 3 })));
-  return out.sort((a, b) => a.rank - b.rank);
+  return attention(s, "maker").map((l, i) => {
+    const late = !!l.step.due && daysUntil(l.step.due) < 0;
+    return {
+      key: `${l.kind}-${l.id}`, icon: KIND[l.kind]?.icon ?? ClipboardList, tone: late ? "red" : KIND[l.kind]?.tone ?? "gray",
+      title: l.step.title, sub: `${l.id}${l.step.detail ? ` · ${l.step.detail}` : ""}`,
+      when: l.step.due ? (late ? `${-daysUntil(l.step.due)} days late` : `due ${fmtDay(l.step.due)}`) : "", href: l.href, rank: i,
+    };
+  });
 }
 
 export default function MakerDashboard() {
@@ -41,7 +40,7 @@ export default function MakerDashboard() {
   const items = useMemo(() => today(s), [s]);
   const lines = useMemo(() => capacityLoad(s), [s]);
   const open = m.orders.filter((o) => o.batches.some((b) => b.status !== "Completed"));
-  const toQuote = items.filter((i) => i.title === "Send a quote").length;
+  const toQuote = items.filter((i) => i.key.startsWith("Enquiry-")).length;
   const toMake = m.samples.filter((x) => x.status === "Submitted").length;
   const madeMonth = m.orders.flatMap((o) => o.batches).filter((b) => b.completed > 0 && Date.now() - new Date(b.end).getTime() < 30 * 864e5 && new Date(b.start).getTime() < Date.now()).reduce((a, b) => a + b.completed, 0);
   const totalCap = lines.reduce((a, l) => a + l.perMonth, 0);
@@ -49,7 +48,7 @@ export default function MakerDashboard() {
   const recv = m.plans.flatMap((p) => p.milestones).filter((x) => x.status !== "Paid");
   const overdue = recv.filter((x) => milestoneStatus(x) === "Overdue");
   const first = s.people.maker.name.split(" ")[0].toUpperCase();
-  const firstQuote = items.find((i) => i.title === "Send a quote");
+  const firstQuote = items.find((i) => i.key.startsWith("Enquiry-"));
   const activity = s.activity.filter((a) => a.who === s.people.maker.name || /NutraLab|Factory/.test(a.text) || m.orders.some((o) => a.text.includes(o.id))).slice(0, 6);
 
   const ACTIONS: { label: string; icon: LucideIcon; color: string; href: string }[] = [

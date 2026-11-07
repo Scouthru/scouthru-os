@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Check, CircleDashed, MessageSquare, TriangleAlert, X } from "lucide-react";
-import type { Milestone, NextStep } from "@/lib/console/flow";
+import type { LinkedStep, Milestone, NextStep } from "@/lib/console/flow";
 // Dates always in India time, like the rest of the app, so the server and browser render the same text.
 import { ago, fmtDateTime, fmtDay } from "@/lib/console/format";
 import { cn } from "@/lib/cn";
@@ -123,5 +124,72 @@ export function Timeline({ items, next, className }: { items: Milestone[]; next?
         </button>
       )}
     </div>
+  );
+}
+
+/**
+ * Top of every dashboard: what is waiting on you, most urgent first, each with the one
+ * button that opens the record where you do it. Short by default; the rest on demand.
+ */
+export function NeedsAttention({ items, waiting, className }: { items: LinkedStep[]; waiting: number; className?: string }) {
+  const [all, setAll] = useState(false);
+  // Three or more of the same routine step (e.g. "3 quotes waiting for you") collapse into one row
+  // that opens the list; anything overdue always keeps its own row.
+  const rows: LinkedStep[] = [];
+  const groups = new Map<string, LinkedStep[]>();
+  for (const l of items) {
+    const late = !!l.step.due && new Date(l.step.due) < new Date();
+    const key = `${l.kind}|${l.step.title}`;
+    if (late) rows.push(l);
+    else groups.set(key, [...(groups.get(key) ?? []), l]);
+  }
+  // A grouped row keeps the place of its most urgent member.
+  const pos = new Map<LinkedStep, number>(items.map((l, i) => [l, i]));
+  for (const [, g] of groups) {
+    if (g.length < 3) { rows.push(...g); continue; }
+    const first = g[0];
+    const row: LinkedStep = { kind: `${g.length} × ${first.kind}`, id: `${g.slice(0, 2).map((x) => x.id).join(", ")} +${g.length - 2} more`, href: first.href.split("?")[0], step: { ...first.step, detail: undefined, due: undefined, actionLabel: "Open list" } };
+    pos.set(row, pos.get(first) ?? 0);
+    rows.push(row);
+  }
+  const ordered = rows.sort((a, b) => (pos.get(a) ?? 0) - (pos.get(b) ?? 0));
+  const shown = all ? ordered : ordered.slice(0, 5);
+  return (
+    <section aria-label="Needs your attention" className={cn("cs-card px-[16px] pb-[12px] pt-[14px]", className)}>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-[12px] gap-y-[4px]">
+        <h2 className="serif flex items-center gap-[8px] text-[19px] font-semibold">
+          Needs your attention
+          <span className={cn("rounded-full px-[8px] py-[1px] font-sans text-[12px] font-medium", items.length ? "bg-cs-green text-white" : "bg-cs-ok-bg text-cs-ok")}>{items.length}</span>
+        </h2>
+        <p className="text-[12px] text-cs-ink-2">{waiting ? `Waiting on others for ${waiting} more` : "Nothing waiting on others"}</p>
+      </div>
+      {items.length === 0 ? (
+        <p className="mt-[10px] flex items-center gap-[8px] rounded-[10px] bg-cs-ok-bg/60 px-[12px] py-[10px] text-[13px] text-cs-ok"><Check className="size-[16px]" />You&apos;re all caught up. New work shows up here first.</p>
+      ) : (
+        <ul className="mt-[10px] divide-y divide-cs-line">
+          {shown.map((l) => {
+            const late = l.step.due && new Date(l.step.due) < new Date();
+            return (
+              <li key={`${l.kind}-${l.id}`} className="flex flex-wrap items-center gap-x-[14px] gap-y-[6px] py-[9px]">
+                <div className="min-w-0 flex-1">
+                  <p className="flex flex-wrap items-center gap-x-[8px]"><span className="monolabel">{l.kind}</span><span className="text-[11.5px] text-cs-ink-2">{l.id}</span>
+                    {l.step.due && <span className={cn("text-[11.5px]", late ? "font-medium text-cs-red" : "text-cs-ink-2")}>{late ? "Overdue · " : "Due "}{fmtDay(l.step.due)}</span>}
+                    {l.step.blocker && <span className="inline-flex items-center gap-[4px] text-[11.5px] text-cs-orange"><TriangleAlert className="size-[11px]" />{l.step.blocker}</span>}
+                  </p>
+                  <p className="mt-[1px] text-[13.5px] font-medium leading-snug">{l.step.title}</p>
+                  {l.step.detail && <p className="mt-[1px] line-clamp-1 text-[12px] text-cs-ink-2">{l.step.detail}</p>}
+                </div>
+                <Link href={l.href} className="inline-flex h-[34px] shrink-0 items-center gap-[6px] rounded-[7px] border border-[#d5c9b7] bg-white px-[12px] text-[12.5px] font-medium hover:border-cs-green hover:text-cs-green">
+                  {l.step.actionLabel ?? "Open"}<ArrowRight className="size-[13px]" />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {ordered.length > 5 && (
+        <button type="button" onClick={() => setAll((v) => !v)} className="mt-[6px] text-[12.5px] font-medium text-cs-green hover:underline">{all ? "Show fewer" : `Show all ${ordered.length} rows`}</button>
+      )}
+    </section>
   );
 }

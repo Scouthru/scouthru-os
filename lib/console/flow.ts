@@ -1,6 +1,7 @@
 import type { ConsoleState, Enquiry, Order, PaymentPlan, PurchaseOrder, QualityBatch, Sample, SampleStatus, Shipment } from "./types";
 import { SHIP_STEPS } from "./types";
 import { fmtDay } from "./format";
+import { milestoneStatus, mine } from "./actions-maker";
 
 /**
  * Shared "what happens next" and timeline rules. Every portal reads the same record
@@ -100,9 +101,10 @@ export function sampleNext(s: ConsoleState, x: Sample, side: Side): NextStep {
         { title: "Waiting for your approval", detail: "Review the sample, then approve it or ask for changes.", action: "review", actionLabel: "Review sample", then: "Approve to place a production order" },
         { title: `With ${L.brand} for review`, detail: "You'll see their decision here.", then: "Approval, or a change request" });
     case "Testing":
-      return step("brand",
-        { title: "Lab tests running", detail: "Approve once results are in.", action: "review", actionLabel: "Review sample", then: "Approve to place a production order" },
-        { title: `${L.brand} is lab testing the sample`, then: "Approval, or a change request" });
+      // Nobody can act until the lab reports, so it waits on the lab, not on the brand.
+      return side === "brand"
+        ? { title: "Lab tests running", owner: "the lab", yours: false, state: "open", detail: "You approve once results are in.", action: "review", actionLabel: "Review sample", then: "Approve to place a production order" }
+        : { title: `${L.brand} is lab testing the sample`, owner: "the lab", yours: false, state: "open", then: "Approval, or a change request" };
     case "Changes Requested":
       return step("maker",
         { title: "Revise and resend the sample", detail: lastComment(x, s.user.name), action: "revise", actionLabel: "Send revised sample", then: `${L.brand} reviews it again` },
@@ -140,6 +142,10 @@ export function enquiryNext(s: ConsoleState, e: Enquiry, side: Side, mfrId?: str
   const quotes = e.quotes.length;
   const myResponse = mfrId ? e.responses.find((r) => r.mfrId === mfrId) : undefined;
   const myQuote = mfrId ? e.quotes.find((q) => q.mfrId === mfrId) : undefined;
+  // Once the product is in production, comparing this enquiry's quotes is history.
+  if (side === "brand" && e.stage !== "Closed" && e.stage !== "In Production" && s.orders.some((o) => (e.productId && o.productId === e.productId) || o.name === e.name)) {
+    return done("Moved on to production", "This product already has a production order.", { action: "production", actionLabel: "Open production" });
+  }
   if (side === "maker") {
     if (e.stage === "Closed") return closed("Enquiry closed");
     if (myResponse?.status === "Declined") return closed("You declined this enquiry", myResponse.note);
@@ -250,7 +256,8 @@ export function qualityTimeline(s: ConsoleState, q: QualityBatch): Milestone[] {
 
 /* -------------------------------- shipments -------------------------------- */
 
-export const toDistributor = (sh: Shipment) => /mumbai/i.test(sh.destination);
+/** Shipments headed to this demo's distributor city (same rule as the distributor's Inbound page). */
+export const toDistributor = (s: ConsoleState, sh: Shipment) => sh.destination.includes(s.distributor.city);
 
 export function shipmentNext(s: ConsoleState, sh: Shipment, side: Side): NextStep {
   // The factory: from the order, else the quality batch that released it, else the product.
@@ -265,9 +272,9 @@ export function shipmentNext(s: ConsoleState, sh: Shipment, side: Side): NextSte
   }
   if (sh.status !== "Delivered") {
     const stage = SHIP_STEPS[sh.step];
-    return { title: sh.status === "Delayed" ? "Delayed in transit" : `${stage} · on its way`, owner: sh.carrier, yours: false, state: "open", detail: `With ${sh.carrier} to ${sh.destination}.`, due: sh.eta, blocker: sh.status === "Delayed" ? sh.note : undefined, action: side === "brand" ? "advance" : undefined, actionLabel: side === "brand" ? "Mark next stage" : undefined, then: toDistributor(sh) ? `${L.distributor} counts it in` : "Delivered" };
+    return { title: sh.status === "Delayed" ? "Delayed in transit" : `${stage} · on its way`, owner: sh.carrier, yours: false, state: "open", detail: `With ${sh.carrier} to ${sh.destination}.`, due: sh.eta, blocker: sh.status === "Delayed" ? sh.note : undefined, action: side === "brand" ? "advance" : undefined, actionLabel: side === "brand" ? "Mark next stage" : undefined, then: toDistributor(s, sh) ? `${L.distributor} counts it in` : "Delivered" };
   }
-  if (toDistributor(sh) && !received) {
+  if (toDistributor(s, sh) && !received) {
     return step("distributor",
       { title: "Count this delivery into stock", detail: `${sh.qty.toLocaleString("en-IN")} units invoiced.`, action: "receive", actionLabel: "Count it in", then: "Stock is ready to sell" },
       { title: `Waiting for ${L.distributor} to count it in`, detail: "Delivered.", then: "Stock is ready to sell" });
@@ -375,17 +382,14 @@ export type LinkedStep = { kind: string; id: string; href: string; step: NextSte
 
 /** Each linked record's next step for the product owner, latest stage first. */
 export function productSteps(s: ConsoleState, r: ProductRecords): LinkedStep[] {
-  // Once there is a production order, earlier open steps (comparing quotes, sample decisions) are history.
-  const moved = (l: LinkedStep): LinkedStep =>
-    r.orders.length && (l.kind === "Enquiry" || l.kind === "Sample") && l.step.state === "open" ? { ...l, step: done("Moved on to production", l.step.title) } : l;
   return [
     ...r.payments.map((x) => ({ kind: "Payment", id: x.orderId, href: `/console/payments?id=${x.orderId}`, step: paymentNext(s, x, "brand") })),
     ...r.shipments.map((x) => ({ kind: "Shipment", id: x.id, href: `/console/shipments?id=${x.id}`, step: shipmentNext(s, x, "brand") })),
     ...r.quality.map((x) => ({ kind: "Quality", id: x.id, href: `/console/quality?id=${x.id}`, step: qualityNext(s, x, "brand") })),
     ...r.orders.map((x) => ({ kind: "Production", id: x.id, href: `/console/production?id=${x.id}`, step: orderNext(s, x, "brand") })),
     ...r.samples.map((x) => ({ kind: "Sample", id: x.id, href: `/console/samples?id=${x.id}`, step: sampleNext(s, x, "brand") })),
-    ...r.enquiries.map((x) => ({ kind: "Enquiry", id: x.id, href: `/console/enquiries?id=${x.id}`, step: enquiryNext(s, x, "brand") })),
-  ].map(moved);
+    ...r.enquiries.map((x) => { const step = enquiryNext(s, x, "brand"); return { kind: "Enquiry", id: x.id, href: `/console/enquiries?id=${x.id}${step.action === "compare" ? "&tab=quotes" : ""}`, step }; }),
+  ];
 }
 
 /**
@@ -424,4 +428,68 @@ export function productTimeline(s: ConsoleState, r: ProductRecords): Milestone[]
     ...r.shipments.flatMap((x) => tag("Shipment", shipmentTimeline(s, x))),
     ...r.payments.flatMap((x) => tag("Payment", paymentTimeline(s, x))),
   ].sort(byTime);
+}
+
+/* ------------------------------ needs your attention ------------------------------ */
+
+/** Overdue, then due within 5 days, then decisions with no date, then later due dates. */
+const urgency = (l: LinkedStep) => {
+  const d = l.step.due ? new Date(l.step.due).getTime() : null;
+  const tier = d === null ? 2 : d < Date.now() ? 0 : d - Date.now() <= 5 * 864e5 ? 1 : 3;
+  return tier * 1e15 + (d ?? 0);
+};
+
+/**
+ * Everything waiting on this side, across every record it can see, overdue first and
+ * then by due date. The same rules as each record's banner, so a dashboard item and
+ * the record it opens always say the same thing.
+ */
+export function attention(s: ConsoleState, side: Side): LinkedStep[] {
+  const out: LinkedStep[] = [];
+  const add = (kind: string, id: string, href: string, step: NextStep) => { if (step.state === "open" && step.yours) out.push({ kind, id, href, step }); };
+  if (side === "brand") {
+    s.payments.forEach((x) => add("Payment", x.orderId, `/console/payments?id=${x.orderId}`, paymentNext(s, x, side)));
+    s.shipments.forEach((x) => add("Shipment", x.id, `/console/shipments?id=${x.id}`, shipmentNext(s, x, side)));
+    s.quality.forEach((x) => add("Quality", x.id, `/console/quality?id=${x.id}`, qualityNext(s, x, side)));
+    s.orders.forEach((x) => add("Production", x.id, `/console/production?id=${x.id}`, orderNext(s, x, side)));
+    s.samples.forEach((x) => add("Sample", x.id, `/console/samples?id=${x.id}`, sampleNext(s, x, side)));
+    s.enquiries.forEach((x) => { const st = enquiryNext(s, x, side); add("Enquiry", x.id, `/console/enquiries?id=${x.id}${st.action === "compare" ? "&tab=quotes" : ""}`, st); });
+  } else if (side === "maker") {
+    const m = mine(s);
+    m.enquiries.forEach((x) => add("Enquiry", x.id, `/console/maker/enquiries?id=${x.id}`, enquiryNext(s, x, side, s.makerId)));
+    m.samples.forEach((x) => add("Sample", x.id, `/console/maker/samples?id=${x.id}`, sampleNext(s, x, side)));
+    m.orders.forEach((x) => add("Production", x.id, `/console/maker/orders?id=${x.id}`, orderNext(s, x, side)));
+    m.quality.forEach((x) => add("Quality", x.id, `/console/maker/quality?id=${x.id}`, qualityNext(s, x, side)));
+    m.shipments.forEach((x) => add("Dispatch", x.id, `/console/maker/dispatch?id=${x.id}`, shipmentNext(s, x, side)));
+    m.pos.forEach((x) => add("Materials", x.id, `/console/maker/materials?id=${x.id}`, poNext(s, x, side)));
+    // The brand pays, but chasing an overdue payment is the factory's job.
+    m.plans.forEach((p) => p.milestones.filter((x) => milestoneStatus(x) === "Overdue").forEach((x) =>
+      add("Payment", x.invoice, "/console/maker/payments", { title: `Chase overdue payment · ${rupees(x.amount)}`, detail: `${x.name} on ${p.orderId}.`, due: x.due, owner: "You", yours: true, state: "open", actionLabel: "Open payments" })));
+  } else if (side === "supplier") {
+    s.purchaseOrders.filter((x) => x.supplierId === s.supplierId).forEach((x) => {
+      const st = poNext(s, x, side);
+      add(x.status === "RFQ" ? "Request" : "Order", x.id, x.status === "RFQ" ? `/console/supplier/requests?id=${x.id}` : x.status === "Confirmed" ? `/console/supplier/dispatch?id=${x.id}` : `/console/supplier/pos?id=${x.id}`, st);
+    });
+  } else {
+    s.shipments.filter((x) => toDistributor(s, x)).forEach((x) => add("Inbound", x.id, `/console/distributor/inbound?id=${x.id}`, shipmentNext(s, x, side)));
+    // Distributor's own work (same rules the dashboard always used): money more than a week
+    // overdue, stock below its reorder level, new retailer orders to pack.
+    const week = 7 * 864e5;
+    s.retailOrders.filter((x) => x.status === "Delivered" && x.payment === "Due" && Date.now() - new Date(x.deliveredAt ?? x.at).getTime() > week).forEach((x) =>
+      add("Collection", x.id, "/console/distributor/collections", { title: `Collect overdue payment · ${rupees(x.value)}`, detail: `${x.retailer}.`, due: new Date(new Date(x.deliveredAt ?? x.at).getTime() + week).toISOString(), owner: "You", yours: true, state: "open", actionLabel: "Record payment" }));
+    s.distStock.filter((x) => x.onHand < x.reorderAt).forEach((x) =>
+      add("Stock", x.sku, "/console/distributor/stock", { title: `Below reorder level: ${x.product}`, detail: `${x.onHand.toLocaleString("en-IN")} on hand, reorder at ${x.reorderAt.toLocaleString("en-IN")}.`, owner: "You", yours: true, state: "open", actionLabel: "Request restock" }));
+    s.retailOrders.filter((x) => x.status === "New").forEach((x) =>
+      add("Retail order", x.id, "/console/distributor/orders", { title: `Pack new order for ${x.retailer}`, detail: `${x.area} · ${rupees(x.value)}.`, owner: "You", yours: true, state: "open", actionLabel: "Pack order" }));
+  }
+  return out.sort((a, b) => urgency(a) - urgency(b));
+}
+
+/** How many records this side is waiting on someone else for. */
+export function waitingCount(s: ConsoleState, side: Side): number {
+  const open = (st: NextStep) => st.state === "open" && !st.yours ? 1 : 0;
+  if (side === "brand") return [...s.samples.map((x) => sampleNext(s, x, side)), ...s.orders.map((x) => orderNext(s, x, side)), ...s.quality.map((x) => qualityNext(s, x, side)), ...s.shipments.map((x) => shipmentNext(s, x, side))].reduce((a, st) => a + open(st), 0);
+  if (side === "maker") { const m = mine(s); return [...m.samples.map((x) => sampleNext(s, x, side)), ...m.pos.map((x) => poNext(s, x, side)), ...m.quality.map((x) => qualityNext(s, x, side))].reduce((a, st) => a + open(st), 0); }
+  if (side === "supplier") return s.purchaseOrders.filter((x) => x.supplierId === s.supplierId).map((x) => poNext(s, x, side)).reduce((a, st) => a + open(st), 0);
+  return s.shipments.filter((x) => toDistributor(s, x)).map((x) => shipmentNext(s, x, side)).reduce((a, st) => a + open(st), 0);
 }

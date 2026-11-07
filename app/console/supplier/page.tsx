@@ -10,6 +10,8 @@ import type { LucideIcon } from "lucide-react";
 import { CardTitle, Hero, Pill, RowMenu, StatStrip, TONE, type Tone } from "@/components/console/kit";
 import { buyerName, isOverdue, minePOs, poValue } from "@/components/console/supplier-kit";
 import { useConsole } from "@/lib/console/store";
+import { NeedsAttention } from "@/components/console/flow";
+import { attention, waitingCount } from "@/lib/console/flow";
 import { ago, csv, daysUntil, download, fmtNum, inr } from "@/lib/console/format";
 import type { POStatus } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
@@ -72,6 +74,7 @@ export default function SupplierDashboard() {
     <div>
       <Hero eyebrow={`WELCOME BACK, ${first}`} title="PackRight Dashboard" lede={<>Requests, orders, dispatch and payments from every factory you supply.<br />Quote fast, ship on time and keep stock current.</>} img="/console/hero-enquiries.jpg" height={160} quoteTop={44} quoteWidth={184} quote={["Packaging that", "keeps production", "moving."]} />
       <div className="px-[15px] pb-[15px]">
+        <NeedsAttention items={attention(s, "supplier")} waiting={waitingCount(s, "supplier")} className="mb-[12px]" />
         <StatStrip items={[
           { icon: Inbox, tone: "orange", value: by("RFQ").length, label: "New Requests", delta: `${by("RFQ").filter((p) => daysUntil(p.needBy) <= 7).length} needed this week`, deltaTone: "muted" },
           { icon: FileText, tone: "blue", value: by("Quoted").length, label: "Quotes Awaiting Reply", delta: inr(by("Quoted").reduce((a, p) => a + poValue(s, p), 0)), deltaTone: "muted" },
