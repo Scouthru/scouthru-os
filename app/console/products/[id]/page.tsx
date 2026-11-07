@@ -58,7 +58,7 @@ export default function ProductWorkspacePage() {
 
         {/* where it stands */}
         <section className="cs-card overflow-x-auto px-[15px] py-[14px]">
-          <CardTitle sub="From the first enquiry to the last payment."><CT>Journey</CT></CardTitle>
+          <CardTitle sub="Each result is proven before its payment is released."><CT>Journey</CT></CardTitle>
           <div className="mt-[14px] min-w-[640px]">
             <Stepper size={40} current={journey.current} allDone={journey.current >= JOURNEY.length} steps={JOURNEY.map((j, i) => ({ label: j.label, icon: j.icon, sub: journey.subs[i] }))} />
           </div>
@@ -90,7 +90,7 @@ function Header({ name }: { name: string }) {
     <Hero
       eyebrow={<Crumbs items={["Products", name]} />}
       title="Product Workspace"
-      lede="Everything about this product in one place: where it stands, whose turn it is, and what happened."
+      lede="The result you're buying: where it stands, whose turn it is, and what has been proven so far."
       img="/console/hero-products.jpg"
       quote={["From concept", "to shelf-ready", "product."]}
       height={152}

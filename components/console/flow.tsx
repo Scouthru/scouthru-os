@@ -100,7 +100,7 @@ export function Timeline({ items, next, className }: { items: Milestone[]; next?
                 <p className="text-[13px] leading-snug">{i.tag && <span className="monolabel mr-[6px]">{i.tag}</span>}<b className="font-medium">{i.title}</b> <span className="text-cs-ink-2">· {i.who}</span></p>
                 <p className="mt-[1px] text-[11.5px] text-cs-ink-2">
                   <time dateTime={i.at}>{fmtDateTime(i.at)}</time>
-                  {" · "}{ago(i.at)}
+                  {" · "}<span suppressHydrationWarning>{ago(i.at)}</span>
                   {i.change && <span className="ml-[6px] font-mono text-[10.5px] tracking-[0.04em]">{i.change[0]} → {i.change[1]}</span>}
                 </p>
                 {i.text && <p className="mt-[4px] rounded-[8px] bg-[#f8f3eb] px-[10px] py-[7px] text-[12.5px] leading-[1.45] text-[#48413b]">{i.text}</p>}

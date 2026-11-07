@@ -138,7 +138,7 @@ export function packText(pack: string, m: Member, s: HqState) {
     "Renewal reminder": expiring.length
       ? `Your ${expiring.map((r) => `${r.doc.kind} ${r.days < 0 ? "has expired" : `runs out in ${r.days} days`}`).join(" and ")}. Please send the renewed copy so your listing stays active.`
       : "All your licences are up to date.",
-    "Plans and pricing": "Free: ₹0. Pro: ask us and we will share the details. Done for you: included in the order price.",
+    "Plans and pricing": "Scouthru works as Results as a Service: brands pay for the finished, checked product, released milestone by milestone on proof. Free: ₹0. Pro: ask us and we will share the details. Done for you: included in the order price.",
     "Agreement to sign": "Please review and sign the attached Scouthru partner agreement.",
     "Login details": `Your Scouthru account is ready. Sign in with ${m.email || m.phone} at scouthru.com.`,
   };

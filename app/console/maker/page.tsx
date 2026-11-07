@@ -62,7 +62,7 @@ export default function MakerDashboard() {
 
   return (
     <div>
-      <Hero eyebrow={`WELCOME BACK, ${first}`} title="NutraLab Factory Dashboard" lede={<>Enquiries, samples, production, quality, dispatch and payments for NutraLab,<br />with every brand update in one place.</>} img="/console/hero-manufacturers.jpg" height={160} quoteTop={32} quoteWidth={160} quote={["Trusted", "manufacturing", "partners for", "global brands."]} />
+      <Hero eyebrow={`WELCOME BACK, ${first}`} title="NutraLab Factory Dashboard" lede={<>Deliver results and get paid on proof: enquiries, samples, production,<br />quality, dispatch and payments for NutraLab in one place.</>} img="/console/hero-manufacturers.jpg" height={160} quoteTop={32} quoteWidth={160} quote={["Trusted", "manufacturing", "partners for", "global brands."]} />
       <div className="px-[15px] pb-[20px]">
         <StatStrip items={[
           { icon: ClipboardList, tone: "orange", value: toQuote, label: "Quotes to Send", delta: "Brands are waiting", deltaTone: toQuote ? "bad" : "muted" },

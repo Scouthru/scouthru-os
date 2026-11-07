@@ -9,7 +9,7 @@ const sans = Instrument_Sans({ subsets: ["latin"], weight: ["400", "500", "600",
 
 export const metadata: Metadata = {
   title: { default: "Scouthru · India's FMCG makers, matched by capability", template: "%s · Scouthru" },
-  description: "The B2B platform for FMCG brand owners, manufacturers, suppliers and distributors. Find Indian makers by what they can make and the capacity they have free, then run every order from idea to delivery in one place.",
+  description: "Results as a Service for FMCG: you pay for the finished, checked product, released milestone by milestone on proof. For brand owners, manufacturers, suppliers and distributors. Find Indian makers by what they can make and the capacity they have free, then run every order from idea to delivery in one place.",
 };
 
 export const viewport: Viewport = { themeColor: "#221e1b" };

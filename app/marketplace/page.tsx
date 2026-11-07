@@ -61,9 +61,9 @@ function Market() {
             <img src="/products/ashwagandha.jpg" alt="" className="absolute right-0 top-0 hidden h-full w-[56%] object-cover object-center sm:block" />
             <div className="absolute inset-y-0 left-[44%] hidden w-[200px] bg-gradient-to-r from-[#fffdf9] via-[#fffdf9]/60 to-transparent sm:block" />
             <div className="relative px-[28px] py-[30px] sm:max-w-[520px]">
-              <p className="eyebrow">White-label ready</p>
+              <p className="eyebrow">Results as a Service</p>
               <h1 className="serif mt-[14px] text-[44px] leading-[0.99] tracking-[-0.038em] text-[#221e1b] sm:text-[52px]">Proven products. <span className="text-[#665c53]">Your brand on it.</span></h1>
-              <p className="mt-[14px] max-w-[42ch] text-[16.5px] leading-[1.55] text-[#665c53]">Pick a ready formula from verified factories, customise flavour and pack, and launch in weeks.</p>
+              <p className="mt-[14px] max-w-[42ch] text-[16.5px] leading-[1.55] text-[#665c53]">Pick a ready formula from verified factories and get the finished, checked product. You pay by milestone, and each payment is released only when its result is proven.</p>
               <div className="mt-[22px] flex flex-wrap gap-[10px]">
                 <Btn kind="primary" onClick={() => pick(null, null)}>Browse ready products</Btn>
                 <Btn onClick={() => openPost()}>Need something custom</Btn>
@@ -87,7 +87,7 @@ function Market() {
               <span className="grid size-[46px] shrink-0 place-items-center rounded-full bg-white text-cs-green"><ShieldCheck className="size-[22px]" strokeWidth={1.7} /></span>
               <span>
                 <span className="serif block text-[22px] font-semibold leading-tight">Scouthru Assured</span>
-                <span className="mt-[4px] block text-[13.5px] text-cs-ink-2">One price. We run production, QC and dispatch.</span>
+                <span className="mt-[4px] block text-[13.5px] text-cs-ink-2">One price for the finished result. We run production, QC and dispatch.</span>
                 <span className="mt-[10px] inline-flex items-center gap-[6px] text-[12.5px] font-medium text-cs-green">How it works <ArrowRight className="size-[14px]" /></span>
               </span>
             </button>
@@ -258,7 +258,7 @@ function Market() {
         <section className="mt-[32px] grid items-center gap-[18px] rounded-[16px] bg-[#682a1f] p-[22px] text-[#fbf6ec] sm:p-[32px] lg:grid-cols-[1fr_1.15fr]">
           <div>
             <h2 className="serif mk-h2">Can&apos;t find it ready-made?</h2>
-            <p className="mt-[8px] text-[14.5px] text-[#fbf6ec]/70">Post a custom requirement. Verified factories that can make it will respond.</p>
+            <p className="mt-[8px] text-[14.5px] text-[#fbf6ec]/70">Tell us the result you need. Verified factories that can deliver it will respond.</p>
           </div>
           <form className="grid gap-[10px] sm:grid-cols-[1.4fr_0.8fr_auto] sm:items-end" onSubmit={(e) => { e.preventDefault(); setPost(true); }}>
             <label className="flex flex-col gap-[5px] text-[12px] font-medium text-[#fbf6ec]/80">Product<input className={cn(inputCls, DARK_INPUT)} placeholder="e.g. Sugar-free gummies" value={quick.product} onChange={(e) => setQuick({ ...quick, product: e.target.value })} /></label>
@@ -270,7 +270,7 @@ function Market() {
       <MarketFooter />
 
       {post && <PostRequirement key={`${quick.product}|${quick.qty}`} open onClose={() => setPost(false)} preset={quick} />}
-      <Modal open={assured} onClose={() => setAssured(false)} title="Scouthru Assured" sub="One all-in price. We run production, QC and dispatch.">
+      <Modal open={assured} onClose={() => setAssured(false)} title="Scouthru Assured" sub="Results as a Service: one price for the finished product. You pay for proven results, not effort.">
         <ol className="space-y-[12px] text-[13.5px]">
           {[
             ["One all-in price", "Product, packaging, QC and freight to your door, frozen for 15 days once you accept."],

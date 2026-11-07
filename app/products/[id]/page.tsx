@@ -129,7 +129,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <Btn icon={MessageSquare} className="h-[44px]" onClick={() => { setMsg(`Interested in ${p.name} (${options}). Please confirm price and lead time.`); setModal("enquiry"); }}>Send enquiry</Btn>
               </div>
             </div>
-            <p className="mt-[8px] text-[11.5px] text-cs-ink-2">Quote frozen for 15 days once accepted. Payment held in escrow by milestone.</p>
+            <p className="mt-[8px] text-[11.5px] text-cs-ink-2">Results as a Service: quote frozen for 15 days once accepted, payment held in escrow and released milestone by milestone on proof.</p>
           </div>
         </div>
 

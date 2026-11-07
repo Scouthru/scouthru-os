@@ -41,7 +41,7 @@ export function PhoneList({ items, detail, empty, className }: { items: PhoneIte
               {i.sub && <span className="mt-[2px] block truncate text-[12px] text-cs-ink-2">{i.sub}</span>}
               {i.meta && i.meta.filter(Boolean).length > 0 && (
                 <span className="mt-[4px] flex flex-wrap gap-x-[10px] gap-y-[2px] text-[12px] text-[#48413b]">
-                  {i.meta.filter(Boolean).map((m) => <span key={m as string}>{m}</span>)}
+                  {i.meta.filter(Boolean).map((m) => <span key={m as string} suppressHydrationWarning>{m}</span>)}
                 </span>
               )}
             </span>

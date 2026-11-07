@@ -136,7 +136,7 @@ function Payments() {
       <Hero
         eyebrow="FINANCE  ·  PAYMENTS  ·  OVERVIEW"
         title="Payments & Milestones"
-        lede={<span className="lg:whitespace-nowrap">Monitor invoices, milestone payments, and financial progress across manufacturing orders.</span>}
+        lede={<span className="lg:whitespace-nowrap">Pay per result: each milestone is released when its proof is in.</span>}
         img="/console/hero-payments.jpg"
         quote={["Clarity in", "payments.", "Confidence in", "execution."]}
         height={146}

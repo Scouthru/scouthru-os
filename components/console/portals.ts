@@ -73,7 +73,7 @@ export const PHONE_NAV: Record<Portal, string[]> = {
 };
 
 export const PORTAL_PROMO: Record<Exclude<Portal, "brand">, { title: string; text: string; img: string; href: string }> = {
-  maker: { title: "Better manufacturing partners. Stronger brands.", text: "Every enquiry, batch and payment in one place.", img: "/console/promo-production.jpg", href: "/console/maker/enquiries" },
+  maker: { title: "Better manufacturing partners. Stronger brands.", text: "Deliver the result, share the proof, get paid.", img: "/console/promo-production.jpg", href: "/console/maker/enquiries" },
   supplier: { title: "Stock running low?", text: "Keep stock and prices current so factories see you as available.", img: "/console/promo-products.jpg", href: "/console/supplier/stock" },
   distributor: { title: "Shipment at the dock?", text: "Count it against the invoice; claims fill themselves from the count.", img: "/console/promo-shipments.jpg", href: "/console/distributor/inbound" },
 };

@@ -72,7 +72,7 @@ export default function SupplierDashboard() {
 
   return (
     <div>
-      <Hero eyebrow={`WELCOME BACK, ${first}`} title="PackRight Dashboard" lede={<>Requests, orders, dispatch and payments from every factory you supply.<br />Quote fast, ship on time and keep stock current.</>} img="/console/hero-enquiries.jpg" height={160} quoteTop={44} quoteWidth={184} quote={["Packaging that", "keeps production", "moving."]} />
+      <Hero eyebrow={`WELCOME BACK, ${first}`} title="PackRight Dashboard" lede={<>Requests, orders, dispatch and payments from every factory you supply.<br />Quote fast, deliver on time, get paid once it&apos;s received.</>} img="/console/hero-enquiries.jpg" height={160} quoteTop={44} quoteWidth={184} quote={["Packaging that", "keeps production", "moving."]} />
       <div className="px-[15px] pb-[15px]">
         <NeedsAttention items={attention(s, "supplier")} waiting={waitingCount(s, "supplier")} className="mb-[12px]" />
         <StatStrip items={[

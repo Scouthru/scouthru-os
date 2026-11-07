@@ -38,7 +38,7 @@ export function MarketHeader({ compact, query = "" }: { compact?: boolean; query
       {!compact && (
         <div className="bg-cs-deep text-white">
           <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-3 px-4 py-[7px] text-[12px] sm:px-6">
-            <span>FMCG makers in India, matched by capability<span className="hidden sm:inline"> · Brands from anywhere · Free for brands</span></span>
+            <span>Results as a Service for FMCG<span className="hidden sm:inline"> · Pay for the finished product, released on proof · Free for brands</span></span>
             <button type="button" onClick={() => openAuth({ kind: "join", portal: "maker" })} className="hidden font-medium text-white/90 hover:text-white sm:inline">Run a factory? Join free →</button>
           </div>
         </div>
@@ -165,7 +165,7 @@ export function MarketFooter() {
   return (
     <footer className="mt-16 border-t border-cs-line bg-cs-ground">
       <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-4 px-4 py-[28px] sm:px-6">
-        <div className="space-y-[6px]"><MarketLogo /><p className="text-[13px] text-cs-ink-2">From idea to delivery, Scouthru&apos;s got you.</p></div>
+        <div className="space-y-[6px]"><MarketLogo /><p className="text-[13px] text-cs-ink-2">Results as a Service. You pay for the result, not the runaround.</p></div>
         <nav className="flex flex-wrap gap-[20px] text-[13px] text-[#36312d]">
           <Link href="/marketplace" className="hover:text-cs-green">Products</Link>
           <Link href="/manufacturers" className="hover:text-cs-green">Manufacturers</Link>

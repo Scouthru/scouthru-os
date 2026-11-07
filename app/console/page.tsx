@@ -137,7 +137,7 @@ export default function Dashboard() {
       <Hero
         eyebrow={`WELCOME BACK, ${firstName}`}
         title="Scouthru OS Dashboard"
-        lede={<span className="text-[17.5px] leading-[1.32]">Your complete operations overview — from enquiries to delivery.<br />Track progress, monitor key metrics, and keep your supply chain moving.</span>}
+        lede={<span className="text-[17.5px] leading-[1.32]">Every result you&apos;re paying for, from enquiry to delivery.<br />See what&apos;s proven, what&apos;s next, and what needs you.</span>}
         img="/console/hero-dashboard-v2.jpg"
         quote={["Ideas.", "Samples.", "Production.", "To global markets."]}
       />

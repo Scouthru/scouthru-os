@@ -60,7 +60,7 @@ export default function DistributorDashboard() {
       <Hero
         eyebrow={`WELCOME BACK, ${s.people.distributor.name.split(" ")[0].toUpperCase()}`}
         title="Distributor Dashboard"
-        lede={<span className="lg:whitespace-nowrap">{s.distributor.name} · {s.distributor.area}. Receive, stock, deliver and collect in one place.</span>}
+        lede={<span className="lg:whitespace-nowrap">{s.distributor.name} · {s.distributor.area}. Count it in, deliver it, collect for it. Every result on record.</span>}
         img="/console/hero-shipments.jpg"
         quote={["From the dock.", "To the shelf.", "Paid on time."]}
         height={142}
