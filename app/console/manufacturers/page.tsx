@@ -14,6 +14,7 @@ import { PhoneList } from "@/components/console/phone-list";
 import { messageMany, setShortlist, toggleShortlist } from "@/lib/console/actions-sourcing";
 import type { ConsoleState, Manufacturer } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, useRowKeys } from "@/components/console/table-tools";
 
 const fmtNum = (n: number) => Math.round(n).toLocaleString("en-US");
 const SEL = "[&_select]:pl-[8px] [&_select]:pr-[18px] [&_select]:text-[11px] [&_svg]:right-[5px] [&_svg]:size-[13px]";
@@ -116,6 +117,8 @@ function Manufacturers() {
   const top = ms.slice().sort((a, b) => b.rating - a.rating)[0];
   // The row open in the panel shows ticked (as in the mockup) and is included in bulk actions.
   const picked = new Set([...bulk, ...(showPanel && sel ? [sel.id] : [])]);
+  // Arrows move through the list; filters can be saved as views (sorting is the Sort by menu).
+  useRowKeys(list.map((m) => m.id), sel?.id, select);
   const allChecked = list.length > 0 && list.every((m) => picked.has(m.id));
 
   const shortlistToggle = (m: Manufacturer) => { update((d) => toggleShortlist(d, m.id)); toast(m.shortlisted ? `${m.name} removed from shortlist` : `${m.name} added to shortlist`); };
@@ -184,6 +187,7 @@ function Manufacturers() {
               <label className="mb-[7px] flex items-center gap-[10px] text-[11.5px] text-cs-ink-2">
                 Sort by
                 <FilterSelect label="Relevance" value={sort} options={["Rating", "Response Time", "Min. MOQ"]} onChange={setSort} className={cn("w-[102px] [&_select]:font-normal [&_select]:text-cs-ink", SEL)} />
+                <SavedViews page="manufacturers" value={{ tab, q, cat, cert, loc, moq, cap, sort }} onApply={(v) => { setTab(v.tab as typeof tab); setQ(String(v.q ?? "")); setCat(String(v.cat ?? "")); setCert(String(v.cert ?? "")); setLoc(String(v.loc ?? "")); setMoq(String(v.moq ?? "")); setCap(String(v.cap ?? "")); setSort(String(v.sort ?? "")); }} />
               </label>
             </div>
 
@@ -214,6 +218,7 @@ function Manufacturers() {
                   return (
                     <li
                       key={m.id}
+                      data-row={m.id}
                       onClick={() => select(m.id)}
                       className={cn("grid cursor-pointer items-center rounded-[8px] border pl-[10px]", COLS, compact ? "py-[5px]" : "py-[7px]", on ? "border-[1.5px] border-cs-green-2 bg-[#fdfcfb]" : "border-transparent border-b-cs-line hover:bg-[#fcfaf6]")}
                     >

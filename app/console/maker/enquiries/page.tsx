@@ -15,6 +15,7 @@ import { capacityFit, lineFor, mine } from "@/lib/console/actions-maker";
 import { ago, fmtDate, fmtNum, inr } from "@/lib/console/format";
 import type { ConsoleState, Enquiry, FactoryLead } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 type Tab = "brand" | "leads" | "quoted" | "won" | "declined";
 type Row = {
@@ -79,6 +80,9 @@ function MakerEnquiries() {
 
   const list = all.filter((r) => IN_TAB[tab](r) && (!source || r.source === source) && (!q.trim() || `${r.name} ${r.id} ${r.buyer}`.toLowerCase().includes(q.trim().toLowerCase())));
   const current = all.find((r) => r.key === sel) ?? list[0] ?? null;
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { name: (r) => r.name, source: (r) => r.source, qty: (r) => r.qty, at: (r) => r.at, status: (r) => r.status });
+  useRowKeys(srt.sorted.map((r) => r.key), current?.key, setSel);
   const count = (t: Tab) => all.filter(IN_TAB[t]).length;
   const wonThisMonth = all.filter((r) => r.status === "Won" && Date.now() - new Date(r.at).getTime() < 30 * 864e5).length;
   const decided = all.filter((r) => ["Won", "Lost", "Declined"].includes(r.status));
@@ -106,20 +110,21 @@ function MakerEnquiries() {
               <div className="mt-[12px] flex flex-wrap items-center gap-[8px]">
                 <SearchBox value={q} onChange={setQ} placeholder="Search product, buyer or ID..." className="w-full min-[1024px]:w-[300px]" />
                 <FilterSelect label="All sources" value={source} onChange={setSource} options={["Scouthru", "IndiaMART", "WhatsApp", "Phone", "Email"]} className="w-[130px]" />
+                <SavedViews page="maker-enquiries" value={{ tab, q, source }} onApply={(v) => { setTab(v.tab as typeof tab); setQ(String(v.q ?? "")); setSource(String(v.source ?? "")); }} />
                 <Btn kind="primary" icon={Plus} className="ml-auto h-[34px] text-[12.5px]" onClick={() => setLeadOpen(true)}>Log a lead</Btn>
               </div>
             </div>
-            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="Nothing here." className="mt-[10px]" items={list.map((r) => ({ key: r.key, img: r.img, title: r.name, sub: `${r.id} · ${r.buyer} · via ${r.source}`, pill: { tone: STATUS_TONE[r.status], label: r.status },
+            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="Nothing here." className="mt-[10px]" items={srt.sorted.map((r) => ({ key: r.key, img: r.img, title: r.name, sub: `${r.id} · ${r.buyer} · via ${r.source}`, pill: { tone: STATUS_TONE[r.status], label: r.status },
               meta: [`${fmtNum(r.qty)} units`, `Received ${ago(r.at)}`], selected: current?.key === r.key, onSelect: () => setSel(r.key) }))} />
             <div className="mt-[10px] overflow-x-auto px-[7px] max-lg:hidden">
               <table className="w-full min-w-[620px] border-separate border-spacing-0">
-                <thead><tr><th className={thc}>Product & Buyer</th><th className={thc}>Source</th><th className={thc}>Quantity</th><th className={thc}>Received</th><th className={thc}>Status</th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
+                <thead><tr><th className={thc} {...ariaSort(srt, "name")}><SortLabel k="name" s={srt}>Product & Buyer</SortLabel></th><th className={thc} {...ariaSort(srt, "source")}><SortLabel k="source" s={srt}>Source</SortLabel></th><th className={thc} {...ariaSort(srt, "qty")}><SortLabel k="qty" s={srt}>Quantity</SortLabel></th><th className={thc} {...ariaSort(srt, "at")}><SortLabel k="at" s={srt}>Received</SortLabel></th><th className={thc} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
                 <tbody>
-                  {list.map((r) => {
+                  {srt.sorted.map((r) => {
                     const Icon = SOURCE_ICON[r.source as keyof typeof SOURCE_ICON] ?? Inbox;
                     const on = current?.key === r.key;
                     return (
-                      <tr key={r.key} onClick={() => setSel(r.key)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
+                      <tr key={r.key} data-row={r.key} onClick={() => setSel(r.key)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
                         <td className={cn(tdc, on && "border-l-2 border-l-cs-green")}>
                           <div className="flex items-center gap-[10px]">
                             {r.img ? <Image src={r.img} alt="" width={36} height={36} className="size-[36px] rounded-[6px] object-cover" /> : <span className="grid size-[36px] place-items-center rounded-[6px] bg-cs-cream text-cs-green"><Icon className="size-[16px]" strokeWidth={1.7} /></span>}

@@ -16,6 +16,7 @@ import { mine } from "@/lib/console/actions-maker";
 import { ago, download, fmtDate, fmtNum } from "@/lib/console/format";
 import type { Sample, SampleStatus } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 type Tab = "make" | "sent" | "changes" | "approved" | "rejected";
 const IN_TAB: Record<Tab, SampleStatus[]> = { make: ["Submitted", "Draft"], sent: ["In Review", "Testing", "Feedback"], changes: ["Changes Requested"], approved: ["Approved"], rejected: ["Rejected"] };
@@ -44,6 +45,9 @@ function MakerSamples() {
   const count = (t: Tab) => samples.filter((x) => IN_TAB[t].includes(x.status)).length;
   const list = samples.filter((x) => IN_TAB[tab].includes(x.status) && (!q.trim() || `${x.name} ${x.id}`.toLowerCase().includes(q.trim().toLowerCase())));
   const current = samples.find((x) => x.id === sel) ?? list[0] ?? null;
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { name: (x) => x.name, qty: (x) => x.qty, requested: (x) => x.requestedAt, status: (x) => x.status });
+  useRowKeys(srt.sorted.map((x) => x.id), current?.id, setSel);
   const approved = samples.filter((x) => x.status === "Approved").length;
   const decided = samples.filter((x) => x.status === "Approved" || x.status === "Rejected").length;
 
@@ -67,16 +71,16 @@ function MakerSamples() {
               ]} />
               <SearchBox value={q} onChange={setQ} placeholder="Search sample or product..." className="mt-[12px] w-full min-[1024px]:w-[300px]" />
             </div>
-            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="No samples here." className="mt-[10px]" items={list.map((x) => ({ key: x.id, img: x.img, title: x.name, sub: `${x.id} · Rev. ${String(x.rev).padStart(2, "0")}`, pill: { tone: MAKER_SAMPLE_TONE[x.status], label: x.status },
+            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="No samples here." className="mt-[10px]" items={srt.sorted.map((x) => ({ key: x.id, img: x.img, title: x.name, sub: `${x.id} · Rev. ${String(x.rev).padStart(2, "0")}`, pill: { tone: MAKER_SAMPLE_TONE[x.status], label: x.status },
               meta: [`${fmtNum(x.qty)} ${x.unit}`, `Requested ${fmtDate(x.requestedAt)}`], selected: current?.id === x.id, onSelect: () => setSel(x.id) }))} />
             <div className="mt-[10px] overflow-x-auto px-[7px] max-lg:hidden">
               <table className="w-full min-w-[560px] border-separate border-spacing-0">
-                <thead><tr><th className={thc}>Sample</th><th className={thc}>Quantity</th><th className={thc}>Requested</th><th className={thc}>Status</th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
+                <thead><tr><th className={thc} {...ariaSort(srt, "name")}><SortLabel k="name" s={srt}>Sample</SortLabel></th><th className={thc} {...ariaSort(srt, "qty")}><SortLabel k="qty" s={srt}>Quantity</SortLabel></th><th className={thc} {...ariaSort(srt, "requested")}><SortLabel k="requested" s={srt}>Requested</SortLabel></th><th className={thc} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
                 <tbody>
-                  {list.map((x) => {
+                  {srt.sorted.map((x) => {
                     const on = current?.id === x.id;
                     return (
-                      <tr key={x.id} onClick={() => setSel(x.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
+                      <tr key={x.id} data-row={x.id} onClick={() => setSel(x.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
                         <td className={cn(tdc, on && "border-l-2 border-l-cs-green")}>
                           <div className="flex items-center gap-[10px]">
                             <Image src={x.img} alt="" width={36} height={36} className="size-[36px] rounded-[6px] object-cover" />

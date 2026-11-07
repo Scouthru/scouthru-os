@@ -14,6 +14,7 @@ import { mine, openOrders } from "@/lib/console/actions-maker";
 import { ago, fmtDate, fmtDateTime, fmtNum, inr } from "@/lib/console/format";
 import type { MaterialLine, POStatus, PurchaseOrder } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 type Tab = "all" | "rfq" | "quoted" | "onorder" | "received";
 /** Short step names so six steps fit the panel width. */
@@ -41,6 +42,9 @@ function MakerMaterials() {
   const count = (t: Tab) => pos.filter((p) => IN_TAB[t].includes(p.status)).length;
   const list = pos.filter((p) => IN_TAB[tab].includes(p.status));
   const cur = pos.find((p) => p.id === sel) ?? list[0] ?? null;
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { title: (p) => p.title, supplier: (p) => s.suppliers.find((x) => x.id === p.supplierId)?.name ?? "", need: (p) => p.needBy, value: (p) => p.quote?.total ?? 0, status: (p) => p.status });
+  useRowKeys(srt.sorted.map((p) => p.id), cur?.id, setSel);
   const supplier = (id: string) => s.suppliers.find((x) => x.id === id)?.name ?? id;
   const onOrderValue = pos.filter((p) => p.status === "Confirmed" || p.status === "Dispatched").reduce((a, p) => a + (p.quote?.total ?? 0), 0);
   const unpaid = pos.filter((p) => p.invoice && !p.invoice.paidAt);
@@ -65,16 +69,16 @@ function MakerMaterials() {
               ]} />
               <div className="mt-[12px] flex"><Btn kind="primary" icon={Plus} className="ml-auto h-[34px] text-[12.5px]" onClick={() => setNewOpen(true)}>Request materials</Btn></div>
             </div>
-            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="No purchase orders here." className="mt-[10px]" items={list.map((p) => ({ key: p.id, title: p.title, sub: `${p.id} · ${s.suppliers.find((x) => x.id === p.supplierId)?.name ?? ""}`, pill: { tone: PO_TONE[p.status], label: p.status === "RFQ" ? "Waiting for quote" : p.status },
+            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="No purchase orders here." className="mt-[10px]" items={srt.sorted.map((p) => ({ key: p.id, title: p.title, sub: `${p.id} · ${s.suppliers.find((x) => x.id === p.supplierId)?.name ?? ""}`, pill: { tone: PO_TONE[p.status], label: p.status === "RFQ" ? "Waiting for quote" : p.status },
               meta: [`Need by ${fmtDate(p.needBy)}`, p.quote && inr(p.quote.total)], selected: cur?.id === p.id, onSelect: () => setSel(p.id) }))} />
             <div className="mt-[8px] overflow-x-auto px-[7px] max-lg:hidden">
               <table className="w-full min-w-[600px] border-separate border-spacing-0">
-                <thead><tr><th className={thc}>Purchase order</th><th className={thc}>Supplier</th><th className={thc}>Need by</th><th className={thc}>Value</th><th className={thc}>Status</th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
+                <thead><tr><th className={thc} {...ariaSort(srt, "title")}><SortLabel k="title" s={srt}>Purchase order</SortLabel></th><th className={thc} {...ariaSort(srt, "supplier")}><SortLabel k="supplier" s={srt}>Supplier</SortLabel></th><th className={thc} {...ariaSort(srt, "need")}><SortLabel k="need" s={srt}>Need by</SortLabel></th><th className={thc} {...ariaSort(srt, "value")}><SortLabel k="value" s={srt}>Value</SortLabel></th><th className={thc} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
                 <tbody>
-                  {list.map((p) => {
+                  {srt.sorted.map((p) => {
                     const on = cur?.id === p.id;
                     return (
-                      <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
+                      <tr key={p.id} data-row={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
                         <td className={cn(tdc, on && "border-l-2 border-l-cs-green")}><p className="font-medium">{p.id}</p><p className="max-w-[220px] truncate text-[11px] text-cs-ink-2">{p.title}</p></td>
                         <td className={tdc}>{supplier(p.supplierId)}</td>
                         <td className={tdc}>{fmtDate(p.needBy)}</td>

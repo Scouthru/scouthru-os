@@ -21,6 +21,7 @@ import { PRODUCT_IMAGES } from "@/lib/console/seed";
 import { ago, daysUntil, fmtDate, fmtDay } from "@/lib/console/format";
 import type { ConsoleState, Enquiry, EnquiryStage, Manufacturer } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, useRowKeys } from "@/components/console/table-tools";
 
 const STAGES: EnquiryStage[] = ["Draft", "In Discussion", "Quote Received", "Samples Requested", "In Production", "Closed"];
 const STAGE_TONE: Record<EnquiryStage, Tone> = {
@@ -128,6 +129,8 @@ function Enquiries() {
 
   // The row open in the panel shows ticked (as in the mockup) and is included in bulk actions.
   const picked = new Set([...bulk, ...(showPanel && sel ? [sel.id] : [])]);
+  // Arrows move through the list; filters can be saved as views (sorting is the Sort by menu).
+  useRowKeys(list.map((e) => e.id), sel?.id, select);
   const allChecked = list.length > 0 && list.every((e) => picked.has(e.id));
   const toggleBulk = (id: string, on: boolean) => setBulk((b) => { const n = new Set(b); if (on) n.add(id); else n.delete(id); return n; });
 
@@ -222,6 +225,7 @@ function Enquiries() {
               <label className="flex items-center gap-[10px] text-[11.5px] text-cs-ink-2">
                 Sort by
                 <FilterSelect label="Last Updated" value={sort === "Last Updated" ? "" : sort} options={["Oldest", "Target MOQ", "Product Name"]} onChange={(v) => setSort(v || "Last Updated")} className="w-[110px] [&_select]:font-normal [&_select]:text-cs-ink" />
+                <SavedViews page="enquiries" value={{ tab, q, cat, stage, moq, range, sort }} onApply={(v) => { setTab(v.tab as typeof tab); setQ(String(v.q ?? "")); setCat(String(v.cat ?? "")); setStage(String(v.stage ?? "")); setMoq(String(v.moq ?? "")); setRange(String(v.range ?? "")); setSort(String(v.sort ?? "Last Updated")); }} />
               </label>
             </div>
 
@@ -240,6 +244,7 @@ function Enquiries() {
                   return (
                     <li
                       key={e.id}
+                      data-row={e.id}
                       onClick={() => select(e.id)}
                       className={cn(
                         "grid cursor-pointer grid-cols-[28px_minmax(0,187fr)_minmax(0,89fr)_minmax(0,97fr)_minmax(0,90fr)_minmax(0,121fr)_minmax(0,113fr)_30px] items-center rounded-[8px] border pl-[10px]",

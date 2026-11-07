@@ -12,6 +12,7 @@ import { PhoneList } from "@/components/console/phone-list";
 import { ago, download, fmtDate, fmtNum, inr } from "@/lib/console/format";
 import type { PurchaseOrder } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 type TabKey = "Confirmed" | "Dispatched" | "Received" | "Paid";
 const TABS: TabKey[] = ["Confirmed", "Dispatched", "Received", "Paid"];
@@ -49,6 +50,9 @@ function POs() {
   }, [all, tab, q, buyer, s]);
 
   const po = s.purchaseOrders.find((p) => p.id === sel && (TABS as string[]).includes(p.status)) ?? list[0] ?? null;
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { buyer: (p) => buyerName(s, p.mfrId), order: (p) => p.orderId ?? "", value: (p) => poValue(s, p), need: (p) => p.needBy, updated: (p) => p.updatedAt });
+  useRowKeys(srt.sorted.map((p) => p.id), po?.id, setSel);
   const n = (k: TabKey) => all.filter((p) => p.status === k).length;
   const book = all.reduce((a, p) => a + poValue(s, p), 0);
 
@@ -72,18 +76,19 @@ function POs() {
               <div className="mt-[12px] flex flex-wrap items-center gap-[7px]">
                 <SearchBox value={q} onChange={setQ} placeholder="Search by PO, item, factory or order..." className="w-full min-[1024px]:w-[280px]" />
                 <FilterSelect label="Buyer" value={buyer} onChange={setBuyer} options={Array.from(new Set(all.map((p) => buyerName(s, p.mfrId))))} className="w-[160px]" />
+                <SavedViews page="supplier-pos" value={{ tab, q, buyer }} onApply={(v) => { setTab(v.tab as typeof tab); setQ(String(v.q ?? "")); setBuyer(String(v.buyer ?? "")); }} />
                 <Btn icon={Download} className="ml-auto h-[34px] text-[12px]" onClick={() => download(`purchase-orders-${tab.toLowerCase()}.csv`, ["PO,Title,Buyer,Status,Need by,Value", ...list.map((p) => `${p.id},"${p.title}","${buyerName(s, p.mfrId)}",${p.status},${fmtDate(p.needBy)},${poValue(s, p)}`)].join("\n"))}>Export</Btn>
               </div>
-              <PhoneList detail={"[data-board] > aside"} empty="No orders here." className="mt-[12px] !px-0" items={list.map((p) => ({ key: p.id, title: p.title, sub: `${p.id} · ${buyerName(s, p.mfrId)}`, pill: { tone: PO_TONE[p.status], label: PO_LABEL[p.status] },
+              <PhoneList detail={"[data-board] > aside"} empty="No orders here." className="mt-[12px] !px-0" items={srt.sorted.map((p) => ({ key: p.id, title: p.title, sub: `${p.id} · ${buyerName(s, p.mfrId)}`, pill: { tone: PO_TONE[p.status], label: PO_LABEL[p.status] },
                 meta: [inr(poValue(s, p)), `Need by ${fmtDate(p.needBy)}`], selected: po?.id === p.id, onSelect: () => setSel(p.id) }))} />
               <div className="mt-[12px] min-h-0 flex-1 overflow-auto max-lg:hidden">
                 <table className="w-full min-w-[620px] border-separate border-spacing-0 text-[12px]">
-                  <thead><tr><th className={cn(th, "rounded-l-[6px]")}>Purchase order</th><th className={th}>Buyer</th><th className={th}>For order</th><th className={th}>Value</th><th className={th}>Need by</th><th className={th}>Updated</th><th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th></tr></thead>
+                  <thead><tr><th className={cn(th, "rounded-l-[6px]")}>Purchase order</th><th className={th} {...ariaSort(srt, "buyer")}><SortLabel k="buyer" s={srt}>Buyer</SortLabel></th><th className={th} {...ariaSort(srt, "order")}><SortLabel k="order" s={srt}>For order</SortLabel></th><th className={th} {...ariaSort(srt, "value")}><SortLabel k="value" s={srt}>Value</SortLabel></th><th className={th} {...ariaSort(srt, "need")}><SortLabel k="need" s={srt}>Need by</SortLabel></th><th className={th} {...ariaSort(srt, "updated")}><SortLabel k="updated" s={srt}>Updated</SortLabel></th><th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th></tr></thead>
                   <tbody>
-                    {list.map((p) => {
+                    {srt.sorted.map((p) => {
                       const on = po?.id === p.id;
                       return (
-                        <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
+                        <tr key={p.id} data-row={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
                           <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#221f1c]">{p.title}</span><span className="text-[10.5px] text-cs-ink-2">{p.id} · {p.lines.length} line{p.lines.length > 1 ? "s" : ""}</span></td>
                           <td className={td}>{buyerName(s, p.mfrId)}</td>
                           <td className={cn(td, "whitespace-nowrap")}>{p.orderId ?? "—"}</td>

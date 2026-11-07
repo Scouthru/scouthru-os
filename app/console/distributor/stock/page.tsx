@@ -12,6 +12,7 @@ import { PhoneList } from "@/components/console/phone-list";
 import { setReorderLevel } from "@/lib/console/actions-distributor";
 import { csv, download, fmtDate, fmtNum, inr, lakh } from "@/lib/console/format";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 export default function StockPage() {
   return (
@@ -38,6 +39,9 @@ function Stock() {
 
   const flag = (x: (typeof s.distStock)[number]) => (x.onHand < x.reorderAt ? "Below reorder" : daysTo(x.expiry) < 90 ? "Expiring soon" : "Healthy");
   const list = useMemo(() => s.distStock.filter((x) => (!q.trim() || [x.sku, x.product, x.batch].some((v) => v.toLowerCase().includes(q.trim().toLowerCase()))) && (!status || flag(x) === status)), [s.distStock, q, status]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { batch: (x) => x.batch, expiry: (x) => x.expiry, onhand: (x) => x.onHand, reorder: (x) => x.reorderAt, price: (x) => x.price, value: (x) => x.onHand * x.price, status: (x) => (x.onHand < x.reorderAt ? 0 : 1) });
+  useRowKeys(srt.sorted.map((x) => x.sku), cur?.sku, (sku) => { setSel(sku); router.replace(`/console/distributor/stock?sku=${sku}`, { scroll: false }); });
   const expiring = s.distStock.filter((x) => daysTo(x.expiry) < 90);
   const low = s.distStock.filter((x) => x.onHand < x.reorderAt);
   const pick = (sku: string) => { setSel(sku); router.replace(`/console/distributor/stock?sku=${sku}`, { scroll: false }); };
@@ -82,30 +86,30 @@ function Stock() {
               <FilterSelect label="All statuses" value={status} onChange={setStatus} options={["Below reorder", "Expiring soon", "Healthy"]} className="w-[140px]" />
               <Btn icon={Download} className="h-[34px]" onClick={exportCsv}>Export CSV</Btn>
             </div>
-            <PhoneList detail="#dist-detail" empty="No stock matches." className="mt-[12px] !px-0" items={list.map((x) => ({ key: x.sku, img: x.img, title: x.product, sub: `${x.sku} · batch ${x.batch}`, pill: x.onHand < x.reorderAt ? { tone: "red", label: "Reorder" } : { tone: "green", label: "OK" },
+            <PhoneList detail="#dist-detail" empty="No stock matches." className="mt-[12px] !px-0" items={srt.sorted.map((x) => ({ key: x.sku, img: x.img, title: x.product, sub: `${x.sku} · batch ${x.batch}`, pill: x.onHand < x.reorderAt ? { tone: "red", label: "Reorder" } : { tone: "green", label: "OK" },
               meta: [`${fmtNum(x.onHand)} on hand`, `Reorder at ${fmtNum(x.reorderAt)}`, `Expires ${fmtDate(x.expiry)}`], selected: cur?.sku === x.sku, onSelect: () => pick(x.sku) }))} />
             <div className="mt-[14px] min-h-0 flex-1 overflow-auto max-lg:hidden">
               <table className="w-full min-w-[720px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[#f9f6f0]">
                     <th className={cn(th, "rounded-l-[6px] pl-[10px]")}>Product</th>
-                    <th className={th}>Batch</th>
-                    <th className={th}>Expiry</th>
-                    <th className={th}>On Hand</th>
-                    <th className={th}>Reorder At</th>
-                    <th className={th}>MRP / Price</th>
-                    <th className={th}>Value</th>
-                    <th className={th}>Status</th>
+                    <th className={th} {...ariaSort(srt, "batch")}><SortLabel k="batch" s={srt}>Batch</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "expiry")}><SortLabel k="expiry" s={srt}>Expiry</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "onhand")}><SortLabel k="onhand" s={srt}>On Hand</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "reorder")}><SortLabel k="reorder" s={srt}>Reorder At</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "price")}><SortLabel k="price" s={srt}>MRP / Price</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "value")}><SortLabel k="value" s={srt}>Value</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th>
                     <th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {list.map((x) => {
+                  {srt.sorted.map((x) => {
                     const on = x.sku === sel;
                     const f = flag(x);
                     const exp = daysTo(x.expiry);
                     return (
-                      <tr key={x.sku} onClick={() => pick(x.sku)} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
+                      <tr key={x.sku} data-row={x.sku} onClick={() => pick(x.sku)} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
                         <td className="py-[9px] pl-[10px] pr-[8px]">
                           <div className="flex items-center gap-[10px]">
                             <Image src={x.img} alt="" width={42} height={42} className="size-[42px] shrink-0 rounded-[6px] object-cover" />

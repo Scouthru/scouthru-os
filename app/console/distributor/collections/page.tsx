@@ -12,6 +12,7 @@ import { PhoneList } from "@/components/console/phone-list";
 import { csv, download, fmtDate, inr, lakh } from "@/lib/console/format";
 import type { RetailOrder } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 type TabKey = "due" | "overdue" | "collected" | "all";
 
@@ -47,6 +48,9 @@ function Collections() {
 
   const base: Record<TabKey, RetailOrder[]> = { due, overdue, collected, all: delivered };
   const list = useMemo(() => base[tab].filter((o) => !q.trim() || [o.id, o.retailer, o.area].some((v) => v.toLowerCase().includes(q.trim().toLowerCase()))).sort((a, b) => age(b) - age(a)), [tab, q, s.retailOrders]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { delivered: (o) => o.deliveredAt ?? o.at, age: (o) => age(o), amount: (o) => o.value, status: (o) => o.payment, mode: (o) => o.collected?.mode ?? "" });
+  useRowKeys(srt.sorted.map((o) => o.id), sel, (id) => { setSel(id); router.replace(`/console/distributor/collections?id=${id}`, { scroll: false }); });
 
   const byRetailer = useMemo(() => {
     const m = new Map<string, { due: number; n: number; oldest: number }>();
@@ -94,7 +98,7 @@ function Collections() {
               <Btn icon={Download} className="h-[34px] shrink-0" onClick={exportCsv}>Export CSV</Btn>
             </div>
             <div className="mt-[14px]"><SearchBox value={q} onChange={setQ} placeholder="Search by order, retailer or area..." /></div>
-            <PhoneList empty="Nothing here." className="mt-[12px] !px-0" items={list.map((o) => ({ key: o.id, title: o.retailer, sub: `${o.id} · ${o.area}`, pill: o.payment === "Collected" ? { tone: "green", label: "Collected" } : ageDays(o.deliveredAt ?? o.at) > 7 ? { tone: "red", label: "Overdue" } : { tone: "orange", label: "Due" },
+            <PhoneList empty="Nothing here." className="mt-[12px] !px-0" items={srt.sorted.map((o) => ({ key: o.id, title: o.retailer, sub: `${o.id} · ${o.area}`, pill: o.payment === "Collected" ? { tone: "green", label: "Collected" } : ageDays(o.deliveredAt ?? o.at) > 7 ? { tone: "red", label: "Overdue" } : { tone: "orange", label: "Due" },
               meta: [inr(o.value), o.collected ? `Collected ${fmtDate(o.collected.at)} · ${o.collected.mode}` : `Delivered ${fmtDate(o.deliveredAt ?? o.at)}`, o.payment === "Due" && "Tap to record payment"], selected: o.id === sel,
               onSelect: () => { setSel(o.id); if (o.payment === "Due") setCollect(o); } }))} />
             <div className="mt-[14px] min-h-0 flex-1 overflow-auto max-lg:hidden">
@@ -102,20 +106,20 @@ function Collections() {
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[#f9f6f0]">
                     <th className={cn(th, "rounded-l-[6px] pl-[10px]")}>Order &amp; Retailer</th>
-                    <th className={th}>Delivered</th>
-                    <th className={th}>Age</th>
-                    <th className={th}>Amount</th>
-                    <th className={th}>Status</th>
-                    <th className={th}>Mode &amp; Reference</th>
+                    <th className={th} {...ariaSort(srt, "delivered")}><SortLabel k="delivered" s={srt}>Delivered</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "age")}><SortLabel k="age" s={srt}>Age</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "amount")}><SortLabel k="amount" s={srt}>Amount</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "mode")}><SortLabel k="mode" s={srt}>Mode &amp; Reference</SortLabel></th>
                     <th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {list.map((o) => {
+                  {srt.sorted.map((o) => {
                     const on = o.id === sel;
                     const late = o.payment === "Due" && age(o) > 7;
                     return (
-                      <tr key={o.id} onClick={() => { setSel(o.id); router.replace(`/console/distributor/collections?id=${o.id}`, { scroll: false }); }} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
+                      <tr key={o.id} data-row={o.id} onClick={() => { setSel(o.id); router.replace(`/console/distributor/collections?id=${o.id}`, { scroll: false }); }} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
                         <td className="py-[10px] pl-[10px] pr-[8px]"><p className="text-[11.5px] font-semibold">{o.id}</p><p className="max-w-[200px] truncate text-[11px] text-[#48413b]">{o.retailer}</p></td>
                         <td className="whitespace-nowrap px-[8px] text-[11.5px]">{o.deliveredAt ? fmtDate(o.deliveredAt) : "—"}</td>
                         <td className={cn("px-[8px] text-[11.5px]", late && "font-semibold text-cs-red")}>{age(o)} days</td>

@@ -29,7 +29,7 @@ export function Hero({ eyebrow, title, lede, img, quote, height = 177, quoteTop 
       <Image src={img} alt="" width={1296} height={350} priority className="absolute right-0 top-0 hidden h-full w-[52%] object-cover object-right md:block" />
       <div className="absolute inset-y-0 left-[48%] hidden w-[140px] bg-gradient-to-r from-[#f7f2ea] to-transparent md:block" />
       <div className="relative px-[20px] pt-[24px] md:pl-[29px] md:pr-0">
-        <p className="text-[11px] font-semibold tracking-[0.2em] text-[#322d29]">{eyebrow}</p>
+        <div className="eyebrow">{eyebrow}</div>
         <h1 className="serif mt-[10px] text-[32px] md:text-[45px] font-semibold leading-none tracking-[-0.02em] text-[#191614]">{title}</h1>
         <p className="mt-[13px] max-w-[620px] text-[16px] leading-[1.35] max-md:[&_*]:whitespace-normal tracking-[-0.005em] text-[#48413b]">{lede}</p>
       </div>
@@ -46,7 +46,7 @@ export function Hero({ eyebrow, title, lede, img, quote, height = 177, quoteTop 
 /** Breadcrumb used instead of the eyebrow on detail screens. */
 export function Crumbs({ items }: { items: string[] }) {
   return (
-    <span className="flex items-center gap-[10px] font-medium normal-case tracking-normal text-[12.5px]">
+    <span className="flex items-center gap-[10px] font-sans font-medium normal-case tracking-normal text-[12.5px]">
       {items.map((c, i) => (
         <span key={c} className="flex items-center gap-[10px]">
           {i > 0 && <span className="text-[#796d63]">›</span>}

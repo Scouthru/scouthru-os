@@ -12,6 +12,7 @@ import { addSupplierRequest } from "@/lib/console/actions-network";
 import { ago, daysUntil, fmtDate, fmtNum, inr } from "@/lib/console/format";
 import type { MaterialLine, PurchaseOrder } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 type TabKey = "new" | "quoted" | "declined";
 const TAB_STATUS: Record<TabKey, PurchaseOrder["status"]> = { new: "RFQ", quoted: "Quoted", declined: "Declined" };
@@ -60,6 +61,9 @@ function Requests() {
   }, [all, tab, q, buyer, source, need, s]);
 
   const po = s.purchaseOrders.find((p) => p.id === sel) ?? list[0] ?? null;
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { buyer: (p) => buyerName(s, p.mfrId), source: (p) => p.source, items: (p) => p.lines.length, value: (p) => poValue(s, p), need: (p) => p.needBy, status: (p) => p.status });
+  useRowKeys(srt.sorted.map((p) => p.id), po?.id, setSel);
   const count = (k: TabKey) => all.filter((p) => p.status === TAB_STATUS[k]).length;
   const rfq = all.filter((p) => p.status === "RFQ");
   const quoted = all.filter((p) => p.status === "Quoted");
@@ -92,18 +96,19 @@ function Requests() {
                 <FilterSelect label="Buyer" value={buyer} onChange={setBuyer} options={Array.from(new Set(all.map((p) => buyerName(s, p.mfrId))))} className="w-[150px]" />
                 <FilterSelect label="Source" value={source} onChange={setSource} options={["Scouthru", "IndiaMART", "WhatsApp", "Phone"]} className="w-[110px]" />
                 <FilterSelect label="Need by" value={need} onChange={setNeed} options={Object.keys(NEED)} className="w-[120px]" />
+                <SavedViews page="supplier-requests" value={{ tab, q, buyer, source, need }} onApply={(v) => { setTab(v.tab as typeof tab); setQ(String(v.q ?? "")); setBuyer(String(v.buyer ?? "")); setSource(String(v.source ?? "")); setNeed(String(v.need ?? "")); }} />
               </div>
-              <PhoneList detail={"[data-board] > aside"} empty="No requests here." className="mt-[12px] !px-0" items={list.map((p) => ({ key: p.id, title: p.title, sub: `${p.id} · ${buyerName(s, p.mfrId)}`, pill: { tone: PO_TONE[p.status], label: PO_LABEL[p.status] },
+              <PhoneList detail={"[data-board] > aside"} empty="No requests here." className="mt-[12px] !px-0" items={srt.sorted.map((p) => ({ key: p.id, title: p.title, sub: `${p.id} · ${buyerName(s, p.mfrId)}`, pill: { tone: PO_TONE[p.status], label: PO_LABEL[p.status] },
                 meta: [inr(poValue(s, p)), `Need by ${fmtDate(p.needBy)}`, p.source], selected: po?.id === p.id, onSelect: () => setSel(p.id) }))} />
               <div className="mt-[12px] min-h-0 flex-1 overflow-auto max-lg:hidden">
                 <table className="w-full min-w-[640px] border-separate border-spacing-0 text-[12px]">
-                  <thead><tr><th className={cn(th, "rounded-l-[6px]")}>Request</th><th className={th}>Buyer</th><th className={th}>Source</th><th className={th}>Items</th><th className={th}>Value</th><th className={th}>Need by</th><th className={th}>Status</th><th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th></tr></thead>
+                  <thead><tr><th className={cn(th, "rounded-l-[6px]")}>Request</th><th className={th} {...ariaSort(srt, "buyer")}><SortLabel k="buyer" s={srt}>Buyer</SortLabel></th><th className={th} {...ariaSort(srt, "source")}><SortLabel k="source" s={srt}>Source</SortLabel></th><th className={th} {...ariaSort(srt, "items")}><SortLabel k="items" s={srt}>Items</SortLabel></th><th className={th} {...ariaSort(srt, "value")}><SortLabel k="value" s={srt}>Value</SortLabel></th><th className={th} {...ariaSort(srt, "need")}><SortLabel k="need" s={srt}>Need by</SortLabel></th><th className={th} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th><th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th></tr></thead>
                   <tbody>
-                    {list.map((p) => {
+                    {srt.sorted.map((p) => {
                       const on = po?.id === p.id;
                       const d = daysUntil(p.needBy);
                       return (
-                        <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
+                        <tr key={p.id} data-row={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
                           <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#221f1c]">{p.title}</span><span className="text-[10.5px] text-cs-ink-2">{p.id} · {ago(p.createdAt)}</span></td>
                           <td className={td}>{buyerName(s, p.mfrId)}</td>
                           <td className={td}><SourceBadge source={p.source} /></td>

@@ -16,6 +16,7 @@ import { mine, replyOnBatch } from "@/lib/console/actions-maker";
 import { ago, fmtDate, fmtNum } from "@/lib/console/format";
 import type { QualityBatch } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 const STATUS_TONE: Record<QualityBatch["status"], Tone> = { "In Testing": "blue", Passed: "green", "Issues Found": "red", "Re-test": "orange" };
 type Tab = "testing" | "issues" | "passed" | "all";
@@ -44,6 +45,9 @@ function MakerQuality() {
   }, [params]);
   const list = batches.filter(IN_TAB[tab]);
   const cur = batches.find((x) => x.id === sel) ?? list[0] ?? null;
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { id: (b) => b.id, order: (b) => b.orderId ?? "", tests: (b) => b.tests.filter((t) => t.status === "Pass" || t.status === "Fail").length, status: (b) => b.status, updated: (b) => b.updatedAt });
+  useRowKeys(srt.sorted.map((b) => b.id), cur?.id, setSel);
   const pending = batches.flatMap((b) => b.tests).filter((t) => t.status === "Pending" || t.status === "In Progress").length;
   const coa = batches.filter((b) => b.checklist.find((c) => c.label === "COA reviewed")?.status === "Completed").length;
   const count = (t: Tab) => batches.filter(IN_TAB[t]).length;
@@ -66,17 +70,17 @@ function MakerQuality() {
                 { key: "testing", label: `In Testing (${count("testing")})` }, { key: "issues", label: `Issues Found (${count("issues")})` }, { key: "passed", label: `Released (${count("passed")})` }, { key: "all", label: `All (${batches.length})` },
               ]} />
             </div>
-            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="No batches here." className="mt-[10px]" items={list.map((b) => ({ key: b.id, img: b.img, title: b.name, sub: b.id, pill: { tone: STATUS_TONE[b.status], label: b.status },
+            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="No batches here." className="mt-[10px]" items={srt.sorted.map((b) => ({ key: b.id, img: b.img, title: b.name, sub: b.id, pill: { tone: STATUS_TONE[b.status], label: b.status },
               meta: [`${b.tests.filter((t) => t.status === "Pass" || t.status === "Fail").length}/${b.tests.length} tests`, `${fmtNum(b.size)} units`, `Release ${fmtDate(b.release)}`], selected: cur?.id === b.id, onSelect: () => setSel(b.id) }))} />
             <div className="mt-[10px] overflow-x-auto px-[7px] max-lg:hidden">
               <table className="w-full min-w-[540px] border-separate border-spacing-0">
-                <thead><tr><th className={thc}>Batch</th><th className={thc}>Order</th><th className={thc}>Tests</th><th className={thc}>Status</th><th className={thc}>Updated</th></tr></thead>
+                <thead><tr><th className={thc} {...ariaSort(srt, "id")}><SortLabel k="id" s={srt}>Batch</SortLabel></th><th className={thc} {...ariaSort(srt, "order")}><SortLabel k="order" s={srt}>Order</SortLabel></th><th className={thc} {...ariaSort(srt, "tests")}><SortLabel k="tests" s={srt}>Tests</SortLabel></th><th className={thc} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th><th className={thc} {...ariaSort(srt, "updated")}><SortLabel k="updated" s={srt}>Updated</SortLabel></th></tr></thead>
                 <tbody>
-                  {list.map((b) => {
+                  {srt.sorted.map((b) => {
                     const passed = b.tests.filter((t) => t.status === "Pass").length;
                     const on = cur?.id === b.id;
                     return (
-                      <tr key={b.id} onClick={() => setSel(b.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
+                      <tr key={b.id} data-row={b.id} onClick={() => setSel(b.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
                         <td className={cn(tdc, on && "border-l-2 border-l-cs-green")}>
                           <div className="flex items-center gap-[10px]">
                             <Image src={b.img} alt="" width={36} height={36} className="size-[36px] rounded-[6px] object-cover" />

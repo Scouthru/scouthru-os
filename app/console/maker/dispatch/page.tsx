@@ -16,6 +16,7 @@ import { mine } from "@/lib/console/actions-maker";
 import { ago, download, fmtDate, fmtDateTime, fmtDay, fmtNum, inr } from "@/lib/console/format";
 import { SHIP_STEPS, type Shipment, type ShipStatus } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 const TONE: Record<ShipStatus, Tone> = { Pending: "orange", "In Transit": "blue", Delayed: "red", Delivered: "green" };
 type Tab = "ready" | "transit" | "delivered";
@@ -42,6 +43,9 @@ function MakerDispatch() {
   const count = (t: Tab) => ships.filter((x) => IN_TAB[t].includes(x.status)).length;
   const list = ships.filter((x) => IN_TAB[tab].includes(x.status));
   const cur = ships.find((x) => x.id === sel) ?? list[0] ?? null;
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { name: (x) => x.name, qty: (x) => x.qty, carrier: (x) => x.carrier, dest: (x) => x.destination, eta: (x) => x.eta, status: (x) => x.status });
+  useRowKeys(srt.sorted.map((x) => x.id), cur?.id, setSel);
   const shippedUnits = ships.filter((x) => x.status !== "Pending").reduce((a, x) => a + x.qty, 0);
 
   return (
@@ -60,16 +64,16 @@ function MakerDispatch() {
             <div className="px-[15px] pt-[12px]">
               <Tabs<Tab> value={tab} onChange={(t) => { setTab(t); setSel(null); }} tabs={[{ key: "ready", label: `Ready to Dispatch (${count("ready")})` }, { key: "transit", label: `In Transit (${count("transit")})` }, { key: "delivered", label: `Delivered (${count("delivered")})` }]} />
             </div>
-            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="No shipments here." className="mt-[10px]" items={list.map((x) => ({ key: x.id, img: x.img, title: x.name, sub: `${x.id} · ${x.destination}`, pill: { tone: TONE[x.status], label: x.status },
+            <PhoneList detail={"[data-split] > :nth-child(2)"} empty="No shipments here." className="mt-[10px]" items={srt.sorted.map((x) => ({ key: x.id, img: x.img, title: x.name, sub: `${x.id} · ${x.destination}`, pill: { tone: TONE[x.status], label: x.status },
               meta: [`${fmtNum(x.qty)} units`, x.status === "Pending" ? "Not booked" : x.carrier, `ETA ${fmtDay(x.eta)}`], selected: cur?.id === x.id, onSelect: () => setSel(x.id) }))} />
             <div className="mt-[10px] overflow-x-auto px-[7px] max-lg:hidden">
               <table className="w-full min-w-[600px] border-separate border-spacing-0">
-                <thead><tr><th className={thc}>Shipment</th><th className={thc}>Quantity</th><th className={thc}>Carrier</th><th className={thc}>Destination</th><th className={thc}>ETA</th><th className={thc}>Status</th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
+                <thead><tr><th className={thc} {...ariaSort(srt, "name")}><SortLabel k="name" s={srt}>Shipment</SortLabel></th><th className={thc} {...ariaSort(srt, "qty")}><SortLabel k="qty" s={srt}>Quantity</SortLabel></th><th className={thc} {...ariaSort(srt, "carrier")}><SortLabel k="carrier" s={srt}>Carrier</SortLabel></th><th className={thc} {...ariaSort(srt, "dest")}><SortLabel k="dest" s={srt}>Destination</SortLabel></th><th className={thc} {...ariaSort(srt, "eta")}><SortLabel k="eta" s={srt}>ETA</SortLabel></th><th className={thc} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th><th className={thc}><span className="sr-only">Actions</span></th></tr></thead>
                 <tbody>
-                  {list.map((x) => {
+                  {srt.sorted.map((x) => {
                     const on = cur?.id === x.id;
                     return (
-                      <tr key={x.id} onClick={() => setSel(x.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
+                      <tr key={x.id} data-row={x.id} onClick={() => setSel(x.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf8f4]")}>
                         <td className={cn(tdc, on && "border-l-2 border-l-cs-green")}>
                           <div className="flex items-center gap-[10px]"><Image src={x.img} alt="" width={36} height={36} className="size-[36px] rounded-[6px] object-cover" /><div className="min-w-0"><p className="font-medium">{x.id}</p><p className="truncate text-[11px] text-cs-ink-2">{x.name}</p></div></div>
                         </td>

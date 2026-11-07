@@ -21,6 +21,7 @@ import { approveBatch, log, raiseIssue, retestBatch } from "@/lib/console/action
 import { ago, download, fmtDate, fmtDateTime, fmtNum } from "@/lib/console/format";
 import type { CheckStatus, ConsoleState, QualityBatch, TestStatus } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 type StepState = "Completed" | "In Progress" | "Pending" | "Issues Found";
 /** Per-test icons, as in the mockup's Testing Results list. */
@@ -134,6 +135,11 @@ function QualityInner() {
     });
   }, [s.quality, s.manufacturers, q, cat, status, range]);
 
+  // Click a column to sort; arrows move through rows; filters can be saved as views.
+  // (Before the loading return: hooks have to run on every render.)
+  const srt = useSort(list, { id: (x) => x.id, name: (x) => x.name, mfr: (x) => s.manufacturers.find((m) => m.id === x.mfrId)?.name ?? "", tests: (x) => x.tests.filter((t) => t.status === "Pass" || t.status === "Fail").length, status: (x) => x.status, updated: (x) => x.updatedAt });
+  useRowKeys(srt.sorted.map((x) => x.id), batch?.id, (id) => { setClosed(false); setOffActive(false); router.replace(`/console/quality?id=${id}`, { scroll: false }); });
+
   if (!ready) return <><Header /><Loading /></>;
 
   const select = (id: string) => { setClosed(false); setOffActive(false); router.replace(`/console/quality?id=${id}`, { scroll: false }); };
@@ -232,6 +238,7 @@ function QualityInner() {
                 <FilterSelect label="Product Category" value={cat} options={categories} onChange={setCat} className="w-[118px] shrink-0 [&_select]:pl-[9px] [&_select]:text-[10.5px]" />
                 <FilterSelect label="Status" value={status} options={["In Testing", "Passed", "Issues Found", "Re-test"]} onChange={setStatus} className="w-[70px] shrink-0 [&_select]:pl-[9px] [&_select]:text-[10.5px]" />
                 <FilterSelect label="Date Range" value={range} options={Object.keys(RANGES)} onChange={setRange} className="w-[92px] shrink-0 [&_select]:pl-[9px] [&_select]:text-[10.5px]" />
+                <SavedViews page="quality" value={{ q, cat, status, range }} onApply={(v) => { setQ(String(v.q ?? "")); setCat(String(v.cat ?? "")); setStatus(String(v.status ?? "")); setRange(String(v.range ?? "")); }} className="shrink-0" />
                 <button type="button" aria-label={compact ? "Comfortable rows" : "Compact rows"} aria-pressed={compact} onClick={() => setCompact((c) => !c)} className={cn("grid size-[34px] shrink-0 place-items-center rounded-[6px] border", compact ? "border-cs-green bg-cs-mint text-cs-green" : "border-cs-line bg-white")}><List className="size-[16px]" /></button>
               </div>
               {showBulk && (
@@ -242,7 +249,7 @@ function QualityInner() {
                   <button type="button" onClick={clearSel} className="ml-auto text-cs-ink-2 hover:underline">Clear</button>
                 </div>
               )}
-              <PhoneList detail="#batch-details" empty="No batches match these filters." className="mt-[10px] !px-0" items={list.map((x) => ({
+              <PhoneList detail="#batch-details" empty="No batches match these filters." className="mt-[10px] !px-0" items={srt.sorted.map((x) => ({
                 key: x.id, img: x.img, title: x.name, sub: `${x.id} · ${s.manufacturers.find((m) => m.id === x.mfrId)?.name ?? ""}`, pill: { tone: QB_TONE[x.status], label: x.status },
                 meta: [`${x.tests.filter((t) => t.status === "Pass" || t.status === "Fail").length}/${x.tests.length} tests`, `${fmtNum(x.size)} units`, `Release ${fmtDate(x.release)}`], selected: batch?.id === x.id, onSelect: () => select(x.id),
               }))} />
@@ -251,16 +258,16 @@ function QualityInner() {
                 <thead>
                   <tr className="text-left text-[11px] text-[#48413b]">
                     <th className="w-[34px] py-[8px] pl-[10px]"><Check label="Select all batches" checked={list.length > 0 && list.every((x) => sel.includes(x.id))} onChange={(v) => { if (v) { setPicked(list.map((x) => x.id)); setOffActive(false); } else clearSel(); }} /></th>
-                    <th className="font-medium">Batch ID</th><th className="font-medium">Product</th><th className="font-medium">Manufacturer</th><th className="font-medium">Tests</th><th className="font-medium">Overall Status</th><th className="font-medium">Last Updated</th><th />
+                    <th className="font-medium" {...ariaSort(srt, "id")}><SortLabel k="id" s={srt}>Batch ID</SortLabel></th><th className="font-medium" {...ariaSort(srt, "name")}><SortLabel k="name" s={srt}>Product</SortLabel></th><th className="font-medium" {...ariaSort(srt, "mfr")}><SortLabel k="mfr" s={srt}>Manufacturer</SortLabel></th><th className="font-medium" {...ariaSort(srt, "tests")}><SortLabel k="tests" s={srt}>Tests</SortLabel></th><th className="font-medium" {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Overall Status</SortLabel></th><th className="font-medium" {...ariaSort(srt, "updated")}><SortLabel k="updated" s={srt}>Last Updated</SortLabel></th><th />
                   </tr>
                 </thead>
                 <tbody>
                   {list.length === 0 && <tr><td colSpan={8}><Empty>No batches match these filters.</Empty></td></tr>}
-                  {list.map((x) => {
+                  {srt.sorted.map((x) => {
                     const on = batch?.id === x.id;
                     const done = x.tests.filter((t) => t.status === "Pass" || t.status === "Fail").length;
                     return (
-                      <tr key={x.id} onClick={() => select(x.id)} className={cn("cursor-pointer", on ? "outline outline-[1.5px] -outline-offset-1 outline-cs-green-2 [&>td]:bg-[#fdfcfb]" : "border-t border-[#f5efe6] hover:bg-[#fbf9f5]")}>
+                      <tr key={x.id} data-row={x.id} onClick={() => select(x.id)} className={cn("cursor-pointer", on ? "outline outline-[1.5px] -outline-offset-1 outline-cs-green-2 [&>td]:bg-[#fdfcfb]" : "border-t border-[#f5efe6] hover:bg-[#fbf9f5]")}>
                         <td className={cn("pl-[10px]", on && "rounded-l-[8px]")}><Check label={`Select ${x.id}`} checked={sel.includes(x.id)} onChange={(v) => { setPicked((p) => (v ? [...p, x.id] : p.filter((y) => y !== x.id))); if (on) setOffActive(!v); }} /></td>
                         <td className={compact ? "py-[5px]" : "py-[13px]"}>
                           <span className="flex items-center gap-[8px]">

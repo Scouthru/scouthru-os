@@ -11,6 +11,7 @@ import { remindInvoice } from "@/lib/console/actions-supplier";
 import { daysUntil, download, fmtDate, fmtNum, inr } from "@/lib/console/format";
 import type { ConsoleState, PurchaseOrder } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 type TabKey = "outstanding" | "overdue" | "paid" | "all";
 
@@ -74,6 +75,9 @@ function Payments() {
   }, [all, tab, q, buyer, s]);
 
   const po = s.purchaseOrders.find((p) => p.id === sel && p.invoice) ?? list[0] ?? null;
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { buyer: (p) => buyerName(s, p.mfrId), amount: (p) => p.invoice?.amount ?? 0, due: (p) => p.invoice?.due ?? "", status: (p) => statusOf(p).label });
+  useRowKeys(srt.sorted.map((p) => p.id), po?.id, setSel);
   const unpaid = all.filter((p) => !p.invoice!.paidAt);
   const overdue = unpaid.filter(isOverdue);
   const paid = all.filter((p) => p.invoice!.paidAt);
@@ -102,18 +106,18 @@ function Payments() {
                 <SearchBox value={q} onChange={setQ} placeholder="Search by invoice, PO or factory..." className="w-full min-[1024px]:w-[280px]" />
                 <FilterSelect label="Buyer" value={buyer} onChange={setBuyer} options={Array.from(new Set(all.map((p) => buyerName(s, p.mfrId))))} className="w-[160px]" />
               </div>
-              <PhoneList detail={"[data-board] > aside"} empty="No invoices here." className="mt-[12px] !px-0" items={list.map((p) => ({ key: p.id, title: p.invoice?.no ?? p.id, sub: `${buyerName(s, p.mfrId)} · ${p.title}`, pill: { tone: statusOf(p).tone, label: statusOf(p).label },
+              <PhoneList detail={"[data-board] > aside"} empty="No invoices here." className="mt-[12px] !px-0" items={srt.sorted.map((p) => ({ key: p.id, title: p.invoice?.no ?? p.id, sub: `${buyerName(s, p.mfrId)} · ${p.title}`, pill: { tone: statusOf(p).tone, label: statusOf(p).label },
                 meta: [p.invoice && inr(p.invoice.amount), p.invoice && (p.invoice.paidAt ? `Paid ${fmtDate(p.invoice.paidAt)}` : `Due ${fmtDate(p.invoice.due)}`)], selected: po?.id === p.id, onSelect: () => setSel(p.id) }))} />
               <div className="mt-[12px] min-h-0 flex-1 overflow-auto max-lg:hidden">
                 <table className="w-full min-w-[620px] border-separate border-spacing-0 text-[12px]">
-                  <thead><tr><th className={cn(th, "rounded-l-[6px]")}>Invoice</th><th className={th}>Buyer</th><th className={th}>Amount</th><th className={th}>Due</th><th className={th}>Status</th><th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th></tr></thead>
+                  <thead><tr><th className={cn(th, "rounded-l-[6px]")}>Invoice</th><th className={th} {...ariaSort(srt, "buyer")}><SortLabel k="buyer" s={srt}>Buyer</SortLabel></th><th className={th} {...ariaSort(srt, "amount")}><SortLabel k="amount" s={srt}>Amount</SortLabel></th><th className={th} {...ariaSort(srt, "due")}><SortLabel k="due" s={srt}>Due</SortLabel></th><th className={th} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th><th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th></tr></thead>
                   <tbody>
-                    {list.map((p) => {
+                    {srt.sorted.map((p) => {
                       const on = po?.id === p.id;
                       const st = statusOf(p);
                       const d = daysUntil(p.invoice!.due);
                       return (
-                        <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
+                        <tr key={p.id} data-row={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
                           <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#221f1c]">{p.invoice!.no}</span><span className="text-[10.5px] text-cs-ink-2">{p.id} · {p.title}</span></td>
                           <td className={td}>{buyerName(s, p.mfrId)}</td>
                           <td className={cn(td, "whitespace-nowrap font-medium")}>{inr(p.invoice!.amount)}</td>

@@ -255,6 +255,21 @@
   padding-inline: 2px;
   color: var(--color-cs-green);
 }
+/* Scouthru OS (.cs-dense): the landing page's details, kept dense for daily work.
+   Cream cards with hairlines, pill-shaped status tags that keep their colour (colour +
+   icon helps low-literacy users) with a thin outline, and squarer buttons. */
+.cs-dense .cs-card {
+  background: #fffdf9;
+  border-color: var(--color-cs-line);
+  border-radius: 14px;
+}
+.cs-dense [data-btn] {
+  border-radius: 6px;
+}
+.cs-dense [data-pill] {
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, currentColor 26%, transparent);
+}
 .eyebrow {
   display: flex;
   align-items: center;

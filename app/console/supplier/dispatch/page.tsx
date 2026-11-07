@@ -12,6 +12,7 @@ import { dispatchPO } from "@/lib/console/actions-network";
 import { ago, daysUntil, download, fmtDate, fmtDateTime, fmtNum, inr } from "@/lib/console/format";
 import type { POStatus, PurchaseOrder } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 type TabKey = "ready" | "transit" | "delivered";
 const TAB_STATUS: Record<TabKey, POStatus[]> = { ready: ["Confirmed"], transit: ["Dispatched"], delivered: ["Received", "Paid"] };
@@ -52,6 +53,9 @@ function Dispatch() {
   }, [all, tab, q, s]);
 
   const po = s.purchaseOrders.find((p) => p.id === sel && all.some((x) => x.id === p.id)) ?? list[0] ?? null;
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { to: (p) => buyerName(s, p.mfrId), units: (p) => p.lines.reduce((a, l) => a + l.qty, 0), status: (p) => p.status });
+  useRowKeys(srt.sorted.map((p) => p.id), po?.id, setSel);
   const n = (k: TabKey) => all.filter((p) => TAB_STATUS[k].includes(p.status)).length;
   const ready = all.filter((p) => p.status === "Confirmed");
   const dueSoon = ready.filter((p) => daysUntil(p.needBy) <= 3).length;
@@ -87,18 +91,18 @@ function Dispatch() {
               <div className="mt-[12px] flex flex-wrap items-center gap-[7px]">
                 <SearchBox value={q} onChange={setQ} placeholder="Search by PO, item, factory or vehicle..." className="w-full min-[1024px]:w-[300px]" />
               </div>
-              <PhoneList detail={"[data-board] > aside"} empty="Nothing to dispatch." className="mt-[12px] !px-0" items={list.map((p) => ({ key: p.id, title: p.title, sub: `${p.id} · ${buyerName(s, p.mfrId)}`, pill: { tone: PO_TONE[p.status], label: PO_LABEL[p.status] },
+              <PhoneList detail={"[data-board] > aside"} empty="Nothing to dispatch." className="mt-[12px] !px-0" items={srt.sorted.map((p) => ({ key: p.id, title: p.title, sub: `${p.id} · ${buyerName(s, p.mfrId)}`, pill: { tone: PO_TONE[p.status], label: PO_LABEL[p.status] },
                 meta: [`Need by ${fmtDate(p.needBy)}`, p.vehicle && `Vehicle ${p.vehicle}`], selected: po?.id === p.id, onSelect: () => setSel(p.id) }))} />
               <div className="mt-[12px] min-h-0 flex-1 overflow-auto max-lg:hidden">
                 <table className="w-full min-w-[620px] border-separate border-spacing-0 text-[12px]">
-                  <thead><tr><th className={cn(th, "rounded-l-[6px]")}>Purchase order</th><th className={th}>Deliver to</th><th className={th}>Units</th><th className={th}>{tab === "ready" ? "Need by" : "Vehicle"}</th><th className={th}>Status</th><th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th></tr></thead>
+                  <thead><tr><th className={cn(th, "rounded-l-[6px]")}>Purchase order</th><th className={th} {...ariaSort(srt, "to")}><SortLabel k="to" s={srt}>Deliver to</SortLabel></th><th className={th} {...ariaSort(srt, "units")}><SortLabel k="units" s={srt}>Units</SortLabel></th><th className={th}>{tab === "ready" ? "Need by" : "Vehicle"}</th><th className={th} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th><th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th></tr></thead>
                   <tbody>
-                    {list.map((p) => {
+                    {srt.sorted.map((p) => {
                       const on = po?.id === p.id;
                       const short = p.status === "Confirmed" && shortLines(s, p).length > 0;
                       const m = s.manufacturers.find((x) => x.id === p.mfrId);
                       return (
-                        <tr key={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
+                        <tr key={p.id} data-row={p.id} onClick={() => setSel(p.id)} className={cn("cursor-pointer", on ? "bg-cs-mint/50" : "hover:bg-[#fbf9f5]")}>
                           <td className={cn(td, on && "border-l-2 border-l-cs-green")}><span className="block font-semibold text-[#221f1c]">{p.title}</span><span className="text-[10.5px] text-cs-ink-2">{p.id}</span></td>
                           <td className={td}>{m?.name}<span className="block text-[10.5px] text-cs-ink-2">{m?.city}, {m?.state}</span></td>
                           <td className={cn(td, "whitespace-nowrap")}>{fmtNum(p.lines.reduce((a, l) => a + l.qty, 0))}</td>

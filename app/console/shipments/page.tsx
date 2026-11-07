@@ -19,6 +19,7 @@ import { markDelayed } from "@/lib/console/actions-ops";
 import { ago, download, fmtDate, fmtDateTime, fmtNum, inr, csv } from "@/lib/console/format";
 import { SHIP_STEPS, type Shipment, type ShipStatus } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 const STATUS_TONE: Record<ShipStatus, Tone> = { "In Transit": "blue", Delivered: "green", Delayed: "red", Pending: "orange" };
 type TabKey = "all" | "transit" | "delivered" | "delayed" | "pending";
@@ -70,6 +71,9 @@ function Shipments() {
 
   const count = (st: ShipStatus | null) => s.shipments.filter((x) => !st || x.status === st).length;
   const ship = s.shipments.find((x) => x.id === sel) ?? null;
+  // Click a column to sort; arrows move through rows; filters can be saved as views.
+  const srt = useSort(list, { name: (x) => x.name, category: (x) => x.category, qty: (x) => x.qty, carrier: (x) => x.carrier, dest: (x) => x.destination, eta: (x) => x.eta, status: (x) => x.status, updated: (x) => x.updatedAt });
+  useRowKeys(srt.sorted.map((x) => x.id), sel, (id) => { setSel(id); setPtab("overview"); router.replace(`/console/shipments?id=${id}`, { scroll: false }); });
 
   // stats
   const weekAgo = Date.now() - 7 * 864e5;
@@ -147,6 +151,7 @@ function Shipments() {
               <FilterSelect label="Destination" value={dest} onChange={setDest} options={opts((x) => x.destination)} className="w-[84px] shrink-0" />
               <FilterSelect label="Carrier" value={carrier} onChange={setCarrier} options={opts((x) => x.carrier)} className="w-[66px] shrink-0" />
               <FilterSelect label="Last 30 Days" value={win} onChange={setWin} options={["Last 7 Days", "Last 90 Days", "All Time"]} className="w-[94px] shrink-0" />
+              <SavedViews page="shipments" value={{ tab, q, cat, status, dest, carrier, win }} onApply={(v) => { setTab(v.tab as TabKey); setQ(String(v.q ?? "")); setCat(String(v.cat ?? "")); setStatus(String(v.status ?? "")); setDest(String(v.dest ?? "")); setCarrier(String(v.carrier ?? "")); setWin(String(v.win ?? "")); }} className="shrink-0" />
               <button type="button" aria-label={compact ? "Comfortable rows" : "Compact rows"} aria-pressed={compact} onClick={() => setCompact((c) => !c)} className={cn("grid size-[32px] shrink-0 place-items-center rounded-[6px] border border-cs-line", compact ? "bg-cs-mint text-cs-green" : "bg-white")}>
                 <List className="size-[16px]" strokeWidth={1.7} />
               </button>
@@ -161,7 +166,7 @@ function Shipments() {
               </div>
             )}
 
-            <PhoneList detail="#shipment-panel" empty="No shipments match these filters." className="mt-[14px] !px-0" items={list.map((x) => ({
+            <PhoneList detail="#shipment-panel" empty="No shipments match these filters." className="mt-[14px] !px-0" items={srt.sorted.map((x) => ({
               key: x.id, img: x.img, title: x.name, sub: `${x.id} · ${x.carrier}`, pill: { tone: STATUS_TONE[x.status], label: x.status },
               meta: [`${fmtNum(x.qty)} units`, x.destination.split(",")[0], x.status === "Delivered" ? `Delivered ${fmtDate(x.eta)}` : `ETA ${fmtDate(x.eta)}`], selected: ship?.id === x.id,
               onSelect: () => { setSel(x.id); setPtab("overview"); router.replace(`/console/shipments?id=${x.id}`, { scroll: false }); },
@@ -171,22 +176,22 @@ function Shipments() {
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[#f9f6f0]">
                     <th className={cn(th, "w-[34px] rounded-l-[6px] pl-[10px]")}><Check checked={allChecked} onChange={(v) => setChecked(v ? Array.from(new Set([...checked, ...list.map((x) => x.id)])) : checked.filter((id) => !list.some((x) => x.id === id)))} label="Select all" /></th>
-                    <th className={th}>Shipment &amp; Product</th>
-                    <th className={th}>Category</th>
-                    <th className={th}>Quantity</th>
-                    <th className={th}>Carrier</th>
-                    <th className={th}>Destination</th>
-                    <th className={th}>ETA</th>
-                    <th className={th}>Status</th>
-                    <th className={th}>Last Update</th>
+                    <th className={th} {...ariaSort(srt, "name")}><SortLabel k="name" s={srt}>Shipment &amp; Product</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "category")}><SortLabel k="category" s={srt}>Category</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "qty")}><SortLabel k="qty" s={srt}>Quantity</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "carrier")}><SortLabel k="carrier" s={srt}>Carrier</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "dest")}><SortLabel k="dest" s={srt}>Destination</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "eta")}><SortLabel k="eta" s={srt}>ETA</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "updated")}><SortLabel k="updated" s={srt}>Last Update</SortLabel></th>
                     <th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {list.map((x) => {
+                  {srt.sorted.map((x) => {
                     const on = x.id === sel;
                     return (
-                      <tr key={x.id} onClick={() => { setSel(x.id); setPtab("overview"); setChecked((c) => (c.length <= 1 ? [x.id] : c)); router.replace(`/console/shipments?id=${x.id}`, { scroll: false }); }} className={cn("group cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
+                      <tr key={x.id} data-row={x.id} onClick={() => { setSel(x.id); setPtab("overview"); setChecked((c) => (c.length <= 1 ? [x.id] : c)); router.replace(`/console/shipments?id=${x.id}`, { scroll: false }); }} className={cn("group cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
                         <td className="pl-[10px]"><Check checked={checked.includes(x.id)} onChange={() => toggle(x.id)} label={`Select ${x.id}`} /></td>
                         <td className={cn("px-[8px]", compact ? "py-[6px]" : "py-[8px]")}>
                           <div className="flex items-center gap-[10px]">

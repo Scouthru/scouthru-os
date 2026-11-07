@@ -15,6 +15,7 @@ import { messageBrand } from "@/lib/console/actions-distributor";
 import { download, fmtDate, fmtDateTime, fmtNum } from "@/lib/console/format";
 import type { Shipment } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 type TabKey = "all" | InboundState;
 
@@ -41,6 +42,9 @@ function Inbound() {
   const list = rows.filter((r) => (tab === "all" || r.state === tab) && (!q.trim() || [r.sh.id, r.sh.name, r.sh.carrier].some((v) => v.toLowerCase().includes(q.trim().toLowerCase()))));
   const count = (k: TabKey) => rows.filter((r) => k === "all" || r.state === k).length;
   const cur = rows.find((r) => r.sh.id === sel) ?? null;
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { units: (r) => r.sh.qty, carrier: (r) => r.sh.carrier, eta: (r) => r.grn?.at ?? r.sh.eta, status: (r) => r.state });
+  useRowKeys(srt.sorted.map((r) => r.sh.id), cur?.sh.id, (id) => { setSel(id); router.replace(`/console/distributor/inbound?id=${id}`, { scroll: false }); });
   const monthAgo = Date.now() - 30 * 864e5;
   const received30 = s.grns.filter((g) => new Date(g.at).getTime() >= monthAgo);
   const units = s.grns.reduce((a, g) => a + g.lines.reduce((b, l) => b + l.received, 0), 0);
@@ -79,25 +83,25 @@ function Inbound() {
               { key: "Received", label: `Received (${count("Received")})` },
             ]} />
             <div className="mt-[14px]"><SearchBox value={q} onChange={setQ} placeholder="Search by shipment ID, product or carrier..." /></div>
-            <PhoneList detail="#dist-detail" empty="No shipments here." className="mt-[12px] !px-0" items={list.map((r) => ({ key: r.sh.id, img: r.sh.img, title: r.sh.name, sub: `${r.sh.id} · ${r.sh.carrier}`, pill: { tone: INBOUND_TONE[r.state], label: r.state },
+            <PhoneList detail="#dist-detail" empty="No shipments here." className="mt-[12px] !px-0" items={srt.sorted.map((r) => ({ key: r.sh.id, img: r.sh.img, title: r.sh.name, sub: `${r.sh.id} · ${r.sh.carrier}`, pill: { tone: INBOUND_TONE[r.state], label: r.state },
               meta: [`${fmtNum(r.sh.qty)} units`, r.grn ? `Counted ${fmtDate(r.grn.at)}` : `ETA ${fmtDate(r.sh.eta)}`], selected: cur?.sh.id === r.sh.id, onSelect: () => pick(r.sh.id) }))} />
             <div className="mt-[14px] min-h-0 flex-1 overflow-auto max-lg:hidden">
               <table className="w-full min-w-[640px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[#f9f6f0]">
                     <th className={cn(th, "rounded-l-[6px] pl-[10px]")}>Shipment &amp; Product</th>
-                    <th className={th}>Units</th>
-                    <th className={th}>Carrier</th>
-                    <th className={th}>ETA / Arrived</th>
-                    <th className={th}>Status</th>
+                    <th className={th} {...ariaSort(srt, "units")}><SortLabel k="units" s={srt}>Units</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "carrier")}><SortLabel k="carrier" s={srt}>Carrier</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "eta")}><SortLabel k="eta" s={srt}>ETA / Arrived</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th>
                     <th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {list.map(({ sh, grn, state }) => {
+                  {srt.sorted.map(({ sh, grn, state }) => {
                     const on = sh.id === sel;
                     return (
-                      <tr key={sh.id} onClick={() => pick(sh.id)} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
+                      <tr key={sh.id} data-row={sh.id} onClick={() => pick(sh.id)} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
                         <td className="py-[9px] pl-[10px] pr-[8px]">
                           <div className="flex items-center gap-[10px]">
                             <Image src={sh.img} alt="" width={42} height={42} className="size-[42px] shrink-0 rounded-[6px] object-cover" />

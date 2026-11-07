@@ -16,6 +16,7 @@ import { setPrimaryPackaging, setProductBrief, setProductStage } from "@/lib/con
 import { ago, download, csv, fmtDate, fmtNum } from "@/lib/console/format";
 import type { ConsoleState, Product, ProductStage } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 const STAGE_TONE: Record<ProductStage, Tone> = { Active: "green", "In Development": "blue", "In Production": "green", Approved: "green", Draft: "gray", Archived: "gray" };
 type TabKey = "all" | ProductStage;
@@ -74,6 +75,9 @@ function Products() {
   const live = s.products.filter((p) => p.stage !== "Archived");
   const week = (k?: ProductStage) => s.products.filter((p) => (!k || p.stage === k) && Date.now() - +new Date(p.updatedAt) < 7 * 864e5).length;
   const p = s.products.find((x) => x.id === sel) ?? null;
+  // Click a column to sort; arrows move through rows; filters can be saved as views.
+  const srt = useSort(list, { name: (x) => x.name, category: (x) => x.category, mfr: (x) => mfrName(x.mfrId), stage: (x) => x.stage });
+  useRowKeys(srt.sorted.map((x) => x.id), sel, (id) => { setSel(id); setEditing(false); router.replace(`/console/products?id=${id}`, { scroll: false }); });
   const moreActive = moqMin !== "" || moqMax !== "";
 
   const sortBy = (k: "updated" | "moq") => { if (sortKey === k) setDesc((d) => !d); else { setSortKey(k); setDesc(true); } };
@@ -114,6 +118,7 @@ function Products() {
               <FilterSelect label="Category" value={cat} onChange={setCat} options={Array.from(new Set(s.products.map((x) => x.category))).sort()} className="w-[104px] shrink-0" />
               <FilterSelect label="Stage" value={stage} onChange={setStage} options={["Draft", "In Development", "Approved", "In Production", "Active", "Archived"]} className="w-[74px] shrink-0" />
               <FilterSelect label="Manufacturer" value={mfr} onChange={setMfr} options={Array.from(new Set(s.products.map((x) => mfrName(x.mfrId)))).sort()} className="w-[112px] shrink-0" />
+              <SavedViews page="products" value={{ tab, q, cat, stage, mfr, moqMin, moqMax }} onApply={(v) => { setTab(v.tab as TabKey); setQ(String(v.q ?? "")); setCat(String(v.cat ?? "")); setStage(String(v.stage ?? "")); setMfr(String(v.mfr ?? "")); setMoqMin(String(v.moqMin ?? "")); setMoqMax(String(v.moqMax ?? "")); }} className="shrink-0" />
               <Menu
                 align="right"
                 className="shrink-0"
@@ -148,7 +153,7 @@ function Products() {
               </div>
             )}
 
-            <PhoneList detail="#product-panel" empty="No products match these filters." className="mt-[10px] !px-0" items={list.map((x) => ({
+            <PhoneList detail="#product-panel" empty="No products match these filters." className="mt-[10px] !px-0" items={srt.sorted.map((x) => ({
               key: x.id, img: x.img, title: x.name, sub: `${x.id} · ${x.category}`, pill: { tone: STAGE_TONE[x.stage], label: x.stage },
               meta: [mfrName(x.mfrId), `MOQ ${fmtNum(x.moq)}`, `Updated ${ago(x.updatedAt)}`], selected: p?.id === x.id,
               onSelect: () => { setSel(x.id); setEditing(false); router.replace(`/console/products?id=${x.id}`, { scroll: false }); },
@@ -158,20 +163,20 @@ function Products() {
                 <thead className="sticky top-0 z-10 bg-white">
                   <tr className="text-left text-[11px] text-[#564e47]">
                     <th className="w-[30px] border-b border-cs-line pb-[9px] pl-[10px] font-medium"><Check checked={list.length > 0 && list.every((x) => checked.includes(x.id))} onChange={(v) => setChecked(v ? list.map((x) => x.id) : [])} label="Select all" /></th>
-                    <th className="border-b border-cs-line pb-[9px] pl-[14px] font-medium">Product</th>
-                    <th className="border-b border-cs-line pb-[9px] font-medium">Category</th>
-                    <th className="border-b border-cs-line pb-[9px] font-medium">Manufacturer</th>
-                    <th className="border-b border-cs-line pb-[9px] font-medium">Stage</th>
+                    <th className="border-b border-cs-line pb-[9px] pl-[14px] font-medium" {...ariaSort(srt, "name")}><SortLabel k="name" s={srt}>Product</SortLabel></th>
+                    <th className="border-b border-cs-line pb-[9px] font-medium" {...ariaSort(srt, "category")}><SortLabel k="category" s={srt}>Category</SortLabel></th>
+                    <th className="border-b border-cs-line pb-[9px] font-medium" {...ariaSort(srt, "mfr")}><SortLabel k="mfr" s={srt}>Manufacturer</SortLabel></th>
+                    <th className="border-b border-cs-line pb-[9px] font-medium" {...ariaSort(srt, "stage")}><SortLabel k="stage" s={srt}>Stage</SortLabel></th>
                     <th className="border-b border-cs-line pb-[9px] font-medium"><button type="button" onClick={() => sortBy("moq")} className="flex items-center gap-[4px]">Target MOQ{sortKey === "moq" && (desc ? <ArrowDown className="size-[12px]" /> : <ArrowUp className="size-[12px]" />)}</button></th>
                     <th className="border-b border-cs-line pb-[9px] font-medium"><button type="button" onClick={() => sortBy("updated")} className="flex items-center gap-[4px]">Last Updated{sortKey === "updated" && (desc ? <ArrowDown className="size-[12px]" /> : <ArrowUp className="size-[12px]" />)}</button></th>
                     <th className="border-b border-cs-line pb-[9px]"><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {list.map((x) => {
+                  {srt.sorted.map((x) => {
                     const on = x.id === sel;
                     return (
-                      <tr key={x.id} onClick={() => { setSel(x.id); setEditing(false); setChecked((c) => (c.length <= 1 ? [x.id] : c)); router.replace(`/console/products?id=${x.id}`, { scroll: false }); }} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td]:bg-[#fdfcfb] [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
+                      <tr key={x.id} data-row={x.id} onClick={() => { setSel(x.id); setEditing(false); setChecked((c) => (c.length <= 1 ? [x.id] : c)); router.replace(`/console/products?id=${x.id}`, { scroll: false }); }} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td]:bg-[#fdfcfb] [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
                         <td className="pl-[10px]"><Check checked={checked.includes(x.id)} onChange={() => setChecked((c) => (c.includes(x.id) ? c.filter((y) => y !== x.id) : [...c, x.id]))} label={`Select ${x.name}`} /></td>
                         <td className="py-[9px] pl-[14px]">
                           <div className="flex items-center gap-[12px]">

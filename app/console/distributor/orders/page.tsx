@@ -12,6 +12,7 @@ import { assignRoute, cancelRetailOrder, deliverRetailOrder, packRetailOrder } f
 import { ago, download, fmtDate, inr, lakh } from "@/lib/console/format";
 import type { RetailOrder } from "@/lib/console/types";
 import { cn } from "@/lib/cn";
+import { SavedViews, SortLabel, ariaSort, useRowKeys, useSort } from "@/components/console/table-tools";
 
 type TabKey = "all" | RetailOrder["status"];
 const STATUSES: RetailOrder["status"][] = ["New", "Packed", "Out for Delivery", "Delivered", "Cancelled"];
@@ -40,6 +41,9 @@ function Orders() {
   const list = useMemo(() => s.retailOrders.filter((o) => (tab === "all" || o.status === tab) && (!area || o.area === area) && (!q.trim() || [o.id, o.retailer, o.area].some((v) => v.toLowerCase().includes(q.trim().toLowerCase())))), [s.retailOrders, tab, area, q]);
   const count = (k: TabKey) => s.retailOrders.filter((o) => k === "all" || o.status === k).length;
   const cur = s.retailOrders.find((o) => o.id === sel) ?? null;
+  // Click a column to sort; arrows move through rows.
+  const srt = useSort(list, { items: (o) => o.lines.length, value: (o) => o.value, route: (o) => o.routeId ?? "", status: (o) => o.status, payment: (o) => o.payment, placed: (o) => o.at });
+  useRowKeys(srt.sorted.map((o) => o.id), cur?.id, (id) => { setSel(id); router.replace(`/console/distributor/orders?id=${id}`, { scroll: false }); });
   const pick = (id: string) => { setSel(id); router.replace(`/console/distributor/orders?id=${id}`, { scroll: false }); };
   const shortOf = (o: RetailOrder) => o.lines.find((l) => (s.distStock.find((x) => x.sku === l.sku)?.onHand ?? 0) < l.qty);
 
@@ -89,28 +93,29 @@ function Orders() {
             <div className="mt-[14px] flex flex-wrap items-center gap-[8px]">
               <SearchBox value={q} onChange={setQ} placeholder="Search by order, retailer or area..." className="min-w-[200px] flex-1" />
               <FilterSelect label="All areas" value={area} onChange={setArea} options={areas} className="w-[130px]" />
+              <SavedViews page="distributor-orders" value={{ tab, q, area }} onApply={(v) => { setTab(v.tab as typeof tab); setQ(String(v.q ?? "")); setArea(String(v.area ?? "")); }} />
             </div>
-            <PhoneList detail="#dist-detail" empty="No orders here." className="mt-[12px] !px-0" items={list.map((o) => ({ key: o.id, title: o.retailer, sub: `${o.id} · ${o.area}`, pill: { tone: RO_TONE[o.status], label: o.status },
+            <PhoneList detail="#dist-detail" empty="No orders here." className="mt-[12px] !px-0" items={srt.sorted.map((o) => ({ key: o.id, title: o.retailer, sub: `${o.id} · ${o.area}`, pill: { tone: RO_TONE[o.status], label: o.status },
               meta: [inr(o.value), `${o.lines.length} line${o.lines.length === 1 ? "" : "s"}`, `Placed ${ago(o.at)}`], selected: cur?.id === o.id, onSelect: () => pick(o.id) }))} />
             <div className="mt-[14px] min-h-0 flex-1 overflow-auto max-lg:hidden">
               <table className="w-full min-w-[720px] border-separate border-spacing-y-[1px]">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[#f9f6f0]">
                     <th className={cn(th, "rounded-l-[6px] pl-[10px]")}>Order &amp; Retailer</th>
-                    <th className={th}>Items</th>
-                    <th className={th}>Value</th>
-                    <th className={th}>Route</th>
-                    <th className={th}>Status</th>
-                    <th className={th}>Payment</th>
-                    <th className={th}>Placed</th>
+                    <th className={th} {...ariaSort(srt, "items")}><SortLabel k="items" s={srt}>Items</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "value")}><SortLabel k="value" s={srt}>Value</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "route")}><SortLabel k="route" s={srt}>Route</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "status")}><SortLabel k="status" s={srt}>Status</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "payment")}><SortLabel k="payment" s={srt}>Payment</SortLabel></th>
+                    <th className={th} {...ariaSort(srt, "placed")}><SortLabel k="placed" s={srt}>Placed</SortLabel></th>
                     <th className={cn(th, "rounded-r-[6px]")}><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {list.map((o) => {
+                  {srt.sorted.map((o) => {
                     const on = o.id === sel;
                     return (
-                      <tr key={o.id} onClick={() => pick(o.id)} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
+                      <tr key={o.id} data-row={o.id} onClick={() => pick(o.id)} className={cn("cursor-pointer", on ? "[&>td]:border-y-[1.5px] [&>td]:border-cs-green-2/70 [&>td:first-child]:rounded-l-[8px] [&>td:first-child]:border-l-[1.5px] [&>td:last-child]:rounded-r-[8px] [&>td:last-child]:border-r-[1.5px] [&>td]:bg-[#fdfcfb]" : "[&>td]:border-b [&>td]:border-cs-line hover:[&>td]:bg-[#fbf9f5]")}>
                         <td className="py-[10px] pl-[10px] pr-[8px]"><p className="text-[11.5px] font-semibold">{o.id}</p><p className="max-w-[190px] truncate text-[11px] text-[#48413b]">{o.retailer}</p></td>
                         <td className="px-[8px] text-[11px] text-[#48413b]">{o.lines.reduce((a, l) => a + l.qty, 0)} packs<span className="block text-cs-ink-2">{o.lines.length} SKU{o.lines.length === 1 ? "" : "s"}</span></td>
                         <td className="whitespace-nowrap px-[8px] text-[11.5px] font-medium">{inr(o.value)}</td>

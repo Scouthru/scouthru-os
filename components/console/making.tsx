@@ -24,7 +24,7 @@ export function WideHero({ eyebrow, title, lede, img, photo, height, quote, quot
       <Image src={img} alt="" width={1500} height={400} priority className="absolute right-0 top-0 hidden h-full object-cover object-right md:block" style={{ width: `${photo}%` }} />
       <div className="absolute inset-y-0 hidden w-[140px] bg-gradient-to-r from-[#f7f2ea] to-transparent md:block" style={{ left: `${100 - photo}%` }} />
       <div className="relative px-[20px] pt-[24px] md:pl-[29px] md:pr-0">
-        <div className="text-[11px] font-semibold tracking-[0.2em] text-[#322d29]">{eyebrow}</div>
+        <div className="eyebrow">{eyebrow}</div>
         <h1 className="serif mt-[10px] text-[32px] font-semibold leading-none tracking-[-0.02em] text-[#191614] md:text-[length:var(--title)]" style={{ "--title": `${titleSize}px` } as React.CSSProperties}>{title}</h1>
         <p className="text-[15px] leading-[1.3] max-md:[&_*]:whitespace-normal tracking-[-0.005em] text-[#48413b] md:max-w-[var(--lede-w)] md:text-[length:var(--lede)]" style={{ marginTop: ledeGap, "--lede-w": `${ledeWidth}px`, "--lede": `${ledeSize}px` } as React.CSSProperties}>{lede}</p>
       </div>
